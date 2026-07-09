@@ -1,25 +1,77 @@
-# bakd-on-the-bay
+# Beslyfe
 
-Production website for the Bayfront Convention Center event experience.
+Beslyfe is the Community Operating System.
 
-## Frontend architecture (Phase 1)
+The platform exists to help every person build their best life through intelligent communities. It connects people, organizations, businesses, events, opportunities, and ideas in ways that strengthen human relationships instead of replacing them.
 
-The frontend uses a static HTML/CSS/JS architecture with a reusable design system foundation:
+Bak'd On The Bay is the flagship implementation built on top of the platform. It is not the final product. It is the first living ecosystem proving the platform model.
 
-- **Design tokens** in `assets/css/style.css` (`:root` variables for color, spacing, radius, shadows, typography).
-- **Layout primitives** (`.container`, `.section`, `.grid`, `.grid-stats`).
-- **Reusable components** (`.btn`, `.btn-secondary`, `.card`, `.stat`, `.badge`).
-- **A11y baseline** (skip link, visible focus styles, `aria-*` support, reduced-motion handling).
-- **Performance-safe interactions** (passive scroll listener, reduced-motion checks).
+## North Star
 
-## Key files
+If someone has a dream, Beslyfe should help them find the people who can make it happen.
 
-- `index.html` — homepage structure and metadata.
-- `assets/css/style.css` — tokens + foundational styles + components.
-- `assets/js/main.js` — countdown, nav behavior, animations, smooth scrolling, dynamic background settings.
-- `docs/FRONTEND_ARCHITECTURE.md` — conventions and extension guidance.
+## Mission
 
-## Local development
+Beslyfe exists to help every person build their best life through intelligent communities.
 
-Open `index.html` in a local static server (recommended) to ensure all asset paths and scripts resolve correctly.
+Our mission is to connect people, organizations, businesses, events, opportunities, and ideas in ways that have never been done before.
 
+Technology should strengthen human relationships instead of replacing them.
+
+Artificial Intelligence should maximize opportunity instead of engagement.
+
+The platform should become the operating system for human opportunity.
+
+## Platform Model
+
+Every event becomes a living ecosystem.
+
+Every community can gain:
+
+- Website
+- Ticketing
+- CRM
+- Community
+- Messaging
+- Groups
+- Marketplace
+- Directory
+- Maps
+- Scheduling
+- AI
+- Analytics
+- Advertising
+- Business networking
+
+Events are only one implementation. The platform must scale to every industry.
+
+## Founding Documents
+
+- [MANIFESTO.md](MANIFESTO.md)
+- [CONSTITUTION.md](CONSTITUTION.md)
+- [docs/PLATFORM_VISION.md](docs/PLATFORM_VISION.md)
+- [docs/PLATFORM_ARCHITECTURE.md](docs/PLATFORM_ARCHITECTURE.md)
+- [docs/FRONTEND_ARCHITECTURE.md](docs/FRONTEND_ARCHITECTURE.md)
+
+## Engineering Standard
+
+This repository is expected to become enterprise software. Every architectural decision must support scalability, maintainability, transparency, accessibility, privacy, trust, and long-term business value.
+
+Never optimize for short-term development speed when it sacrifices long-term architecture.
+
+Build ecosystems, not websites.
+
+## Current Implementation
+
+The current codebase contains the Bak'd On The Bay event ecosystem, including the public site, community surfaces, admin workflows, Netlify functions, database migrations, and reusable platform theme structure.
+
+## Local Development
+
+Install dependencies, then run the test suite:
+
+```powershell
+npm install
+npm test
+```
+
+Open `index.html` through a local static server so asset paths and scripts resolve correctly.
