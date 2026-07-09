@@ -140,6 +140,7 @@ Status:
 - Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
 - Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
 - Reusable person identity contract is tracked in `platform/identity/person-contract.mjs`.
+- Reusable organization identity contract is tracked in `platform/identity/organization-contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
 - Reusable conversation contract is tracked in `platform/conversations/contract.mjs`.
 - Reusable experience contract is tracked in `platform/experiences/contract.mjs`.
