@@ -140,6 +140,7 @@ Status:
 - Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
 - Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
+- Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
 
 Tasks:
 
