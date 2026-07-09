@@ -86,6 +86,10 @@ Tasks:
 
 Goal: identify reusable Beslyfe platform modules inside the Bak'd On The Bay product.
 
+Status:
+
+- Initial module-by-module extraction map is tracked in `docs/PLATFORM_EXTRACTION_MAP.md`.
+
 Candidate reusable modules:
 
 - Identity and accounts
