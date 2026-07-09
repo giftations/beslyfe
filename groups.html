@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Groups — Bak'd On The Bay</title>
+  <meta name="description" content="Create and join community chat groups.">
+  <link rel="stylesheet" href="/profiles.css">
+  <link rel="stylesheet" href="/social.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Groups — Bak'd On The Bay">
+  <meta property="og:description" content="Create and join community chat groups for Bak'd On The Bay.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/groups">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Groups — Bak'd On The Bay">
+  <meta name="twitter:description" content="Create and join community chat groups for Bak'd On The Bay.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/groups">
+</head>
+<body data-cms-page="groups">
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/hub">Hub</a></li>
+        <li><a href="/feed">Feed</a></li>
+        <li><a href="/packages" class="btn-nav">Buy Package</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="soNav"></div>
+
+  <div class="so-page">
+    <h1>Chat Groups</h1>
+    <p class="lead">Create a group around a topic, booth or crew — then chat in real time.</p>
+
+    <div class="so-identity" id="identityBar" style="margin-bottom:18px">
+      <div class="so-avatar placeholder" id="idAvatar">?</div>
+      <div class="so-id-text" id="idText"><strong>Choose your profile</strong><span>to chat in groups</span></div>
+      <button class="so-btn" id="idChangeBtn" type="button">Choose profile</button>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+      <button class="so-btn" id="newGroupBtn" type="button">+ New group</button>
+      <button class="so-btn ghost" id="discoverBtn" type="button">Discover public groups</button>
+    </div>
+
+    <div class="groups-layout">
+      <div class="group-list" id="groupList"><p class="so-muted">Loading your groups…</p></div>
+      <div class="group-chat" id="groupChat"><div class="gc-empty">Pick a group to open the conversation, or create one.</div></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+  </footer>
+
+  <script src="/social-common.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/groups.js"></script>
+  <script src="/bay-notifications.js"></script>
+</body>
+</html>

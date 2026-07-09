@@ -1,0 +1,499 @@
+@import url('assets/css/design-system.css');
+
+:root {
+  /* Brand + neutral colours and card/input surfaces inherit from
+     design-system.css (imported above) so this page follows CMS theme
+     settings. Only page-specific shell values are declared here. */
+  --site-bg-overlay-top: rgba(0,0,0,.45);
+  --site-bg-overlay-bottom: rgba(0,0,0,.72);
+  --hero-image: url('assets/images/bayfront-crowd-hero.jpg');
+  --nav-logo-font-size: 1.3rem;
+  --nav-logo-image-height: 44px;
+  --nav-link-font-size: 0.9rem;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-family-base);
+  background:
+    linear-gradient(var(--site-bg-overlay-top), var(--site-bg-overlay-bottom)),
+    var(--hero-image),
+    var(--dark);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: white;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Header ──────────────────────────────────── */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.site-header nav {
+  max-width: 1300px;
+  margin: auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+}
+
+.site-logo {
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  font-weight: 800;
+  font-size: var(--nav-logo-font-size);
+  letter-spacing: 1px;
+  line-height: 1.1;
+  text-decoration: none;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.logo-image {
+  width: auto;
+  height: var(--nav-logo-image-height);
+  max-width: 190px;
+  object-fit: contain;
+  display: block;
+}
+
+.logo-image-only .logo-image { max-width: 240px; }
+.logo-text { flex: 0 0 auto; }
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  list-style: none;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--nav-link-font-size);
+  transition: color .2s;
+}
+
+.nav-links a:hover { color: var(--green); }
+
+.btn-nav {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--green);
+  color: black !important;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: transform .2s, opacity .2s;
+}
+
+.btn-nav:hover { transform: translateY(-2px); opacity: .9; }
+
+/* ── Page Hero ───────────────────────────────── */
+.page-hero {
+  padding: 140px 24px 60px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(7,16,8,.88) 60%, rgba(7,16,8,.96) 100%),
+    var(--hero-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.page-hero .event-badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border: 1px solid rgba(159, 226, 45, 0.45);
+  border-radius: 999px;
+  color: var(--green);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  margin-bottom: 20px;
+}
+
+.page-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.page-hero h1 span { color: var(--green); }
+
+.page-hero p {
+  font-size: 1.1rem;
+  color: var(--gray);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ── Form Card ───────────────────────────────── */
+.form-section {
+  padding: 0 24px 80px;
+  background: rgba(7, 16, 8, 0.72);
+}
+
+.form-card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--dark-card);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 20px;
+  padding: 40px 44px;
+}
+
+.form-card h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(159,226,45,.2);
+}
+
+/* ── Field groups ────────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.field-group {
+  margin-bottom: 18px;
+}
+
+.field-group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+
+.field-group label span {
+  color: var(--muted);
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--dark-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: white;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field-group input::placeholder,
+.field-group textarea::placeholder {
+  color: var(--muted);
+}
+
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(159,226,45,.1);
+}
+
+.field-group select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239FE22D' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.field-group select option { background: #111; }
+
+.field-group textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.field-group input[type="file"] {
+  padding: 9px 12px;
+  cursor: pointer;
+  color: var(--gray);
+}
+
+.field-group input[type="file"]::file-selector-button {
+  background: rgba(159,226,45,.15);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--green);
+  padding: 5px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background .2s;
+}
+
+.field-group input[type="file"]::file-selector-button:hover {
+  background: rgba(159,226,45,.25);
+}
+
+/* ── Tier Cards ──────────────────────────────── */
+.tier-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.tier-card { position: relative; }
+
+.tier-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tier-card label {
+  display: block;
+  padding: 16px 14px;
+  border: 2px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  text-transform: none;
+  letter-spacing: 0;
+  color: white;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.tier-card label .tier-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--green);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.tier-card label .tier-price {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: white;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.tier-card label .tier-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  display: block;
+}
+
+.tier-card input:checked + label {
+  border-color: var(--green);
+  background: rgba(159,226,45,.08);
+}
+
+/* ── Section Divider ─────────────────────────── */
+.form-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin: 28px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* ── Submit ──────────────────────────────────── */
+.submit-area {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 999px;
+  background: var(--green);
+  color: black;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: transform .2s, opacity .2s;
+  font-family: inherit;
+}
+
+.btn-submit:hover { transform: translateY(-2px); }
+.btn-submit:active { transform: translateY(0); }
+
+.btn-submit:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ── Feedback Messages ───────────────────────── */
+.form-message {
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 20px;
+  font-size: 0.95rem;
+  display: none;
+}
+
+.form-message.show { display: block; }
+
+.form-message.success {
+  background: rgba(159,226,45,.12);
+  border: 1px solid rgba(159,226,45,.35);
+  color: #c8f56a;
+}
+
+.form-message.error {
+  background: rgba(220,38,38,.1);
+  border: 1px solid rgba(220,38,38,.3);
+  color: #fca5a5;
+}
+
+/* ── Footer ──────────────────────────────────── */
+.site-footer {
+  background: #050505;
+  text-align: center;
+  padding: 50px 24px;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+
+.site-footer p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.site-footer a { color: var(--green); text-decoration: none; }
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 640px) {
+  body { background-attachment: scroll; }
+  .form-card { padding: 28px 20px; }
+  .field-row { grid-template-columns: 1fr; gap: 0; }
+  .nav-links { display: none; }
+  .tier-cards { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Translucent "bubble" surfaces — let the hero photo show through the cards ── */
+.form-section { background: transparent; }
+
+.page-hero {
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.28) 0%, rgba(7,16,8,.45) 100%),
+    var(--hero-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.form-card {
+  background: rgba(10, 18, 10, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.tier-card label { background: rgba(0, 0, 0, 0.28); }
+
+.field-group input,
+.field-group select,
+.field-group textarea { background: rgba(0, 0, 0, 0.42); }
+
+.contract-box {
+  border: 1px solid rgba(159, 226, 45, 0.28);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 18px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.contract-box p {
+  color: var(--gray);
+  margin-bottom: 8px;
+}
+
+.contract-box a,
+.check-field span {
+  color: var(--green);
+}
+
+.check-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 22px;
+  font-size: 0.92rem;
+}
+
+.check-field input {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  accent-color: var(--green);
+}
+
+/* Shared polish layer */
+.site-header { background: rgba(5, 12, 7, .84); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.nav-links a { padding: 7px 10px; border-radius: 8px; }
+.page-hero { padding: clamp(7.5rem, 12vw, 9.5rem) 24px clamp(3.2rem, 7vw, 5rem); }
+.page-hero h1 { font-family: var(--font-family-display); font-size: clamp(2.35rem, 5vw, 3.75rem); line-height: 1.04; }
+.form-card { max-width: 760px; border-color: var(--border); border-radius: 20px; box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.08); }
+.form-card h2 { font-size: clamp(1.25rem, 2vw, 1.55rem); }
+.field-row { gap: 18px; }
+.btn-submit { min-height: 48px; box-shadow: 0 14px 34px rgba(159,226,45,.18); }

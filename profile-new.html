@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Your Profile — Bak'd On The Bay</title>
+  <meta name="description" content="Create your public profile for Bak'd On The Bay — vendors, sponsors, speakers and attendees.">
+  <link rel="stylesheet" href="/profiles.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Create Your Profile — Bak'd On The Bay">
+  <meta property="og:description" content="Create your public profile for Bak'd On The Bay — vendors, sponsors, speakers and attendees.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/profile-new">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Create Your Profile — Bak'd On The Bay">
+  <meta name="twitter:description" content="Create your public profile for Bak'd On The Bay — vendors, sponsors, speakers and attendees.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/profile-new">
+</head>
+<body>
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/directory">Directory</a></li>
+        <li><a href="/sponsors">Sponsors</a></li>
+        <li><a href="/vendors">Vendors</a></li>
+        <li><a href="/directory" class="btn-nav">View Profiles</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-hero">
+    <div class="event-badge">September 26 · Bayfront Convention Center · Erie, PA</div>
+    <h1>Create Your <span>Profile</span></h1>
+    <p class="lead">Tell the Bak'd On The Bay community who you are. Your profile appears in our public directory so attendees, vendors, sponsors and speakers can find and connect with you.</p>
+  </div>
+
+  <div class="content">
+    <div class="bubble form-card">
+      <h2>Your Profile</h2>
+      <p class="hint">Fields marked <span style="color:var(--green)">*</span> are required. Everything else is optional but helps people get to know you.</p>
+
+      <form id="profileForm" novalidate>
+
+        <div class="form-section-label">I am a…</div>
+        <div class="role-cards" id="roleCards">
+          <div class="role-card">
+            <input type="radio" id="role-attendee" name="role" value="attendee" checked>
+            <label for="role-attendee"><span class="role-emoji">🎟️</span><span class="role-name">Attendee</span></label>
+          </div>
+          <div class="role-card">
+            <input type="radio" id="role-vendor" name="role" value="vendor">
+            <label for="role-vendor"><span class="role-emoji">🏪</span><span class="role-name">Vendor</span></label>
+          </div>
+          <div class="role-card">
+            <input type="radio" id="role-sponsor" name="role" value="sponsor">
+            <label for="role-sponsor"><span class="role-emoji">⭐</span><span class="role-name">Sponsor</span></label>
+          </div>
+          <div class="role-card">
+            <input type="radio" id="role-speaker" name="role" value="speaker">
+            <label for="role-speaker"><span class="role-emoji">🎤</span><span class="role-name">Speaker</span></label>
+          </div>
+          <div class="role-card">
+            <input type="radio" id="role-dj" name="role" value="dj">
+            <label for="role-dj"><span class="role-emoji">🎧</span><span class="role-name">DJ / Act</span></label>
+          </div>
+        </div>
+
+        <div class="form-section-label">About You</div>
+        <div class="field-row">
+          <div class="field-group">
+            <label for="displayName">Display Name <span>*</span></label>
+            <input type="text" id="displayName" name="displayName" placeholder="Your name" required>
+          </div>
+          <div class="field-group">
+            <label for="email">Email <span>*</span></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group" id="companyGroup">
+            <label for="company"><span id="companyLabel">Company / Business</span> <span>(optional)</span></label>
+            <input type="text" id="company" name="company" placeholder="Where you work or your business name">
+          </div>
+          <div class="field-group">
+            <label for="website">Website <span>(optional)</span></label>
+            <input type="url" id="website" name="website" placeholder="https://…">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="tagline">Tagline <span>(optional)</span></label>
+          <input type="text" id="tagline" name="tagline" placeholder="A short one-line intro">
+        </div>
+
+        <div class="field-group">
+          <label for="bio">Bio <span>(optional)</span></label>
+          <textarea id="bio" name="bio" placeholder="Tell the community about yourself, your work, or what you're excited about."></textarea>
+        </div>
+
+        <!-- Role-specific extras get injected here -->
+        <div id="roleExtras"></div>
+
+        <div class="form-section-label">Photo</div>
+        <div class="field-group">
+          <label for="headshot">Profile Photo <span>(optional)</span></label>
+          <input type="file" id="headshot" name="headshot" accept="image/*">
+          <img id="headshotPreview" class="headshot-preview" alt="Profile photo preview">
+        </div>
+
+        <div class="submit-area">
+          <button type="submit" class="btn-submit" id="submitBtn">Publish Profile →</button>
+          <span class="submit-note">Your profile is published to the public directory.</span>
+        </div>
+
+        <div class="form-message success" id="successMsg">
+          <strong>🎉 Your profile is live!</strong><br>
+          <a id="viewLink" href="/directory">View it in the directory →</a>
+        </div>
+        <div class="form-message error" id="errorMsg">Something went wrong. Please check your details and try again.</div>
+
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p style="margin-top:8px"><a href="/">Back to Home</a> · <a href="/directory">Browse the Directory</a></p>
+  </footer>
+
+  <script src="/social-common.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/profile-new.js"></script>
+</body>
+</html>

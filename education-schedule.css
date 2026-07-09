@@ -1,0 +1,81 @@
+
+@import url('assets/css/design-system.css');
+
+body{
+font-family:var(--font-family-base);
+background:
+radial-gradient(circle at 18% 8%, rgba(159,226,45,.1), transparent 28rem),
+linear-gradient(180deg,#071008,#050805);
+color:white;
+padding:20px;
+min-height:100vh;
+}
+
+main{ max-width:760px; margin:0 auto; padding:14px 4px 60px; }
+
+h1{
+text-align:center;
+margin:18px 0 6px;
+font-size:clamp(1.7rem,4vw,2.4rem);
+}
+h1::after{
+content:"";
+display:block;
+width:64px;
+height:3px;
+margin:12px auto 0;
+border-radius:999px;
+background:var(--color-brand,#9FE22D);
+}
+.schedule-intro{ text-align:center; color:var(--color-text-muted,#8a9a8a); margin:0 0 24px; }
+
+/* Photo-forward session cards. */
+.schedule-strip{ display:flex; flex-direction:column; gap:14px; }
+.schedule-item{
+display:flex;
+align-items:center;
+gap:16px;
+padding:14px 18px;
+background:var(--surface-glass, rgba(8,18,10,.72));
+border:1px solid var(--border);
+border-radius:16px;
+box-shadow:var(--shadow-soft), inset 0 1px 0 rgba(255,255,255,.08);
+backdrop-filter:blur(18px);
+text-decoration:none;
+color:inherit;
+transition:transform var(--duration-med,280ms) var(--ease-standard,cubic-bezier(.2,.8,.2,1)), border-color var(--duration-fast,160ms) ease, box-shadow var(--duration-med,280ms) ease;
+}
+a.schedule-item:hover{
+transform:translateY(-4px);
+border-color:var(--color-brand,#9FE22D);
+box-shadow:var(--shadow-lift, 0 28px 78px rgba(0,0,0,.54));
+}
+.schedule-item img.sch-photo,
+.schedule-item .sch-photo.placeholder{
+width:66px;
+height:66px;
+border-radius:50%;
+object-fit:cover;
+flex:none;
+background:#0c130c;
+border:1px solid rgba(255,255,255,.14);
+}
+.schedule-item .sch-photo.placeholder{
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:800;
+font-size:1.1rem;
+color:var(--color-brand,#9FE22D);
+}
+.sch-body{ display:flex; flex-direction:column; gap:2px; }
+.schedule-item .sch-time{ font-weight:800; color:var(--color-brand,#9FE22D); font-size:.85rem; letter-spacing:.03em; }
+.schedule-item .sch-name{ font-weight:700; font-size:1.05rem; }
+.schedule-item .sch-topic{ color:var(--color-text-muted,#8a9a8a); font-size:.9rem; }
+.empty{ text-align:center; color:var(--color-text-muted,#8a9a8a); padding:50px 20px; }
+
+@media (max-width:520px){
+.schedule-item{ gap:12px; padding:12px 14px; }
+.schedule-item img.sch-photo,
+.schedule-item .sch-photo.placeholder{ width:54px; height:54px; }
+}

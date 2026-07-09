@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy Your Package — Bak'd On The Bay</title>
+  <meta name="description" content="Approved vendors and sponsors unlock their Eventbrite purchase link to buy their package for Bak'd On The Bay.">
+  <link rel="stylesheet" href="/package-access.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Buy Your Package — Bak'd On The Bay">
+  <meta property="og:description" content="Approved vendors and sponsors unlock their purchase link to buy their package for Bak'd On The Bay.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/package-access">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Buy Your Package — Bak'd On The Bay">
+  <meta name="twitter:description" content="Approved vendors and sponsors unlock their purchase link to buy their package for Bak'd On The Bay.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/package-access">
+</head>
+<body data-cms-page="package-access">
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#sponsors">Sponsors</a></li>
+        <li><a href="/#vendors">Vendors</a></li>
+        <li><a href="/vendors" class="btn-nav">Vendor</a></li>
+        <li><a href="/sponsors" class="btn-nav">Sponsor</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="page-hero">
+    <div class="event-badge">September 26 · Bayfront Convention Center · Erie, PA</div>
+    <h1>Buy Your <span>Package</span></h1>
+    <p>Once your vendor or sponsor application is approved, enter the email you applied with to unlock your Eventbrite purchase link.</p>
+  </div>
+
+  <section class="form-section">
+    <div class="form-card">
+      <h2>Unlock Your Purchase Link</h2>
+
+      <form id="accessForm" novalidate>
+        <div class="field-group">
+          <label for="email">Application Email <span>*</span></label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+
+        <div class="submit-area">
+          <button type="submit" class="btn-submit" id="submitBtn">Unlock My Package →</button>
+          <span class="submit-note">Only approved vendors and sponsors can buy packages.</span>
+        </div>
+      </form>
+
+      <div class="result" id="result" hidden></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <p><strong style="color:white">Bak'd On The Bay</strong></p>
+    <p>September 26 · Bayfront Convention Center · Erie, PA</p>
+    <p style="margin-top:10px"><a href="/">Back to Home</a></p>
+  </footer>
+
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/package-access.js"></script>
+</body>
+</html>

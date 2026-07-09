@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floor Plan — Bak'd On The Bay</title>
+  <meta name="description" content="Explore the to-scale floor plan for Bak'd On The Bay at the Bayfront Convention Center — vendor booths, food, stages and more.">
+  <style>
+    :root { --green:#9FE22D; --dark:#071008; --muted:#8a9a8a; --border:rgba(159,226,45,.22); --glass:rgba(8,18,10,.72); --nav-logo-font-size:1.3rem; --nav-logo-image-height:44px; --nav-link-font-size:.9rem; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Segoe UI",Arial,sans-serif; color:#fff;
+      background:linear-gradient(rgba(0,0,0,.55),rgba(7,16,8,.8)), url('assets/images/bayfront-crowd-hero.jpg') center/cover fixed, var(--dark); min-height:100vh; }
+    .site-header { position:sticky; top:0; z-index:50; background:rgba(0,0,0,.7); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.06); }
+    .site-header nav { max-width:1300px; margin:auto; padding:14px 24px; display:flex; justify-content:flex-start; align-items:center; gap:16px; }
+    .site-logo { color:var(--green); display:inline-flex; align-items:center; gap:.65rem; font-weight:800; font-size:var(--nav-logo-font-size); letter-spacing:1px; line-height:1.1; text-decoration:none; flex:0 0 auto; white-space:nowrap; }
+    .logo-image { width:auto; height:var(--nav-logo-image-height); max-width:190px; object-fit:contain; display:block; }
+    .logo-image-only .logo-image { max-width:240px; }
+    .logo-text { flex:0 0 auto; }
+    .site-header nav > div { margin-left:auto; text-align:right; }
+    .site-header a.link { color:#fff; text-decoration:none; font-weight:600; font-size:var(--nav-link-font-size); margin-left:18px; }
+    .wrap { max-width:1200px; margin:0 auto; padding:34px 18px 70px; }
+    h1 { text-align:center; margin:0 0 6px; }
+    h1 span { color:var(--green); }
+    .sub { text-align:center; color:var(--muted); margin:0 0 8px; }
+    .venue-name { text-align:center; color:#cfe8c2; font-weight:600; margin-bottom:18px; }
+    .floor-tools { display:grid; grid-template-columns:minmax(220px,1fr) auto; gap:12px; align-items:end; margin:18px auto; max-width:900px; padding:14px; border:1px solid var(--border); border-radius:16px; background:var(--glass); box-shadow:0 18px 50px rgba(0,0,0,.38); backdrop-filter:blur(16px); }
+    .floor-tools label { display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:.76rem; text-transform:uppercase; letter-spacing:.06em; font-weight:800; }
+    .floor-tools input { min-height:44px; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,.35); color:#fff; padding:0 12px; font:inherit; }
+    .zoom-controls { display:flex; gap:8px; }
+    .zoom-controls button { min-width:42px; min-height:42px; border:1px solid var(--border); border-radius:12px; background:rgba(159,226,45,.12); color:#fff; cursor:pointer; font-weight:900; }
+    .zoom-controls button:hover { border-color:var(--green); color:var(--green); }
+    .legend { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-bottom:18px; font-size:.82rem; color:var(--muted); }
+    .legend span { display:inline-flex; align-items:center; gap:6px; }
+    .legend i { width:14px; height:14px; border-radius:4px; display:inline-block; }
+    .stage-scroll { overflow:auto; border:1px solid var(--border); border-radius:18px; background:rgba(4,12,7,.76); backdrop-filter:blur(10px); padding:0; box-shadow:0 24px 70px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.08); touch-action:pan-x pan-y; }
+    #stage { position:relative; margin:auto;
+      background-image:linear-gradient(rgba(159,226,45,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(159,226,45,.06) 1px,transparent 1px);
+      background-color:rgba(7,17,9,.6); }
+    .booth { position:absolute; border-radius:6px; display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; color:#04210a; text-align:center; cursor:pointer; overflow:hidden;
+      border:2px solid rgba(0,0,0,.35); transition:transform .16s ease, box-shadow .16s ease, filter .16s ease; box-shadow:inset 0 1px 0 rgba(255,255,255,.28); }
+    .booth:hover, .booth:focus-visible { transform:scale(1.06); z-index:5; outline:2px solid #fff; box-shadow:0 14px 28px rgba(0,0,0,.32); filter:saturate(1.12); }
+    .booth.is-match { outline:3px solid #fff; z-index:6; }
+    .booth.status-available { opacity:.6; }
+    .booth.status-reserved { opacity:.85; border-style:dashed; }
+    .booth .lbl { pointer-events:none; padding:1px 3px; line-height:1.05; }
+    /* Hover bubble: shows a booth's vendor logo + company info on hover/focus (desktop
+       and keyboard). Positioned in JS. On touch, tapping a booth opens the full popup. */
+    .booth-tip { position:fixed; z-index:120; max-width:250px; pointer-events:none;
+      background:rgba(10,20,12,.96); border:1px solid var(--border); border-radius:14px;
+      padding:12px 14px; box-shadow:0 22px 60px rgba(0,0,0,.6); backdrop-filter:blur(16px);
+      opacity:0; transform:translateY(6px); transition:opacity .14s ease, transform .14s ease; display:none; }
+    .booth-tip.show { opacity:1; transform:translateY(0); }
+    .booth-tip .tip-head { display:flex; align-items:center; gap:10px; }
+    .booth-tip .tip-logo { width:42px; height:42px; border-radius:10px; object-fit:cover; flex:0 0 auto;
+      background:#0c130c; border:1px solid rgba(255,255,255,.14); }
+    .booth-tip .tip-logo.placeholder { display:flex; align-items:center; justify-content:center;
+      font-weight:800; color:var(--green); font-size:1rem; }
+    .booth-tip .tip-name { font-weight:800; color:#fff; font-size:.95rem; line-height:1.15; }
+    .booth-tip .tip-meta { color:var(--muted); font-size:.76rem; margin-top:1px; }
+    .booth-tip .tip-note { color:#cfe8c2; font-size:.8rem; margin:8px 0 0; line-height:1.3; }
+    .booth-tip .tip-pill { display:inline-block; font-size:.64rem; text-transform:uppercase; letter-spacing:.05em;
+      color:#04210a; padding:2px 8px; border-radius:999px; font-weight:800; margin-top:8px; }
+    .empty { text-align:center; color:var(--muted); padding:60px 20px; }
+    .scale-note { text-align:center; color:var(--muted); font-size:.78rem; margin-top:10px; }
+    /* Popup */
+    .pop-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:100; padding:16px; }
+    .pop-overlay.open { display:flex; }
+    .pop { background:rgba(10,20,12,.94); border:1px solid var(--border); border-radius:18px; padding:22px; max-width:390px; width:100%; position:relative; box-shadow:0 28px 90px rgba(0,0,0,.62); backdrop-filter:blur(18px); }
+    .pop h3 { margin:0 0 4px; color:#fff; }
+    .pop .use-pill { display:inline-block; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:#04210a; padding:2px 10px; border-radius:999px; font-weight:800; }
+    .pop dl { margin:14px 0 0; display:grid; grid-template-columns:auto 1fr; gap:6px 14px; font-size:.9rem; }
+    .pop dt { color:var(--muted); }
+    .pop dd { margin:0; color:#fff; }
+    .pop .close { position:absolute; top:10px; right:14px; background:none; border:none; color:var(--muted); font-size:1.6rem; cursor:pointer; }
+    .footer { text-align:center; color:var(--muted); padding:30px; font-size:.85rem; }
+    .footer a { color:var(--green); }
+    @media (max-width:700px){ .site-header nav{align-items:flex-start}.site-header nav>div{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}.site-header a.link{margin-left:0}.floor-tools{grid-template-columns:1fr}.zoom-controls{justify-content:space-between}.zoom-controls button{flex:1} }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Floor Plan — Bak'd On The Bay">
+  <meta property="og:description" content="Explore the to-scale floor plan for Bak'd On The Bay at the Bayfront Convention Center — vendor booths, food, stages and more.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/floorplan">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Floor Plan — Bak'd On The Bay">
+  <meta name="twitter:description" content="Explore the to-scale floor plan for Bak'd On The Bay at the Bayfront Convention Center — vendor booths, food, stages and more.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/floorplan">
+</head>
+<body>
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <div>
+        <a class="link" href="#" id="backLink">← Back</a>
+        <a class="link" href="/">Home</a>
+        <a class="link" href="/directory">Directory</a>
+        <a class="link" href="/vendors">Become a Vendor</a>
+        <a class="link" href="https://www.axs.com/events/1498004/bakd-on-the-bay-tickets" target="_blank" rel="noopener">Get Tickets</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <h1>Event <span>Floor Plan</span></h1>
+    <p class="sub">Tap any booth for details. Drawn to scale.</p>
+    <p class="venue-name" id="venueName"></p>
+    <div class="floor-tools">
+      <label>Search booths and vendors
+        <input id="boothSearch" type="search" placeholder="Search booth, vendor, status, type">
+      </label>
+      <div class="zoom-controls" aria-label="Floor plan zoom controls">
+        <button type="button" id="zoomOut" aria-label="Zoom out">-</button>
+        <button type="button" id="zoomReset" aria-label="Reset zoom">100%</button>
+        <button type="button" id="zoomIn" aria-label="Zoom in">+</button>
+      </div>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="stage-scroll"><div id="stage"></div></div>
+    <p class="scale-note" id="scaleNote"></p>
+  </div>
+
+  <div class="pop-overlay" id="popOverlay">
+    <div class="pop" id="pop"></div>
+  </div>
+
+  <div class="footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Bayfront Convention Center, Erie, PA</p>
+    <p><a href="/">Back to Home</a></p>
+  </div>
+
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/floorplan-view.js"></script>
+  <script>
+    // "Back" returns to the previous page, or Home if there is no history.
+    document.getElementById('backLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (history.length > 1) history.back(); else window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

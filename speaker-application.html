@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speaker Application — Bak'd On The Bay</title>
+  <meta name="description" content="Apply to speak at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <link rel="stylesheet" href="/speaker-application.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Speaker Application — Bak'd On The Bay">
+  <meta property="og:description" content="Apply to speak at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/speaker-application">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Speaker Application — Bak'd On The Bay">
+  <meta name="twitter:description" content="Apply to speak at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/speaker-application">
+  <style>
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
+    .skip-link:focus{left:8px}
+  </style>
+</head>
+<body data-cms-page="speaker-application">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#education-station">Education</a></li>
+        <li><a href="/#sponsors">Sponsors</a></li>
+        <li><a href="/#vendors">Vendors</a></li>
+        <li><a href="/#venue">Venue</a></li>
+        <li><a href="/vendors" class="btn-nav">Vendor</a></li>
+        <li><a href="/sponsors" class="btn-nav">Sponsor</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+  <div class="page-hero">
+    <div class="event-badge" data-cms="hero.badge">September 26 · Bayfront Convention Center · Erie, PA</div>
+    <h1 data-cms="hero.title">Apply to <span>Speak</span></h1>
+    <p data-cms="hero.subtitle">Share your expertise with 2,500+ cannabis industry professionals, advocates, and consumers at the Bayfront Convention Center.</p>
+  </div>
+
+  <section class="speaker-tools">
+    <a href="#timeRequest" aria-label="Jump to speaking time request section">Request Speaking Time</a>
+    <a href="#profileSection" aria-label="Jump to speaker profile details section">Speaker Profile Section</a>
+    <a href="/#vendors">Vendor Lookup</a>
+    <a href="/#sponsors">Sponsor Lookup</a>
+  </section>
+
+  <section class="form-section">
+    <div class="form-card">
+      <h2>Speaker Application</h2>
+
+      <form id="speakerForm" novalidate>
+
+        <div class="form-section-label">Personal Information</div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="name">Full Name <span>*</span></label>
+            <input type="text" id="name" name="name" placeholder="Your full name" required>
+          </div>
+          <div class="field-group">
+            <label for="email">Email Address <span>*</span></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="phone">Phone <span>(optional)</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000">
+          </div>
+          <div class="field-group">
+            <label for="website">Website / Social <span>(optional)</span></label>
+            <input type="url" id="website" name="website" placeholder="https://yoursite.com">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="company">Company / Organization <span>(optional)</span></label>
+          <input type="text" id="company" name="company" placeholder="Where do you work or what do you represent?">
+        </div>
+
+        <div class="form-section-label">Profile & Sign In</div>
+
+        <div class="field-group">
+          <label for="displayName">Public Profile Name <span>*</span></label>
+          <input type="text" id="displayName" name="displayName" placeholder="Name shown in the member directory" required>
+        </div>
+
+        <div class="field-group">
+          <label for="tagline">Profile Tagline <span>*</span></label>
+          <input type="text" id="tagline" name="tagline" placeholder="Short description for your public profile" required>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Create Password <span>*</span></label>
+          <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters" required>
+        </div>
+
+        <div class="form-section-label">Presentation Details</div>
+
+        <div class="field-group">
+          <label for="topic">Presentation Title <span>*</span></label>
+          <input type="text" id="topic" name="topic" placeholder="e.g. The Future of Cannabis Retail in PA" required>
+        </div>
+
+        <div class="field-group">
+          <label for="format" data-cms="speaker.format.label">Presentation Format <span>*</span></label>
+          <select id="format" name="format" required>
+            <option value="talk" data-cms="speaker.format.talk">Solo Talk (30 min)</option>
+            <option value="panel" data-cms="speaker.format.panel">Panel Discussion</option>
+            <option value="workshop" data-cms="speaker.format.workshop">Workshop / Interactive (60 min)</option>
+            <option value="keynote" data-cms="speaker.format.keynote">Keynote (45 min)</option>
+          </select>
+        </div>
+
+        <div class="field-row" id="timeRequest">
+          <div class="field-group">
+            <label for="preferredTime" data-cms="speaker.slot.label">Preferred Speaking Time <span>*</span></label>
+            <select id="preferredTime" name="preferredTime" required>
+              <option value="" selected disabled>Select your preferred slot</option>
+              <option value="morning" data-cms="speaker.slot.morning">Morning (9:00 AM – 12:00 PM)</option>
+              <option value="afternoon" data-cms="speaker.slot.afternoon">Afternoon (12:00 PM – 4:00 PM)</option>
+              <option value="evening" data-cms="speaker.slot.evening">Evening (4:00 PM – 7:00 PM)</option>
+              <option value="flexible" data-cms="speaker.slot.flexible">Flexible</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="alternateTime">Alternate Time Requests <span>(optional)</span></label>
+            <input type="text" id="alternateTime" name="alternateTime" placeholder="Any backup time windows you can do">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="description">Presentation Description <span>*</span></label>
+          <textarea id="description" name="description" placeholder="Summarize your talk: what will attendees learn, why is this topic important, and what makes you the right person to present it?" required></textarea>
+        </div>
+
+        <div class="form-section-label" id="profileSection">About You</div>
+
+        <div class="field-group">
+          <label for="bio">Speaker Bio <span>*</span></label>
+          <textarea id="bio" name="bio" placeholder="A brief professional bio (2–3 sentences) that we can use in the event program." required></textarea>
+        </div>
+
+        <div class="field-group">
+          <label for="headshot">Headshot link <span>(optional)</span></label>
+          <input type="url" id="headshot" name="headshotUrl" placeholder="Paste a link to your headshot — Drive, Dropbox, your website…">
+          <p class="hint" style="margin-top:6px">We can’t take file uploads on this form yet — share a link and we’ll collect it during onboarding.</p>        </div>
+
+        <div class="form-section-label">Contract</div>
+
+        <div class="contract-box">
+          <p>Review the Bak'd On The Bay speaker, DJ, and entertainer agreement before submitting.</p>
+          <a href="/assets/contracts/bakd-on-the-bay-speaker-dj-entertainer-agreement.pdf" target="_blank" rel="noopener">Open entertainer agreement</a>
+        </div>
+
+        <div class="field-group">
+          <label for="contractSignature">Virtual Signature <span>*</span></label>
+          <input type="text" id="contractSignature" name="contractSignature" placeholder="Type your full legal name" required>
+        </div>
+
+        <label class="check-field">
+          <input type="checkbox" name="contractAccepted" value="yes" required>
+          <span>I have read and agree to the Bak'd On The Bay speaker, DJ, and entertainer agreement.</span>
+        </label>
+
+        <div class="submit-area">
+          <button type="submit" class="btn-submit" id="submitBtn">
+            Submit Application →
+          </button>
+          <span class="submit-note">We'll follow up within 2–3 business days.</span>
+        </div>
+
+        <div class="form-message success" id="successMsg">
+          <strong>🎤 Application received!</strong><br>
+          Thank you for applying to speak at Bak'd On The Bay. Your account and profile are pending review. Once approved, you'll receive an email with a link to your profile and can sign in with the password you created.
+        </div>
+        <div class="form-message error" id="errorMsg">
+          Something went wrong. Please try again or email us directly.
+        </div>
+
+      </form>
+    </div>
+  </section>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong style="color:white">Bak'd On The Bay</strong></p>
+    <p>September 26 · Bayfront Convention Center · Erie, PA</p>
+    <p style="margin-top:10px"><a href="/">Back to Home</a></p>
+  </footer>
+
+  <script src="/speaker-application.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+</body>
+</html>

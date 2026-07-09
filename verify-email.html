@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Your Email — Bak'd On The Bay</title>
+<meta name="description" content="Confirm your email address to activate your Bak'd On The Bay account.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="stylesheet" href="password-reset.css">
+</head>
+<body>
+<main class="reset-box">
+<h1>Verifying Your Email</h1>
+<div id="verifyMessage" role="status" aria-live="polite">One moment while we confirm your account…</div>
+
+<!-- Shown only when the link is expired or already used, to request a fresh one. -->
+<form id="resendForm" style="display:none">
+<label for="resendEmail">Enter your email to get a new link</label>
+<input id="resendEmail" name="email" type="email" autocomplete="email" placeholder="your@email.com" required>
+<button type="submit">Resend verification email</button>
+</form>
+
+<p><a href="/admin-login.html">Back to sign in</a></p>
+</main>
+<script src="verify-email.js"></script>
+</body>
+</html>

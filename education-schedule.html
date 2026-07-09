@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Education Station Schedule</title>
+<link rel="stylesheet" href="education-schedule.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta name="description" content="The Education Station schedule for Bak'd On The Bay — talks and sessions at the Bayfront Convention Center in Erie, PA.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Education Station Schedule — Bak'd On The Bay">
+  <meta property="og:description" content="The Education Station schedule for Bak'd On The Bay — talks and sessions at the Bayfront Convention Center in Erie, PA.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/education-schedule">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Education Station Schedule — Bak'd On The Bay">
+  <meta name="twitter:description" content="The Education Station schedule for Bak'd On The Bay — talks and sessions at the Bayfront Convention Center in Erie, PA.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/education-schedule">
+  <style>
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
+    .skip-link:focus{left:8px}
+  </style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav style="display:flex;gap:16px;align-items:center;padding:14px 20px;background:#071008;border-bottom:1px solid rgba(159,226,45,.22)">
+  <a href="/" style="color:#9FE22D;font-weight:800;text-decoration:none;letter-spacing:1px">BAK'D ON THE BAY</a>
+  <span style="flex:1"></span>
+  <a href="#" id="backLink" style="color:#fff;text-decoration:none;font-weight:600">← Back</a>
+  <a href="/" style="color:#fff;text-decoration:none;font-weight:600">Home</a>
+  <a href="/directory" style="color:#fff;text-decoration:none;font-weight:600">Directory</a>
+</nav>
+
+<main id="main">
+<h1>Education Station Schedule</h1>
+<p class="schedule-intro">Meet the speakers taking the stage at Bak'd On The Bay — tap anyone to see their profile.</p>
+
+<div id="schedule-container"></div>
+</main>
+
+<script>
+  document.getElementById('backLink').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (history.length > 1) history.back(); else window.location.href = '/';
+  });
+</script>
+<script src="education-schedule.js"></script>
+
+</body>
+</html>

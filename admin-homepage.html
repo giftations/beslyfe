@@ -1,0 +1,1631 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Tools | Bak'd On The Bay</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --muted: #1f2937;
+        --text: #e5e7eb;
+        --subtext: #9ca3af;
+        --accent: #22c55e;
+        --accent-2: #3b82f6;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        background: linear-gradient(135deg, #0b1220 0%, #111827 100%);
+        color: var(--text);
+      }
+
+      .container { max-width: 1000px; margin: 2rem auto; padding: 1rem; }
+
+      .card {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid #374151;
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      }
+
+      h1 { margin-top: 0; font-size: 1.75rem; }
+      h2 { font-size: 1.2rem; }
+      h3 { font-size: 1rem; margin: 0 0 0.5rem; color: #d1d5db; }
+      p.helper { margin-top: 0.25rem; color: var(--subtext); }
+
+      .actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 0.7rem 1rem;
+        font-size: 0.92rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        transition: transform 0.08s ease, opacity 0.15s ease;
+      }
+      button:hover { opacity: 0.95; }
+      button:active { transform: translateY(1px); }
+
+      .btn-publish { background: var(--accent); }
+      .btn-unpublish { background: var(--danger); }
+      .btn-feature { background: var(--accent-2); }
+      .btn-reset { background: var(--warning); color: #111827; }
+      .btn-logout { background: #475569; }
+      .btn-save { background: #10b981; }
+      .btn-load { background: #6366f1; }
+      .btn-clear { background: #6b7280; }
+      .btn-danger { background: var(--danger); }
+
+      form { display: grid; gap: 0.85rem; }
+      .field { display: grid; gap: 0.35rem; }
+      label { font-size: 0.92rem; color: #d1d5db; }
+
+      input, textarea, select {
+        width: 100%;
+        background: #0b1020;
+        color: var(--text);
+        border: 1px solid #374151;
+        border-radius: 10px;
+        padding: 0.6rem 0.7rem;
+        font-size: 0.92rem;
+      }
+      input[type="color"] { padding: 0.2rem; height: 42px; }
+      input[type="range"] { padding: 0; }
+      textarea { min-height: 70px; resize: vertical; }
+
+      .form-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+      .status {
+        border-radius: 10px;
+        padding: 0.8rem;
+        border: 1px solid #334155;
+        background: #0b1220;
+        line-height: 1.4;
+      }
+      .status[data-type="success"] { border-color: #16a34a; background: rgba(22, 163, 74, 0.15); }
+      .status[data-type="error"] { border-color: #dc2626; background: rgba(220, 38, 38, 0.15); }
+      .meta { color: var(--subtext); font-size: 0.9rem; }
+
+      .section-quicknav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+      .section-quicknav a {
+        font-size: 0.82rem; color: var(--text); text-decoration: none;
+        background: var(--muted); border: 1px solid #374151; border-radius: 999px; padding: 0.3rem 0.7rem;
+      }
+      .section-quicknav a:hover { border-color: var(--accent-2); }
+
+      .group-title { margin: 1rem 0 0.4rem; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .group-title:first-of-type { margin-top: 0; }
+
+      /* Buttons editor rows */
+      .btn-editor {
+        border: 1px solid #374151; border-radius: 10px; background: var(--muted);
+        padding: 0.7rem 0.8rem; margin-bottom: 0.7rem;
+      }
+      .btn-editor .btn-editor-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+      .btn-editor .btn-editor-head strong { font-size: 0.9rem; }
+      .btn-editor .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+      .btn-editor .color-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+      .btn-editor .color-field { display: grid; gap: 0.3rem; color: #d1d5db; font-size: 0.82rem; }
+      .btn-editor input[type="color"] { min-height: 42px; padding: 0.2rem; cursor: pointer; }
+      .btn-editor .hide-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+      .btn-editor .hide-row input { width: auto; }
+      label.hide-row { display: flex; align-items: center; gap: 0.4rem; color: #d1d5db; }
+      label.hide-row input { width: auto; }
+
+      /* Templates */
+      .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.85rem; }
+      .template-card { border: 1px solid #374151; border-radius: 12px; overflow: hidden; background: var(--muted); }
+      .template-swatch { height: 70px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+      .template-body { padding: 0.6rem 0.7rem; }
+      .template-body .tname { font-size: 0.95rem; margin-bottom: 0.2rem; }
+      .template-body .tdesc { font-size: 0.78rem; color: var(--subtext); margin-bottom: 0.55rem; }
+      .template-body button { width: 100%; }
+
+      /* Applications */
+      .apps-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+      .apps-toolbar .counts { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .pill { font-size: 0.78rem; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid #374151; }
+      .pill-pending { color: #fde68a; border-color: #a16207; }
+      .pill-approved { color: #bbf7d0; border-color: #15803d; }
+      .pill-rejected { color: #fecaca; border-color: #b91c1c; }
+      .app-item { border: 1px solid #374151; border-radius: 10px; background: var(--muted); padding: 0.7rem 0.8rem; margin-bottom: 0.7rem; }
+      .app-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; }
+      .app-title { font-size: 0.96rem; }
+      .app-sub { color: var(--subtext); font-size: 0.82rem; }
+      .badge { font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+      .badge-pending { background: rgba(161,98,7,0.3); color: #fde68a; }
+      .badge-approved { background: rgba(21,128,61,0.3); color: #bbf7d0; }
+      .badge-rejected { background: rgba(185,28,28,0.3); color: #fecaca; }
+      .app-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.6rem; }
+      .app-actions button { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+      .app-details { margin-top: 0.55rem; font-size: 0.82rem; color: #cbd5e1; display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.75rem; }
+      .app-details dt { color: var(--subtext); }
+      .app-details dd { margin: 0; word-break: break-word; }
+      .empty { color: var(--subtext); font-size: 0.92rem; }
+
+      /* Media library */
+      .media-hint { margin: 0 0 0.85rem; color: var(--subtext); }
+      .media-current { display: flex; align-items: center; gap: 0.85rem; margin: 0.85rem 0; padding: 0.6rem 0.75rem; border: 1px solid #374151; border-radius: 10px; background: var(--muted); }
+      .media-current img { width: 120px; height: 70px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #0b1020; }
+      .media-current .media-current-label { color: var(--subtext); font-size: 0.9rem; }
+      .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.85rem; margin-top: 1rem; }
+      .media-empty { color: var(--subtext); font-size: 0.92rem; margin-top: 0.75rem; }
+      .media-item { border: 1px solid #374151; border-radius: 10px; overflow: hidden; background: var(--muted); display: flex; flex-direction: column; }
+      .media-item.is-active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.35); }
+      .media-item img { width: 100%; height: 110px; object-fit: cover; display: block; background: #0b1020; }
+      .media-item .media-name { padding: 0.45rem 0.55rem; font-size: 0.78rem; color: var(--subtext); word-break: break-all; flex: 1; }
+      .media-item .media-actions { display: flex; gap: 0.35rem; padding: 0 0.55rem 0.55rem; }
+      .media-item .media-actions button { flex: 1; padding: 0.45rem 0.5rem; font-size: 0.74rem; border-radius: 8px; }
+      .btn-apply-bg { background: var(--accent-2); }
+      .btn-remove-media { background: #6b7280; }
+
+      /* Section order drag-and-drop */
+      .section-order-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+      .section-order-item { display: flex; align-items: center; gap: 0.65rem; background: var(--muted); border: 1px solid #374151; border-radius: 10px; padding: 0.65rem 0.85rem; cursor: grab; user-select: none; }
+      .section-order-item:active { cursor: grabbing; }
+      .section-order-item.dragging { opacity: 0.45; }
+      .section-order-item.drag-over { background: #1e3a5f; border-color: var(--accent-2); }
+      .drag-handle { font-size: 1.2rem; line-height: 1; color: var(--subtext); flex-shrink: 0; }
+      .section-label { flex: 1; font-size: 0.95rem; }
+      .section-transparent-toggle { display: flex; align-items: center; gap: 0.35rem; color: var(--subtext); font-size: 0.82rem; }
+      .section-transparent-toggle input { width: auto; }
+      .order-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.85rem; }
+      .btn-save-order { background: #10b981; }
+      .btn-reset-order { background: var(--warning); color: #111827; }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta name="robots" content="noindex, nofollow">
+</head>
+  <body>
+    <script>
+      (function () {
+        try {
+          var sessionRaw = localStorage.getItem('bakd_session');
+          var session = sessionRaw ? JSON.parse(sessionRaw) : null;
+          if (!session || session.role !== 'admin') {
+            window.location.replace('/admin-login.html');
+          }
+        } catch (e) {
+          window.location.replace('/admin-login.html');
+        }
+      })();
+    </script>
+    <div class="container">
+      <section class="card">
+        <h1>Site Editor</h1>
+        <p class="helper">Customize every part of the public site — text, buttons, theme and media — for any page, not just the homepage. Changes publish to the live site for all visitors. <a href="/admin" style="color:var(--accent)">← Back to Admin Dashboard</a></p>
+        <div class="field" style="margin-top:0.6rem;max-width:420px;">
+          <label for="pageSelect">Page to edit</label>
+          <select id="pageSelect"></select>
+        </div>
+        <nav class="section-quicknav" aria-label="Jump to section">
+          <a href="/admin">Dashboard</a>
+          <a href="#quick">Quick Actions</a>
+          <a href="#page-text">Page Text</a>
+          <a href="#buttons">Buttons &amp; Links</a>
+          <a href="#background">Background &amp; Theme</a>
+          <a href="#templates">Templates</a>
+          <a href="#order">Section Order</a>
+          <a href="#media">Media</a>
+        </nav>
+      </section>
+
+      <section class="card homepage-only" id="quick">
+        <h2>Quick Actions</h2>
+        <div class="actions">
+          <button id="publishBtn" class="btn-publish" type="button">Publish</button>
+          <button id="unpublishBtn" class="btn-unpublish" type="button">Unpublish</button>
+          <button id="featureEventBtn" class="btn-feature" type="button">Feature Event</button>
+          <button id="clearFeatureBtn" class="btn-reset" type="button">Clear Featured Event</button>
+          <button id="resetBannerBtn" class="btn-reset" type="button">Reset Homepage Banner</button>
+          <button id="logoutBtn" class="btn-logout" type="button">Log Out</button>
+        </div>
+        <div class="field" style="margin-top:0.85rem;">
+          <label for="featuredEventName">Featured Event Name</label>
+          <input id="featuredEventName" name="featuredEventName" type="text" placeholder="Enter event name to feature on homepage" />
+        </div>
+      </section>
+
+      <section class="card" id="applications">
+        <h2>Applications</h2>
+        <p class="helper">Vendor, sponsor and speaker submissions. Approve or reject each one — decisions are saved for the whole site.</p>
+        <div class="apps-toolbar">
+          <div class="counts" id="appCounts"></div>
+          <div style="flex:1"></div>
+          <select id="appStatusFilter" style="max-width:170px">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="">All</option>
+          </select>
+          <select id="appTypeFilter" style="max-width:150px">
+            <option value="">All types</option>
+            <option value="vendor">Vendor</option>
+            <option value="sponsor">Sponsor</option>
+            <option value="speaker">Speaker</option>
+            <option value="dj">DJ / Entertainment</option>
+            <option value="attendee">Attendee</option>
+            <option value="other">Other</option>
+          </select>
+          <button id="appRefreshBtn" class="btn-load" type="button">Refresh</button>
+        </div>
+        <div id="appList"></div>
+      </section>
+
+      <section class="card" id="page-text">
+        <h2>Page Text</h2>
+        <p class="helper">Edit every heading, label and paragraph on the selected page. Leave a field blank to keep the default wording.</p>
+        <form id="textForm">
+          <div id="textFields"></div>
+          <div class="form-actions">
+            <button class="btn-save" type="submit">Save Text</button>
+            <button class="btn-clear" id="textReloadBtn" type="button">Reload</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" id="buttons">
+        <h2>Buttons &amp; Links</h2>
+        <p class="helper">Rename any button, change where it goes, set its colors, or hide it entirely. Leave label/link blank to keep the default.</p>
+        <div id="buttonFields"></div>
+        <div class="form-actions">
+          <button class="btn-save" id="saveButtonsBtn" type="button">Save Buttons</button>
+          <button class="btn-clear" id="buttonsReloadBtn" type="button">Reload</button>
+        </div>
+      </section>
+
+      <section class="card" id="brand">
+        <h2>Navbar Brand</h2>
+        <p class="helper">Control the brand area in the navigation. Use text, an uploaded image URL from the Media Library, or both.</p>
+        <div class="field">
+          <label for="brandText">Brand text</label>
+          <input id="brandText" type="text" placeholder="BAK'D ON THE BAY" />
+        </div>
+        <div class="field">
+          <label for="brandImage">Brand image URL</label>
+          <input id="brandImage" type="text" placeholder="/.netlify/functions/site-media?file=logo.png" />
+        </div>
+        <label class="hide-row"><input id="brandShowText" type="checkbox" checked /> Show text</label>
+        <label class="hide-row"><input id="brandShowImage" type="checkbox" /> Show image</label>
+        <div class="field">
+          <label for="brandLogoFontSize">Logo text size (rem)</label>
+          <input id="brandLogoFontSize" type="number" min="1" max="2" step="0.05" value="1.3" />
+        </div>
+        <div class="field">
+          <label for="brandLogoImageHeight">Logo image height (px)</label>
+          <input id="brandLogoImageHeight" type="number" min="32" max="88" step="1" value="44" />
+        </div>
+        <div class="field">
+          <label for="brandLinkFontSize">Navigation link size (rem)</label>
+          <input id="brandLinkFontSize" type="number" min="0.75" max="1.05" step="0.01" value="0.9" />
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" id="saveBrandBtn" type="button">Save Brand</button>
+          <button class="btn-clear" id="brandReloadBtn" type="button">Reload</button>
+        </div>
+      </section>
+
+      <section class="card homepage-only" id="eventbrite-links">
+        <h2>Package Purchase Links (Eventbrite)</h2>
+        <p class="helper">Paste the Eventbrite links that let vendors and sponsors buy their packages. These links are <strong>only</strong> revealed to applicants you have approved — when an approved vendor or sponsor enters their email on the <a href="/packages" target="_blank" rel="noopener">package purchase page</a>, the matching link unlocks. Leave a field blank to keep that package locked.</p>
+        <div class="field">
+          <label for="ebVendorUrl">Vendor package Eventbrite link</label>
+          <input id="ebVendorUrl" type="url" placeholder="https://www.eventbrite.com/e/your-vendor-event" />
+        </div>
+        <div class="field">
+          <label for="ebSponsorUrl">Sponsor package Eventbrite link</label>
+          <input id="ebSponsorUrl" type="url" placeholder="https://www.eventbrite.com/e/your-sponsor-event" />
+        </div>
+        <div class="field">
+          <label for="ebPassword">Eventbrite access password</label>
+          <input id="ebPassword" type="text" placeholder="Password approved buyers enter on Eventbrite" autocomplete="off" />
+          <p class="helper">The password that unlocks your password-protected Eventbrite ticket pages. It is sent to each applicant you approve and shown to them on the package purchase page. Leave blank to omit it.</p>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" id="saveEventbriteBtn" type="button">Save Purchase Links</button>
+          <button class="btn-clear" id="eventbriteReloadBtn" type="button">Reload</button>
+        </div>
+      </section>
+
+      <section class="card" id="background">
+        <h2>Background &amp; Theme</h2>
+        <p class="helper">Control the hero background image (chosen in Media below), how dark the overlay is, where the image sits, and the brand colors.</p>
+        <div class="field">
+          <label for="heroOverlay">Background overlay darkness (<span id="heroOverlayVal">50</span>%)</label>
+          <input id="heroOverlay" type="range" min="0" max="90" step="5" value="50" />
+        </div>
+        <div class="field">
+          <label for="heroPosition">Background image position</label>
+          <select id="heroPosition">
+            <option value="center">Center</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+            <option value="left">Left</option>
+            <option value="right">Right</option>
+            <option value="top left">Top left</option>
+            <option value="top right">Top right</option>
+            <option value="bottom left">Bottom left</option>
+            <option value="bottom right">Bottom right</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="brandColor">Brand / accent color</label>
+          <input id="brandColor" type="color" value="#9FE22D" />
+        </div>
+        <div class="field">
+          <label for="bgColor">Page background color</label>
+          <input id="bgColor" type="color" value="#071008" />
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" id="saveThemeBtn" type="button">Save Background &amp; Theme</button>
+          <button class="btn-clear" id="clearBgColorBtn" type="button">Clear Page Background Color</button>
+          <button class="btn-clear" id="themeReloadBtn" type="button">Reload</button>
+        </div>
+      </section>
+
+      <section class="card" id="templates">
+        <h2>Premade Templates</h2>
+        <p class="helper">One click applies a coordinated color theme and overlay to the homepage. You can fine-tune afterwards in Background &amp; Theme.</p>
+        <div class="template-grid" id="templateGrid"></div>
+      </section>
+
+      <section class="card homepage-only">
+        <h2>Content Settings</h2>
+        <p class="helper">Section notes and toggles. Clearing a section's box hides that section on the homepage.</p>
+        <form id="adminForm">
+          <div class="field"><label for="floorPlan">Floor Plan</label><textarea id="floorPlan" name="floorPlan" placeholder="Enter floor plan details or URL"></textarea></div>
+          <div class="field"><label for="vendors">Vendors</label><textarea id="vendors" name="vendors" placeholder="List vendors (comma-separated or lines)"></textarea></div>
+          <div class="field"><label for="speakers">Speakers</label><textarea id="speakers" name="speakers" placeholder="List speaker names and highlights"></textarea></div>
+          <div class="field"><label for="dj">DJ</label><input id="dj" name="dj" type="text" placeholder="Enter DJ name" /></div>
+          <div class="field"><label for="sponsors">Sponsors</label><textarea id="sponsors" name="sponsors" placeholder="List sponsor names"></textarea></div>
+          <div class="field"><label for="siteLayout">Site Layout</label><textarea id="siteLayout" name="siteLayout" placeholder="Describe layout configuration"></textarea></div>
+          <div class="field">
+            <label for="siteTheme">Site Theme</label>
+            <select id="siteTheme" name="siteTheme">
+              <option value="">Select a theme</option>
+              <option value="classic">Classic</option>
+              <option value="modern">Modern</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="form-actions">
+            <button class="btn-save" type="submit">Save Settings</button>
+            <button class="btn-load" id="loadBtn" type="button">Load Saved Settings</button>
+            <button class="btn-clear" id="clearBtn" type="button">Clear Form</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card homepage-only" id="order">
+        <h2>Homepage Section Order</h2>
+        <p class="helper">Drag sections to reorder them on the homepage. Turn on Transparent for any section that should let the background show through.</p>
+        <ul id="sectionOrderList" class="section-order-list" aria-label="Homepage sections — drag to reorder"></ul>
+        <div class="order-actions">
+          <button id="saveOrderBtn" class="btn-save-order" type="button">Save Order</button>
+          <button id="resetOrderBtn" class="btn-reset-order" type="button">Reset to Default</button>
+        </div>
+      </section>
+
+      <section class="card" id="media">
+        <h2>Media Library</h2>
+        <p class="media-hint">Upload images or videos and apply one as the background for the selected page. Photos (including ones straight from your phone) are automatically resized and optimized, and videos are auto-configured to stream on the site, so any upload just works. Media and your chosen background are saved on the site and published for every visitor.</p>
+        <div class="field"><label for="mediaFile">Upload an image or video</label><input id="mediaFile" type="file" accept="image/*,video/*" /></div>
+        <div class="form-actions">
+          <button id="uploadMediaBtn" class="btn-save" type="button">Add to Library</button>
+          <button id="clearBgBtn" class="btn-clear" type="button">Clear Page Background</button>
+        </div>
+        <div id="mediaCurrent" class="media-current" hidden>
+          <img id="mediaCurrentImg" alt="Current page background" />
+          <span class="media-current-label">Current page background</span>
+        </div>
+        <ul id="mediaGrid" class="media-grid" aria-label="Uploaded photos"></ul>
+        <p id="mediaEmpty" class="media-empty">No photos uploaded yet.</p>
+      </section>
+
+      <section class="card homepage-only" id="speakerSchedule">
+        <h2>Speaker Schedule</h2>
+        <p class="helper">Build the Education Station schedule in 30-minute intervals. Add a speaker to each slot — pick an approved speaker profile to auto-fill their name and photo, or type a name and add a photo URL. The schedule publishes on the homepage with each speaker's name and image.</p>
+        <div id="scheduleRows" class="schedule-rows"></div>
+        <div class="form-actions" style="margin-top:12px">
+          <button id="addSlotBtn" class="btn-save" type="button">+ Add 30-min slot</button>
+          <button id="saveScheduleBtn" class="btn-save" type="button">Save Schedule</button>
+        </div>
+        <style>
+          .schedule-rows { display:flex; flex-direction:column; gap:10px; }
+          .schedule-row { display:grid; grid-template-columns:110px 1fr 1fr 36px; gap:8px; align-items:center;
+            background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:10px; }
+          .schedule-row .sr-speaker { display:flex; gap:8px; align-items:center; }
+          .schedule-row img.sr-thumb { width:34px; height:34px; border-radius:50%; object-fit:cover; background:#1f2937; flex:none; }
+          .schedule-row select, .schedule-row input { width:100%; }
+          .schedule-row .sr-remove { background:#ef4444; color:#fff; border:none; border-radius:8px; cursor:pointer; height:34px; font-weight:700; }
+          .schedule-row .sr-stack { display:flex; flex-direction:column; gap:6px; }
+          @media(max-width:760px){ .schedule-row { grid-template-columns:1fr; } }
+        </style>
+      </section>
+
+      <section class="card">
+        <h2>Status</h2>
+        <div id="statusPanel" class="status" data-type="success">Ready.</div>
+        <p class="meta" id="metaInfo">No admin actions yet.</p>
+      </section>
+    </div>
+
+    <script>
+      /*
+       * Admin client — reads and writes all published homepage settings through
+       * the site-settings, site-media and applications Netlify Functions (backed
+       * by Netlify Blobs), so every change publishes to the live site for all
+       * visitors.
+       */
+      (function () {
+        const SETTINGS_BASE = "/.netlify/functions/site-settings";
+        const MEDIA_ENDPOINT = "/.netlify/functions/site-media";
+        const APPS_ENDPOINT = "/.netlify/functions/applications";
+        const STATE_KEY = "bayfront.admin.state";
+
+        // Pages the admin can customize. Each slug matches the page key the
+        // site-wide CMS loader derives from that page's path.
+        const PAGES = [
+          { key: "homepage", label: "Homepage", path: "/" },
+          { key: "about", label: "About", path: "/about.html" },
+          { key: "contact", label: "Contact", path: "/contact.html" },
+          { key: "vendor-application", label: "Vendor Application", path: "/vendor-application.html" },
+          { key: "sponsor-application", label: "Sponsor Application", path: "/sponsor-application.html" },
+          { key: "speaker-application", label: "Speaker Application", path: "/speaker-application.html" },
+          { key: "dj-application", label: "DJ / Entertainment Application", path: "/dj-application.html" },
+          { key: "directory", label: "Directory", path: "/directory.html" },
+          { key: "feed", label: "Community Feed", path: "/feed.html" },
+        ];
+        // The settings endpoint is rebuilt whenever the selected page changes so
+        // every save/load targets that page's own published document.
+        let CURRENT_PAGE = "homepage";
+        let SETTINGS_ENDPOINT = SETTINGS_BASE + "?page=homepage";
+        function currentPageDef() {
+          for (let i = 0; i < PAGES.length; i++) { if (PAGES[i].key === CURRENT_PAGE) return PAGES[i]; }
+          return PAGES[0];
+        }
+        function setEndpointForPage(key) {
+          CURRENT_PAGE = key;
+          SETTINGS_ENDPOINT = SETTINGS_BASE + "?page=" + encodeURIComponent(key);
+        }
+
+        const statusPanel = document.getElementById("statusPanel");
+        const metaInfo = document.getElementById("metaInfo");
+
+        // ── Editable-field registry for the selected page ──
+        // Discovered by scanning the page's own markup (every [data-cms] and
+        // [data-cms-btn] node), so the editor always matches what is actually on
+        // the page — no hardcoded list to drift out of sync.
+        let pageTextDefs = [];   // [{ key, label, def, multiline }]
+        let pageButtonDefs = []; // [{ key, label, defLabel, defHref }]
+
+        function humanizeKey(key) {
+          return String(key).split(/[.\-_]/).filter(Boolean)
+            .map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); })
+            .join(" · ");
+        }
+
+        async function discoverPage(page) {
+          pageTextDefs = [];
+          pageButtonDefs = [];
+          let html = "";
+          try {
+            const res = await fetch(page.path, { headers: { Accept: "text/html" } });
+            html = await res.text();
+          } catch (e) { return; }
+          let doc;
+          try { doc = new DOMParser().parseFromString(html, "text/html"); }
+          catch (e) { return; }
+          const seenT = {};
+          doc.querySelectorAll("[data-cms]").forEach(function (el) {
+            const key = el.getAttribute("data-cms");
+            if (!key || seenT[key]) return;
+            seenT[key] = true;
+            const def = (el.textContent || "").trim().replace(/\s+/g, " ");
+            pageTextDefs.push({ key: key, label: humanizeKey(key), def: def.slice(0, 160), multiline: def.length > 60 });
+          });
+          const seenB = {};
+          doc.querySelectorAll("[data-cms-btn]").forEach(function (el) {
+            const key = el.getAttribute("data-cms-btn");
+            if (!key || seenB[key]) return;
+            seenB[key] = true;
+            pageButtonDefs.push({
+              key: key,
+              label: humanizeKey(key),
+              defLabel: (el.textContent || "").trim().slice(0, 120),
+              defHref: el.getAttribute("href") || "",
+            });
+          });
+        }
+
+        const TEMPLATES = [
+          { id: "bay-green", name: "Bay Green", desc: "The signature look.", brand: "#9FE22D", bg: "#071008", overlay: 50 },
+          { id: "midnight", name: "Midnight", desc: "Cool violet on near-black.", brand: "#7C5CFF", bg: "#0B0B14", overlay: 65 },
+          { id: "sunset", name: "Sunset", desc: "Warm amber, bold contrast.", brand: "#FF7A45", bg: "#140A08", overlay: 55 },
+          { id: "ocean", name: "Ocean", desc: "Bright cyan, deep navy.", brand: "#22D3EE", bg: "#04121A", overlay: 60 },
+          { id: "rose", name: "Rose", desc: "Hot pink statement.", brand: "#F472B6", bg: "#140810", overlay: 55 },
+          { id: "gold", name: "Gold", desc: "Premium gold on charcoal.", brand: "#FACC15", bg: "#0E0D08", overlay: 45 },
+        ];
+
+        // Content settings form
+        const form = document.getElementById("adminForm");
+        const loadBtn = document.getElementById("loadBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const fields = ["floorPlan", "vendors", "speakers", "dj", "sponsors", "siteLayout", "siteTheme"];
+
+        // Quick actions
+        const publishBtn = document.getElementById("publishBtn");
+        const unpublishBtn = document.getElementById("unpublishBtn");
+        const featureEventBtn = document.getElementById("featureEventBtn");
+        const clearFeatureBtn = document.getElementById("clearFeatureBtn");
+        const resetBannerBtn = document.getElementById("resetBannerBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const featuredEventNameInput = document.getElementById("featuredEventName");
+
+        // Section order
+        const orderList = document.getElementById("sectionOrderList");
+        const saveOrderBtn = document.getElementById("saveOrderBtn");
+        const resetOrderBtn = document.getElementById("resetOrderBtn");
+        const DEFAULT_SECTIONS = [
+          { id: "featured-event", label: "Featured Event (hidden by default)" },
+          { id: "about", label: "Why Bak'd On The Bay?" },
+          { id: "stats", label: "Event Statistics" },
+          { id: "education-station", label: "Education Station" },
+          { id: "sponsors", label: "Featured Sponsors" },
+          { id: "vendors", label: "Featured Vendors" },
+          { id: "entertainment", label: "DJs & Live Entertainment" },
+          { id: "venue", label: "Venue" },
+          { id: "schedule", label: "Event Schedule Preview" },
+          { id: "join", label: "Join The Experience" },
+        ];
+        let dragSrcEl = null;
+
+        // Media library
+        const fileInput = document.getElementById("mediaFile");
+        const uploadBtn = document.getElementById("uploadMediaBtn");
+        const clearBgBtn = document.getElementById("clearBgBtn");
+        const grid = document.getElementById("mediaGrid");
+        const emptyMsg = document.getElementById("mediaEmpty");
+        const currentWrap = document.getElementById("mediaCurrent");
+        const currentImg = document.getElementById("mediaCurrentImg");
+
+        // Cached server state
+        let settings = {};
+        let mediaItems = [];
+
+        function setStatus(message, type) {
+          statusPanel.textContent = message;
+          statusPanel.setAttribute("data-type", type || "success");
+          metaInfo.textContent = "Last update: " + new Date().toLocaleString();
+        }
+
+        function escHtml(s) {
+          return String(s == null ? "" : s)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+
+        async function apiGet(url) {
+          const res = await fetch(url, { headers: { Accept: "application/json" } });
+          if (!res.ok) throw new Error("Request failed (" + res.status + ")");
+          return res.json();
+        }
+
+        async function saveSettings(patch) {
+          const res = await fetch(SETTINGS_ENDPOINT, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(patch),
+          });
+          const data = await res.json().catch(function () { return {}; });
+          if (!res.ok) throw new Error(data.error || "Save failed (" + res.status + ")");
+          if (data.settings) settings = data.settings;
+          return settings;
+        }
+
+        /* ---------- Page text ---------- */
+
+        function buildTextFields() {
+          const wrap = document.getElementById("textFields");
+          if (!pageTextDefs.length) {
+            wrap.innerHTML = '<p class="helper">This page has no editable text yet. Add data-cms attributes to its markup to make text editable here.</p>';
+            return;
+          }
+          // Group fields by the first segment of their key (e.g. hero, about).
+          const groups = {};
+          const order = [];
+          pageTextDefs.forEach(function (f) {
+            const g = String(f.key).split(/[.\-]/)[0] || "page";
+            if (!groups[g]) { groups[g] = []; order.push(g); }
+            groups[g].push(f);
+          });
+          let html = "";
+          order.forEach(function (g) {
+            html += '<div class="group-title">' + escHtml(humanizeKey(g)) + "</div>";
+            groups[g].forEach(function (f) {
+              const id = "txt__" + f.key;
+              const ph = f.def ? "Default: " + f.def : "";
+              html += '<div class="field"><label for="' + escHtml(id) + '">' + escHtml(f.label) + "</label>";
+              if (f.multiline) {
+                html += '<textarea id="' + escHtml(id) + '" data-key="' + escHtml(f.key) + '" placeholder="' + escHtml(ph) + '"></textarea>';
+              } else {
+                html += '<input id="' + escHtml(id) + '" data-key="' + escHtml(f.key) + '" type="text" placeholder="' + escHtml(ph) + '" />';
+              }
+              html += "</div>";
+            });
+          });
+          wrap.innerHTML = html;
+        }
+
+        function fillTextFields() {
+          const texts = settings.texts || {};
+          document.querySelectorAll("#textFields [data-key]").forEach(function (el) {
+            el.value = texts[el.getAttribute("data-key")] || "";
+          });
+        }
+
+        document.getElementById("textForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const texts = {};
+          document.querySelectorAll("#textFields [data-key]").forEach(function (el) {
+            texts[el.getAttribute("data-key")] = el.value;
+          });
+          try {
+            await saveSettings({ texts: texts });
+            setStatus("Page text saved and published.", "success");
+          } catch (err) {
+            setStatus("Failed to save text: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("textReloadBtn").addEventListener("click", async function () {
+          try { settings = await apiGet(SETTINGS_ENDPOINT); fillTextFields(); setStatus("Text reloaded.", "success"); }
+          catch (err) { setStatus("Failed to reload: " + err.message, "error"); }
+        });
+
+        /* ---------- Buttons & links ---------- */
+
+        function buildButtonFields() {
+          const wrap = document.getElementById("buttonFields");
+          if (!pageButtonDefs.length) {
+            wrap.innerHTML = '<p class="helper">This page has no editable buttons yet.</p>';
+            return;
+          }
+          let html = "";
+          pageButtonDefs.forEach(function (b) {
+            html += '<div class="btn-editor" data-key="' + escHtml(b.key) + '">'
+              + '<div class="btn-editor-head"><strong>' + escHtml(b.label) + "</strong></div>"
+              + '<div class="row2">'
+              + '<input class="b-label" type="text" placeholder="Label: ' + escHtml(b.defLabel) + '" />'
+              + '<input class="b-href" type="text" placeholder="Link: ' + escHtml(b.defHref) + '" />'
+              + "</div>"
+              + '<div class="color-row">'
+              + '<label class="color-field">Button color<input class="b-bg-color" type="color" value="#9FE22D" /></label>'
+              + '<label class="color-field">Text color<input class="b-text-color" type="color" value="#000000" /></label>'
+              + "</div>"
+              + '<label class="hide-row"><input class="b-hidden" type="checkbox" /> Hide this button</label>'
+              + "</div>";
+          });
+          wrap.innerHTML = html;
+        }
+
+        function fillButtonFields() {
+          const buttons = settings.buttons || {};
+          document.querySelectorAll("#buttonFields .btn-editor").forEach(function (row) {
+            const cfg = buttons[row.getAttribute("data-key")] || {};
+            row.querySelector(".b-label").value = cfg.label || "";
+            row.querySelector(".b-href").value = cfg.href || "";
+            row.querySelector(".b-hidden").checked = cfg.hidden === true;
+            row.querySelector(".b-bg-color").value = /^#[0-9a-fA-F]{6}$/.test(cfg.bgColor || "") ? cfg.bgColor : "#9FE22D";
+            row.querySelector(".b-text-color").value = /^#[0-9a-fA-F]{6}$/.test(cfg.textColor || "") ? cfg.textColor : "#000000";
+          });
+        }
+
+        document.getElementById("saveButtonsBtn").addEventListener("click", async function () {
+          const buttons = {};
+          document.querySelectorAll("#buttonFields .btn-editor").forEach(function (row) {
+            buttons[row.getAttribute("data-key")] = {
+              label: row.querySelector(".b-label").value,
+              href: row.querySelector(".b-href").value,
+              hidden: row.querySelector(".b-hidden").checked,
+              bgColor: row.querySelector(".b-bg-color").value,
+              textColor: row.querySelector(".b-text-color").value,
+            };
+          });
+          try {
+            await saveSettings({ buttons: buttons });
+            setStatus("Buttons saved and published.", "success");
+          } catch (err) {
+            setStatus("Failed to save buttons: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("buttonsReloadBtn").addEventListener("click", async function () {
+          try { settings = await apiGet(SETTINGS_ENDPOINT); fillButtonFields(); setStatus("Buttons reloaded.", "success"); }
+          catch (err) { setStatus("Failed to reload: " + err.message, "error"); }
+        });
+
+        /* ---------- Navbar brand ---------- */
+
+        const brandTextInput = document.getElementById("brandText");
+        const brandImageInput = document.getElementById("brandImage");
+        const brandShowTextInput = document.getElementById("brandShowText");
+        const brandShowImageInput = document.getElementById("brandShowImage");
+        const brandLogoFontSizeInput = document.getElementById("brandLogoFontSize");
+        const brandLogoImageHeightInput = document.getElementById("brandLogoImageHeight");
+        const brandLinkFontSizeInput = document.getElementById("brandLinkFontSize");
+
+        function fillBrandFields() {
+          const brand = settings.brand || {};
+          const style = brand.style || {};
+          brandTextInput.value = typeof brand.text === "string" ? brand.text : "";
+          brandImageInput.value = typeof brand.image === "string" ? brand.image : "";
+          brandShowTextInput.checked = brand.showText !== false;
+          brandShowImageInput.checked = brand.showImage === true;
+          brandLogoFontSizeInput.value = typeof style.logoFontSize === "number" ? style.logoFontSize : 1.3;
+          brandLogoImageHeightInput.value = typeof style.logoImageHeight === "number" ? style.logoImageHeight : 44;
+          brandLinkFontSizeInput.value = typeof style.linkFontSize === "number" ? style.linkFontSize : 0.9;
+        }
+
+        document.getElementById("saveBrandBtn").addEventListener("click", async function () {
+          try {
+            await saveSettings({
+              brand: {
+                text: brandTextInput.value,
+                image: brandImageInput.value.trim(),
+                showText: brandShowTextInput.checked,
+                showImage: brandShowImageInput.checked,
+                style: {
+                  logoFontSize: Number(brandLogoFontSizeInput.value),
+                  logoImageHeight: Number(brandLogoImageHeightInput.value),
+                  linkFontSize: Number(brandLinkFontSizeInput.value),
+                },
+              },
+            });
+            fillBrandFields();
+            setStatus("Navbar brand saved and published.", "success");
+          } catch (err) {
+            setStatus("Failed to save brand: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("brandReloadBtn").addEventListener("click", async function () {
+          try { settings = await apiGet(SETTINGS_ENDPOINT); fillBrandFields(); setStatus("Brand reloaded.", "success"); }
+          catch (err) { setStatus("Failed to reload brand: " + err.message, "error"); }
+        });
+
+        /* ---------- Package purchase links (Eventbrite) ---------- */
+
+        const ebVendorInput = document.getElementById("ebVendorUrl");
+        const ebSponsorInput = document.getElementById("ebSponsorUrl");
+        const ebPasswordInput = document.getElementById("ebPassword");
+
+        function fillEventbrite() {
+          if (!ebVendorInput || !ebSponsorInput) return;
+          ebVendorInput.value = typeof settings.eventbriteVendorUrl === "string" ? settings.eventbriteVendorUrl : "";
+          ebSponsorInput.value = typeof settings.eventbriteSponsorUrl === "string" ? settings.eventbriteSponsorUrl : "";
+          if (ebPasswordInput) ebPasswordInput.value = typeof settings.eventbritePassword === "string" ? settings.eventbritePassword : "";
+        }
+
+        const saveEventbriteBtn = document.getElementById("saveEventbriteBtn");
+        if (saveEventbriteBtn) {
+          saveEventbriteBtn.addEventListener("click", async function () {
+            try {
+              await saveSettings({
+                eventbriteVendorUrl: ebVendorInput.value.trim(),
+                eventbriteSponsorUrl: ebSponsorInput.value.trim(),
+                eventbritePassword: ebPasswordInput ? ebPasswordInput.value.trim() : "",
+              });
+              fillEventbrite();
+              setStatus("Purchase links saved. Approved vendors and sponsors can now unlock them.", "success");
+            } catch (err) {
+              setStatus("Failed to save purchase links: " + err.message, "error");
+            }
+          });
+        }
+
+        const eventbriteReloadBtn = document.getElementById("eventbriteReloadBtn");
+        if (eventbriteReloadBtn) {
+          eventbriteReloadBtn.addEventListener("click", async function () {
+            try { settings = await apiGet(SETTINGS_ENDPOINT); fillEventbrite(); setStatus("Purchase links reloaded.", "success"); }
+            catch (err) { setStatus("Failed to reload: " + err.message, "error"); }
+          });
+        }
+
+        /* ---------- Background & theme ---------- */
+
+        const overlayInput = document.getElementById("heroOverlay");
+        const overlayVal = document.getElementById("heroOverlayVal");
+        const positionInput = document.getElementById("heroPosition");
+        const brandInput = document.getElementById("brandColor");
+        const bgInput = document.getElementById("bgColor");
+
+        overlayInput.addEventListener("input", function () { overlayVal.textContent = overlayInput.value; });
+
+        function fillTheme() {
+          const ov = typeof settings.heroOverlay === "number" ? settings.heroOverlay : 50;
+          overlayInput.value = ov; overlayVal.textContent = ov;
+          positionInput.value = settings.heroPosition || "center";
+          const theme = settings.theme || {};
+          brandInput.value = /^#[0-9a-fA-F]{6}$/.test(theme.brand || "") ? theme.brand : "#9FE22D";
+          bgInput.value = /^#[0-9a-fA-F]{6}$/.test(theme.bg || "") ? theme.bg : "#071008";
+        }
+
+        document.getElementById("saveThemeBtn").addEventListener("click", async function () {
+          try {
+            await saveSettings({
+              heroOverlay: parseInt(overlayInput.value, 10),
+              heroPosition: positionInput.value,
+              theme: { brand: brandInput.value, bg: bgInput.value },
+            });
+            setStatus("Background and theme saved and published.", "success");
+          } catch (err) {
+            setStatus("Failed to save theme: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("clearBgColorBtn").addEventListener("click", async function () {
+          try {
+            await saveSettings({
+              heroOverlay: parseInt(overlayInput.value, 10),
+              heroPosition: positionInput.value,
+              theme: { brand: brandInput.value, bg: null },
+            });
+            settings = await apiGet(SETTINGS_ENDPOINT);
+            fillTheme();
+            setStatus("Page background color cleared and published.", "success");
+          } catch (err) {
+            setStatus("Failed to clear background color: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("themeReloadBtn").addEventListener("click", async function () {
+          try { settings = await apiGet(SETTINGS_ENDPOINT); fillTheme(); setStatus("Theme reloaded.", "success"); }
+          catch (err) { setStatus("Failed to reload: " + err.message, "error"); }
+        });
+
+        /* ---------- Templates ---------- */
+
+        function buildTemplates() {
+          const wrap = document.getElementById("templateGrid");
+          wrap.innerHTML = "";
+          TEMPLATES.forEach(function (t) {
+            const card = document.createElement("div");
+            card.className = "template-card";
+            const swatch = document.createElement("div");
+            swatch.className = "template-swatch";
+            swatch.style.background = t.bg;
+            swatch.style.color = t.brand;
+            swatch.textContent = "Aa";
+            const body = document.createElement("div");
+            body.className = "template-body";
+            body.innerHTML = '<div class="tname">' + escHtml(t.name) + '</div><div class="tdesc">' + escHtml(t.desc) + "</div>";
+            const btn = document.createElement("button");
+            btn.className = "btn-feature";
+            btn.type = "button";
+            btn.textContent = "Apply";
+            btn.addEventListener("click", async function () {
+              try {
+                await saveSettings({
+                  template: t.id,
+                  heroOverlay: t.overlay,
+                  theme: { brand: t.brand, bg: t.bg },
+                });
+                fillTheme();
+                setStatus('Template "' + t.name + '" applied and published.', "success");
+              } catch (err) {
+                setStatus("Failed to apply template: " + err.message, "error");
+              }
+            });
+            body.appendChild(btn);
+            card.appendChild(swatch);
+            card.appendChild(body);
+            wrap.appendChild(card);
+          });
+        }
+
+        /* ---------- Applications ---------- */
+
+        const appList = document.getElementById("appList");
+        const appCounts = document.getElementById("appCounts");
+        const appStatusFilter = document.getElementById("appStatusFilter");
+        const appTypeFilter = document.getElementById("appTypeFilter");
+
+        function renderAppDetails(fields) {
+          if (!fields || typeof fields !== "object") return "";
+          const keys = Object.keys(fields);
+          if (!keys.length) return "";
+          let html = '<dl class="app-details">';
+          keys.forEach(function (k) {
+            html += "<dt>" + escHtml(k) + "</dt><dd>" + escHtml(fields[k]) + "</dd>";
+          });
+          html += "</dl>";
+          return html;
+        }
+
+        function renderApps(data) {
+          const items = (data && data.items) || [];
+          const counts = (data && data.counts) || { pending: 0, approved: 0, rejected: 0 };
+          appCounts.innerHTML =
+            '<span class="pill pill-pending">Pending: ' + counts.pending + "</span>"
+            + '<span class="pill pill-approved">Approved: ' + counts.approved + "</span>"
+            + '<span class="pill pill-rejected">Rejected: ' + counts.rejected + "</span>";
+
+          if (!items.length) {
+            appList.innerHTML = '<p class="empty">No applications match this filter.</p>';
+            return;
+          }
+          appList.innerHTML = items.map(function (a) {
+            const when = a.createdAt ? new Date(a.createdAt).toLocaleString() : "";
+            return '<div class="app-item" data-id="' + escHtml(a.id) + '">'
+              + '<div class="app-head">'
+              + '<div><div class="app-title">' + escHtml(a.name || "(no name)")
+              + ' <span class="badge badge-' + escHtml(a.status) + '">' + escHtml(a.status) + "</span></div>"
+              + '<div class="app-sub">' + escHtml(a.type) + (a.email ? " • " + escHtml(a.email) : "") + (when ? " • " + escHtml(when) : "") + "</div></div>"
+              + "</div>"
+              + renderAppDetails(a.fields)
+              + '<div class="app-actions">'
+              + (a.status !== "approved" ? '<button class="btn-publish" data-act="approved">Approve</button>' : "")
+              + (a.status !== "rejected" ? '<button class="btn-unpublish" data-act="rejected">Reject</button>' : "")
+              + (a.status !== "pending" ? '<button class="btn-clear" data-act="pending">Mark Pending</button>' : "")
+              + '<button class="btn-danger" data-act="delete">Delete</button>'
+              + "</div></div>";
+          }).join("");
+        }
+
+        async function loadApps() {
+          appList.innerHTML = '<p class="empty">Loading…</p>';
+          const params = [];
+          if (appStatusFilter.value) params.push("status=" + encodeURIComponent(appStatusFilter.value));
+          if (appTypeFilter.value) params.push("type=" + encodeURIComponent(appTypeFilter.value));
+          try {
+            const data = await apiGet(APPS_ENDPOINT + (params.length ? "?" + params.join("&") : ""));
+            renderApps(data);
+          } catch (err) {
+            appList.innerHTML = '<p class="empty">Failed to load applications: ' + escHtml(err.message) + "</p>";
+          }
+        }
+
+        appList.addEventListener("click", async function (e) {
+          const btn = e.target.closest("button[data-act]");
+          if (!btn) return;
+          const item = btn.closest(".app-item");
+          const id = item && item.getAttribute("data-id");
+          if (!id) return;
+          const act = btn.getAttribute("data-act");
+          try {
+            if (act === "delete") {
+              if (!confirm("Delete this application permanently?")) return;
+              const res = await fetch(APPS_ENDPOINT + "?id=" + encodeURIComponent(id), { method: "DELETE" });
+              if (!res.ok) throw new Error("Delete failed (" + res.status + ")");
+              setStatus("Application deleted.", "success");
+            } else {
+              const res = await fetch(APPS_ENDPOINT, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id, status: act }),
+              });
+              const data = await res.json().catch(function () { return {}; });
+              if (!res.ok) throw new Error(data.error || "Update failed (" + res.status + ")");
+              setStatus("Application marked " + act + ".", "success");
+            }
+            await loadApps();
+          } catch (err) {
+            setStatus("Action failed: " + err.message, "error");
+          }
+        });
+
+        document.getElementById("appRefreshBtn").addEventListener("click", loadApps);
+        appStatusFilter.addEventListener("change", loadApps);
+        appTypeFilter.addEventListener("change", loadApps);
+
+        /* ---------- Content settings ---------- */
+
+        function fillForm(content) {
+          content = content || {};
+          fields.forEach(function (field) {
+            const el = document.getElementById(field);
+            if (el) el.value = content[field] || "";
+          });
+        }
+
+        function getFormContent() {
+          const payload = {};
+          fields.forEach(function (field) {
+            const el = document.getElementById(field);
+            payload[field] = el ? el.value : "";
+          });
+          return payload;
+        }
+
+        form.addEventListener("submit", async function (event) {
+          event.preventDefault();
+          try {
+            await saveSettings({ content: getFormContent() });
+            setStatus("Settings saved and published to the homepage.", "success");
+          } catch (err) {
+            setStatus("Failed to save settings: " + err.message, "error");
+          }
+        });
+
+        loadBtn.addEventListener("click", async function () {
+          try { settings = await apiGet(SETTINGS_ENDPOINT); fillForm(settings.content); setStatus("Settings loaded.", "success"); }
+          catch (err) { setStatus("Failed to load settings: " + err.message, "error"); }
+        });
+
+        clearBtn.addEventListener("click", function () {
+          fillForm({});
+          setStatus("Form cleared. Click Save Settings to publish the change.", "success");
+        });
+
+        /* ---------- Quick actions ---------- */
+
+        publishBtn.addEventListener("click", async function () {
+          try { await saveSettings({ published: true }); setStatus("Site published. The homepage is now live.", "success"); }
+          catch (err) { setStatus("Failed to publish: " + err.message, "error"); }
+        });
+
+        unpublishBtn.addEventListener("click", async function () {
+          try { await saveSettings({ published: false }); setStatus("Site unpublished. Visitors now see a Coming Soon notice.", "success"); }
+          catch (err) { setStatus("Failed to unpublish: " + err.message, "error"); }
+        });
+
+        featureEventBtn.addEventListener("click", async function () {
+          const name = featuredEventNameInput ? featuredEventNameInput.value.trim() : "";
+          if (!name) { setStatus("Enter an event name to feature on the homepage.", "error"); return; }
+          try { await saveSettings({ featuredEvent: name }); setStatus('Event "' + name + '" featured on the homepage.', "success"); }
+          catch (err) { setStatus("Failed to feature event: " + err.message, "error"); }
+        });
+
+        clearFeatureBtn.addEventListener("click", async function () {
+          try {
+            await saveSettings({ featuredEvent: null });
+            if (featuredEventNameInput) featuredEventNameInput.value = "";
+            setStatus("Featured event cleared.", "success");
+          } catch (err) { setStatus("Failed to clear featured event: " + err.message, "error"); }
+        });
+
+        resetBannerBtn.addEventListener("click", function () {
+          try {
+            const current = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+            current.homepageBannerReset = true;
+            localStorage.setItem(STATE_KEY, JSON.stringify(current));
+            setStatus("Homepage welcome banner will show again on this browser.", "success");
+          } catch (err) { setStatus("Failed to reset homepage banner: " + err.message, "error"); }
+        });
+
+        logoutBtn.addEventListener("click", function () {
+          try { localStorage.removeItem("bakd_session"); } catch (e) {}
+          window.location.replace("/admin-login.html");
+        });
+
+        /* ---------- Section order ---------- */
+
+        function buildOrderList(sections) {
+          orderList.innerHTML = "";
+          sections.forEach(function (item) {
+            const li = document.createElement("li");
+            li.className = "section-order-item";
+            li.setAttribute("draggable", "true");
+            li.dataset.id = item.id;
+            li.innerHTML = '<span class="drag-handle" aria-hidden="true">⠇</span><span class="section-label"></span><label class="section-transparent-toggle"><input type="checkbox" class="section-transparent-input" /> Transparent</label>';
+            li.querySelector(".section-label").textContent = item.label;
+            li.querySelector(".section-transparent-input").checked = !!((settings.sectionTransparency || {})[item.id]);
+            li.setAttribute("aria-label", item.label + " — drag to reorder");
+
+            li.addEventListener("dragstart", function (e) {
+              dragSrcEl = li; li.classList.add("dragging");
+              e.dataTransfer.effectAllowed = "move";
+              e.dataTransfer.setData("text/plain", li.dataset.id);
+            });
+            li.addEventListener("dragend", function () {
+              li.classList.remove("dragging");
+              orderList.querySelectorAll(".section-order-item").forEach(function (el) { el.classList.remove("drag-over"); });
+            });
+            li.addEventListener("dragover", function (e) {
+              e.preventDefault(); e.dataTransfer.dropEffect = "move";
+              if (li !== dragSrcEl) li.classList.add("drag-over");
+            });
+            li.addEventListener("dragleave", function () { li.classList.remove("drag-over"); });
+            li.addEventListener("drop", function (e) {
+              e.stopPropagation(); e.preventDefault(); li.classList.remove("drag-over");
+              if (dragSrcEl && dragSrcEl !== li) {
+                const items = Array.prototype.slice.call(orderList.querySelectorAll(".section-order-item"));
+                const srcIdx = items.indexOf(dragSrcEl);
+                const tgtIdx = items.indexOf(li);
+                orderList.insertBefore(dragSrcEl, srcIdx < tgtIdx ? li.nextSibling : li);
+              }
+            });
+            orderList.appendChild(li);
+          });
+        }
+
+        function renderOrder(savedOrder) {
+          const labelMap = {};
+          DEFAULT_SECTIONS.forEach(function (s) { labelMap[s.id] = s.label; });
+          if (Array.isArray(savedOrder) && savedOrder.length > 0) {
+            const ordered = [];
+            savedOrder.forEach(function (id) { if (labelMap[id]) ordered.push({ id: id, label: labelMap[id] }); });
+            DEFAULT_SECTIONS.forEach(function (s) { if (savedOrder.indexOf(s.id) === -1) ordered.push(s); });
+            buildOrderList(ordered);
+          } else {
+            buildOrderList(DEFAULT_SECTIONS);
+          }
+        }
+
+        function getCurrentOrder() {
+          return Array.prototype.slice.call(orderList.querySelectorAll(".section-order-item"))
+            .map(function (li) { return li.dataset.id; });
+        }
+
+        function getSectionTransparency() {
+          const out = {};
+          orderList.querySelectorAll(".section-order-item").forEach(function (li) {
+            out[li.dataset.id] = !!li.querySelector(".section-transparent-input").checked;
+          });
+          return out;
+        }
+
+        saveOrderBtn.addEventListener("click", async function () {
+          try { await saveSettings({ sectionOrder: getCurrentOrder(), sectionTransparency: getSectionTransparency() }); setStatus("Homepage section order and transparency saved and published.", "success"); }
+          catch (err) { setStatus("Failed to save section order: " + err.message, "error"); }
+        });
+
+        resetOrderBtn.addEventListener("click", async function () {
+          try { await saveSettings({ sectionOrder: null }); renderOrder(null); setStatus("Homepage section order reset to default.", "success"); }
+          catch (err) { setStatus("Failed to reset section order: " + err.message, "error"); }
+        });
+
+        /* ---------- Media library ---------- */
+
+        function currentBg() { return settings.heroBackground || ""; }
+        function currentBgKind() {
+          if (settings.heroBackgroundKind === "video" || settings.heroBackgroundKind === "image") return settings.heroBackgroundKind;
+          return /\.(mp4|webm|ogv|ogg|mov)(\?|$)/i.test(currentBg()) ? "video" : "image";
+        }
+
+        function renderCurrentBg() {
+          const bg = currentBg();
+          if (bg) {
+            const isVideo = currentBgKind() === "video";
+            currentImg.style.display = isVideo ? "none" : "";
+            if (isVideo) {
+              currentImg.removeAttribute("src");
+            } else {
+              currentImg.src = bg;
+            }
+            currentWrap.hidden = false;
+          } else {
+            currentImg.removeAttribute("src");
+            currentWrap.hidden = true;
+          }
+        }
+
+        function renderMedia() {
+          const activeBg = currentBg();
+          grid.innerHTML = "";
+          emptyMsg.hidden = mediaItems.length !== 0;
+          mediaItems.forEach(function (item) {
+            const li = document.createElement("li");
+            li.className = "media-item" + (item.url === activeBg ? " is-active" : "");
+            let thumb;
+            if (item.kind === "video") {
+              thumb = document.createElement("video");
+              thumb.src = item.url; thumb.muted = true; thumb.loop = true; thumb.playsInline = true;
+              thumb.setAttribute("playsinline", ""); thumb.preload = "metadata";
+              thumb.addEventListener("mouseenter", function () { thumb.play().catch(function () {}); });
+              thumb.addEventListener("mouseleave", function () { thumb.pause(); });
+            } else {
+              thumb = document.createElement("img");
+              thumb.src = item.url; thumb.alt = item.name || "Uploaded media"; thumb.loading = "lazy";
+            }
+            const name = document.createElement("div");
+            name.className = "media-name";
+            name.textContent = (item.kind === "video" ? "🎬 " : "") + (item.name || "media");
+            const actions = document.createElement("div");
+            actions.className = "media-actions";
+            const applyBtn = document.createElement("button");
+            applyBtn.type = "button"; applyBtn.className = "btn-apply-bg";
+            applyBtn.textContent = item.url === activeBg ? "In Use" : "Set BG";
+            applyBtn.addEventListener("click", async function () {
+              try { await saveSettings({ heroBackground: item.url, heroBackgroundKind: item.kind || "image" }); renderCurrentBg(); renderMedia(); setStatus("Page background updated and published.", "success"); }
+              catch (err) { setStatus("Failed to set background: " + err.message, "error"); }
+            });
+            if (item.kind !== "video") {
+              const brandBtn = document.createElement("button");
+              brandBtn.type = "button"; brandBtn.className = "btn-apply-bg";
+              brandBtn.textContent = "Set Logo";
+              brandBtn.addEventListener("click", async function () {
+                try {
+                  brandImageInput.value = item.url;
+                  brandShowImageInput.checked = true;
+                  await saveSettings({
+                    brand: {
+                      text: brandTextInput.value,
+                      image: item.url,
+                      showText: brandShowTextInput.checked,
+                      showImage: true,
+                      style: {
+                        logoFontSize: Number(brandLogoFontSizeInput.value),
+                        logoImageHeight: Number(brandLogoImageHeightInput.value),
+                        linkFontSize: Number(brandLinkFontSizeInput.value),
+                      },
+                    },
+                  });
+                  fillBrandFields();
+                  renderMedia();
+                  setStatus("Navbar brand image updated and published.", "success");
+                } catch (err) { setStatus("Failed to set brand image: " + err.message, "error"); }
+              });
+              actions.appendChild(brandBtn);
+            }
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button"; removeBtn.className = "btn-remove-media"; removeBtn.textContent = "Remove";
+            removeBtn.addEventListener("click", async function () {
+              try {
+                const res = await fetch(MEDIA_ENDPOINT + "?file=" + encodeURIComponent(item.id), { method: "DELETE" });
+                if (!res.ok) throw new Error("Delete failed (" + res.status + ")");
+                if (item.url === currentBg()) { await saveSettings({ heroBackground: null }); }
+                await loadMedia(); renderCurrentBg(); setStatus("Item removed from the library.", "success");
+              } catch (err) { setStatus("Failed to remove item: " + err.message, "error"); }
+            });
+            actions.appendChild(applyBtn); actions.appendChild(removeBtn);
+            li.appendChild(thumb); li.appendChild(name); li.appendChild(actions);
+            grid.appendChild(li);
+          });
+        }
+
+        async function loadMedia() {
+          const data = await apiGet(MEDIA_ENDPOINT);
+          mediaItems = Array.isArray(data.items) ? data.items : [];
+          renderMedia();
+        }
+
+        function readFileBase64(file) {
+          return new Promise(function (resolve, reject) {
+            const reader = new FileReader();
+            reader.onload = function () {
+              const result = String(reader.result || "");
+              const comma = result.indexOf(",");
+              resolve(comma >= 0 ? result.slice(comma + 1) : result);
+            };
+            reader.onerror = function () { reject(new Error("Could not read that file.")); };
+            reader.readAsDataURL(file);
+          });
+        }
+
+        // Loads a File into an <img> via an object URL so we can draw it to a
+        // canvas. Resolves with the decoded image; always revokes the URL.
+        function loadImageFromFile(file) {
+          return new Promise(function (resolve, reject) {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+            img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("That file could not be read as an image.")); };
+            img.src = url;
+          });
+        }
+
+        // Phone photos are routinely larger than what a serverless function can
+        // accept in one request, which is why a straight upload of a camera
+        // image used to fail. To make "upload any photo" reliable, the image is
+        // resized in the browser to a sensible maximum dimension and re-encoded
+        // as a progressively-more-compressed JPEG until it is comfortably small
+        // enough to send. Returns { dataBase64, contentType }.
+        const MAX_EDGE = 2560;          // longest side, in pixels
+        const TARGET_BYTES = 3 * 1024 * 1024; // keep the encoded image well under the request limit
+
+        async function prepareImageForUpload(file) {
+          // SVGs are vector/text and tiny; send as-is (the server still guards size).
+          if (file.type === "image/svg+xml") {
+            return { dataBase64: await readFileBase64(file), contentType: file.type };
+          }
+
+          let img;
+          try {
+            img = await loadImageFromFile(file);
+          } catch (e) {
+            // Could not decode for resizing — fall back to sending the raw bytes.
+            return { dataBase64: await readFileBase64(file), contentType: file.type || "application/octet-stream" };
+          }
+
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+
+          // Small enough already (dimensions and bytes) — keep the original so
+          // PNG transparency and quality are preserved.
+          if (w <= MAX_EDGE && h <= MAX_EDGE && file.size <= TARGET_BYTES) {
+            return { dataBase64: await readFileBase64(file), contentType: file.type || "image/jpeg" };
+          }
+
+          const scale = Math.min(1, MAX_EDGE / Math.max(w, h));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(w * scale));
+          canvas.height = Math.max(1, Math.round(h * scale));
+          const ctx = canvas.getContext("2d");
+          if (!ctx || typeof canvas.toDataURL !== "function") {
+            // Canvas unavailable — fall back to the raw bytes.
+            return { dataBase64: await readFileBase64(file), contentType: file.type || "image/jpeg" };
+          }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Step the JPEG quality down until the encoded image fits the target.
+          let quality = 0.85;
+          let dataUrl = canvas.toDataURL("image/jpeg", quality);
+          while (dataUrl.length * 0.75 > TARGET_BYTES && quality > 0.4) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+          }
+          const comma = dataUrl.indexOf(",");
+          return {
+            dataBase64: comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl,
+            contentType: "image/jpeg",
+          };
+        }
+
+        // Video upload limit must match the server (site-media.mjs MAX_VIDEO_BYTES).
+        const MAX_VIDEO_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+        uploadBtn.addEventListener("click", async function () {
+          if (!fileInput.files || !fileInput.files[0]) { setStatus("Choose an image or video to upload first.", "error"); return; }
+          const file = fileInput.files[0];
+          const isVideo = /^video\//.test(file.type) || /\.(mp4|m4v|webm|ogv|mov)$/i.test(file.name || "");
+          const isImage = /^image\//.test(file.type);
+          if (!isVideo && !isImage) { setStatus("Only image or video files can be uploaded.", "error"); return; }
+          try {
+            let prepared;
+            if (isVideo) {
+              // Videos are sent as-is and auto-configured by the server (correct
+              // content type + streaming). They cannot be re-compressed in the
+              // browser, so guard the size up front.
+              if (file.size > MAX_VIDEO_UPLOAD_BYTES) {
+                setStatus("That video is too large (max " + (MAX_VIDEO_UPLOAD_BYTES / 1024 / 1024) + " MB). Please upload a smaller or shorter clip.", "error");
+                return;
+              }
+              setStatus("Uploading video…", "success");
+              prepared = { dataBase64: await readFileBase64(file), contentType: file.type || "" };
+            } else {
+              setStatus("Optimizing image…", "success");
+              // Large photos (e.g. straight from a phone) are resized and
+              // compressed in the browser so the upload reliably fits within the
+              // server's limits — the admin no longer has to shrink images first.
+              prepared = await prepareImageForUpload(file);
+              // Backstop for the rare pass-through cases (e.g. a very large SVG or
+              // an image that could not be re-encoded): keep the request within
+              // the server limit and explain clearly rather than failing opaquely.
+              if (prepared.dataBase64.length * 0.75 > 5 * 1024 * 1024) {
+                setStatus("That image is too large to upload even after optimizing. Please try a smaller file.", "error");
+                return;
+              }
+              setStatus("Uploading image…", "success");
+            }
+            const baseName = (file.name || (isVideo ? "video" : "photo")).replace(/\.[^.]+$/, "");
+            const filename = prepared.contentType === "image/jpeg" ? baseName + ".jpg" : file.name;
+            const res = await fetch(MEDIA_ENDPOINT, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ filename: filename, contentType: prepared.contentType, dataBase64: prepared.dataBase64 }),
+            });
+            const data = await res.json().catch(function () { return {}; });
+            if (!res.ok) throw new Error(data.error || "Upload failed (" + res.status + ")");
+            fileInput.value = "";
+            await loadMedia();
+            setStatus((isVideo ? "Video" : "Photo") + " added to your library.", "success");
+          } catch (err) { setStatus("Failed to upload: " + err.message, "error"); }
+        });
+
+        clearBgBtn.addEventListener("click", async function () {
+          try { await saveSettings({ heroBackground: null }); renderCurrentBg(); renderMedia(); setStatus("Homepage background cleared. The default image will be used.", "success"); }
+          catch (err) { setStatus("Failed to clear background: " + err.message, "error"); }
+        });
+
+        /* ---------- Page selector & initial load ---------- */
+
+        buildTemplates();
+
+        const pageSelect = document.getElementById("pageSelect");
+        function populatePageSelect() {
+          pageSelect.innerHTML = PAGES.map(function (p) {
+            return '<option value="' + escHtml(p.key) + '">' + escHtml(p.label) + "</option>";
+          }).join("");
+          pageSelect.value = CURRENT_PAGE;
+        }
+
+        /* ---------- Speaker schedule ---------- */
+
+        // 30-minute interval time options across a full day (00:00 … 23:30),
+        // shown to the admin in a friendly 12-hour format.
+        const SCHEDULE_TIMES = (function () {
+          const out = [];
+          for (let h = 0; h < 24; h++) {
+            for (let m = 0; m < 60; m += 30) {
+              const hh = String(h).padStart(2, "0");
+              const mm = String(m).padStart(2, "0");
+              const ampm = h < 12 ? "AM" : "PM";
+              const h12 = ((h + 11) % 12) + 1;
+              out.push({ value: hh + ":" + mm, label: h12 + ":" + mm + " " + ampm });
+            }
+          }
+          return out;
+        })();
+
+        // Approved speaker profiles, loaded once, used to auto-fill a slot's name
+        // and photo from a real profile.
+        let speakerProfiles = [];
+        async function loadSpeakerProfiles() {
+          try {
+            const data = await apiGet("/.netlify/functions/profiles?role=speaker");
+            speakerProfiles = (data && data.items) || [];
+          } catch (e) { speakerProfiles = []; }
+        }
+
+        function timeOptions(selected) {
+          return SCHEDULE_TIMES.map(function (t) {
+            return '<option value="' + t.value + '"' + (t.value === selected ? " selected" : "") + ">" + escHtml(t.label) + "</option>";
+          }).join("");
+        }
+
+        function speakerOptions() {
+          return '<option value="">— Pick a speaker profile —</option>' + speakerProfiles.map(function (p) {
+            return '<option value="' + escHtml(p.id) + '">' + escHtml(p.displayName || "(no name)") + "</option>";
+          }).join("");
+        }
+
+        function scheduleRowHtml(slot) {
+          slot = slot || {};
+          return '<div class="schedule-row">' +
+            '<select class="sr-time">' + timeOptions(slot.time || "") + "</select>" +
+            '<div class="sr-stack">' +
+              '<select class="sr-pick">' + speakerOptions() + "</select>" +
+              '<div class="sr-speaker"><img class="sr-thumb" src="' + escHtml(slot.image || "") + '" alt="" ' + (slot.image ? "" : 'style="visibility:hidden"') + " />" +
+                '<input class="sr-name" type="text" placeholder="Speaker name" value="' + escHtml(slot.name || "") + '" /></div>' +
+            "</div>" +
+            '<div class="sr-stack">' +
+              '<input class="sr-topic" type="text" placeholder="Talk / topic (optional)" value="' + escHtml(slot.topic || "") + '" />' +
+              '<input class="sr-image" type="text" placeholder="Photo URL (optional)" value="' + escHtml(slot.image || "") + '" />' +
+              '<input class="sr-profile" type="hidden" value="' + escHtml(slot.profileId || "") + '" />' +
+            "</div>" +
+            '<button class="sr-remove" type="button" title="Remove slot">×</button>' +
+          "</div>";
+        }
+
+        function renderSchedule(list) {
+          const wrap = document.getElementById("scheduleRows");
+          if (!wrap) return;
+          const slots = Array.isArray(list) ? list : [];
+          wrap.innerHTML = slots.length ? slots.map(scheduleRowHtml).join("") : "";
+        }
+
+        function collectSchedule() {
+          const rows = document.querySelectorAll("#scheduleRows .schedule-row");
+          const out = [];
+          rows.forEach(function (row) {
+            const time = row.querySelector(".sr-time").value;
+            const name = row.querySelector(".sr-name").value.trim();
+            const topic = row.querySelector(".sr-topic").value.trim();
+            const image = row.querySelector(".sr-image").value.trim();
+            const profileId = row.querySelector(".sr-profile").value.trim();
+            if (time && name) out.push({ time: time, name: name, topic: topic, image: image, profileId: profileId });
+          });
+          return out;
+        }
+
+        const scheduleRowsEl = document.getElementById("scheduleRows");
+        if (scheduleRowsEl) {
+          // Choosing a speaker profile fills in the name, photo and a topic.
+          scheduleRowsEl.addEventListener("change", function (e) {
+            const pick = e.target.closest(".sr-pick");
+            if (!pick) return;
+            const row = pick.closest(".schedule-row");
+            const p = speakerProfiles.find(function (x) { return x.id === pick.value; });
+            if (!p) { row.querySelector(".sr-profile").value = ""; return; }
+            row.querySelector(".sr-name").value = p.displayName || "";
+            row.querySelector(".sr-image").value = p.headshotUrl || "";
+            row.querySelector(".sr-profile").value = p.id;
+            const d = p.details || {};
+            if (!row.querySelector(".sr-topic").value) row.querySelector(".sr-topic").value = d.talkTitle || d.topic || p.tagline || "";
+            const thumb = row.querySelector(".sr-thumb");
+            thumb.src = p.headshotUrl || "";
+            thumb.style.visibility = p.headshotUrl ? "visible" : "hidden";
+          });
+          // Keep the thumbnail in sync when an image URL is typed.
+          scheduleRowsEl.addEventListener("input", function (e) {
+            const img = e.target.closest(".sr-image");
+            if (!img) return;
+            const thumb = img.closest(".schedule-row").querySelector(".sr-thumb");
+            thumb.src = img.value.trim();
+            thumb.style.visibility = img.value.trim() ? "visible" : "hidden";
+          });
+          scheduleRowsEl.addEventListener("click", function (e) {
+            const rm = e.target.closest(".sr-remove");
+            if (!rm) return;
+            rm.closest(".schedule-row").remove();
+          });
+        }
+
+        const addSlotBtn = document.getElementById("addSlotBtn");
+        if (addSlotBtn) addSlotBtn.addEventListener("click", function () {
+          document.getElementById("scheduleRows").insertAdjacentHTML("beforeend", scheduleRowHtml({}));
+        });
+
+        const saveScheduleBtn = document.getElementById("saveScheduleBtn");
+        if (saveScheduleBtn) saveScheduleBtn.addEventListener("click", async function () {
+          try {
+            await saveSettings({ speakerSchedule: collectSchedule() });
+            renderSchedule(settings.speakerSchedule);
+            setStatus("Speaker schedule saved and published to the homepage.", "success");
+          } catch (err) { setStatus("Failed to save schedule: " + err.message, "error"); }
+        });
+
+        // Show homepage-only cards (publish/feature, content toggles, section
+        // order) only while editing the homepage.
+        function applyPageMode() {
+          const isHome = CURRENT_PAGE === "homepage";
+          document.querySelectorAll(".homepage-only").forEach(function (el) {
+            el.style.display = isHome ? "" : "none";
+          });
+        }
+
+        // Load a page into the editor: scan it for editable fields, fetch its
+        // saved settings, and fill every control.
+        async function selectPage(key) {
+          setEndpointForPage(key);
+          applyPageMode();
+          const def = currentPageDef();
+          setStatus("Loading " + def.label + "…", "success");
+          await discoverPage(def);
+          buildTextFields();
+          buildButtonFields();
+          try {
+            settings = await apiGet(SETTINGS_ENDPOINT);
+          } catch (err) {
+            settings = {};
+            setStatus("Could not load saved settings: " + err.message, "error");
+          }
+          fillForm(settings.content);
+          if (featuredEventNameInput) {
+            featuredEventNameInput.value = typeof settings.featuredEvent === "string" ? settings.featuredEvent : "";
+          }
+          fillTextFields();
+          fillButtonFields();
+          fillBrandFields();
+          fillEventbrite();
+          fillTheme();
+          renderOrder(settings.sectionOrder);
+          renderCurrentBg();
+          renderMedia();
+          renderSchedule(settings.speakerSchedule);
+          setStatus("Editing " + def.label + ". Changes publish to that page for every visitor.", "success");
+        }
+
+        pageSelect.addEventListener("change", function () { selectPage(pageSelect.value); });
+
+        (async function init() {
+          populatePageSelect();
+          await loadSpeakerProfiles();
+          await selectPage("homepage");
+          try { await loadMedia(); } catch (err) { setStatus("Could not load media library: " + err.message, "error"); }
+          loadApps();
+        })();
+      })();
+    </script>
+  </body>
+</html>

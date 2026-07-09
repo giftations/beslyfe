@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Hub — Bak'd On The Bay</title>
+  <meta name="description" content="Your Bak'd On The Bay home base — buy your package, share posts, reels and stories, chat in groups, share your location and browse the community.">
+  <link rel="stylesheet" href="/profiles.css">
+  <link rel="stylesheet" href="/social.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your Hub — Bak'd On The Bay">
+  <meta property="og:description" content="Your Bak'd On The Bay home base — buy your package, share posts, reels and stories, chat in groups, share your location and browse the community.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/hub">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Your Hub — Bak'd On The Bay">
+  <meta name="twitter:description" content="Your Bak'd On The Bay home base — buy your package, share posts, reels and stories, chat in groups, share your location and browse the community.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/hub">
+  <style>
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
+    .skip-link:focus{left:8px}
+    /* Apply-for-a-position panel (signed-in members) — collapsible, sits below the
+       Create & connect grid so it never crowds the member's main tools. */
+    .apply-panel{background:rgba(10,20,12,.6);border:1px solid var(--border,rgba(159,226,45,.22));border-radius:18px;margin-top:30px;overflow:hidden}
+    .apply-panel[hidden]{display:none}
+    .apply-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;background:none;border:0;cursor:pointer;color:#fff;text-align:left;padding:18px 22px;font:inherit}
+    .apply-toggle:hover{background:rgba(159,226,45,.06)}
+    .apply-toggle-text{display:flex;flex-direction:column;gap:3px}
+    .apply-toggle #applyHeading{font-size:1.15rem;font-weight:800;color:#fff}
+    .apply-toggle-sub{color:var(--muted,#8a9a8a);font-size:.82rem}
+    .apply-caret{color:var(--green,#9FE22D);font-size:1.1rem;transition:transform .2s ease;flex:0 0 auto}
+    .apply-toggle[aria-expanded="true"] .apply-caret{transform:rotate(180deg)}
+    .apply-body{padding:0 22px 22px}
+    .apply-body[hidden]{display:none}
+    .apply-panel p.apply-intro{color:var(--muted,#8a9a8a);margin:0 0 16px;font-size:.9rem}
+    .apply-panel label{display:block;color:#cfe8c2;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:800;margin:0 0 6px}
+    .apply-panel select,.apply-panel textarea,.apply-panel input[type=text]{width:100%;min-height:44px;border:1px solid var(--border,rgba(159,226,45,.22));border-radius:12px;background:rgba(0,0,0,.35);color:#fff;padding:10px 12px;font:inherit;margin-bottom:14px}
+    .apply-panel textarea{min-height:96px;resize:vertical}
+    .apply-contract{border:1px solid var(--border,rgba(159,226,45,.22));border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:.86rem;color:var(--muted,#8a9a8a)}
+    .apply-contract a{color:var(--green,#9FE22D);font-weight:700}
+    .apply-check{display:flex;gap:10px;align-items:flex-start;color:#cfe8c2;font-size:.86rem;text-transform:none;letter-spacing:0;font-weight:500;margin-bottom:14px}
+    .apply-check input{margin-top:3px}
+    .apply-msg{margin-top:6px;font-size:.9rem}
+    .apply-msg.ok{color:var(--green,#9FE22D)}
+    .apply-msg.err{color:#ffb4b4}
+  </style>
+</head>
+<body data-cms-page="hub">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/directory">Directory</a></li>
+        <li><a href="/feed">Feed</a></li>
+        <li><a href="/packages" class="btn-nav">Buy Package</a></li>
+        <li><a href="#" data-logout="/" data-auth-only hidden>Log out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="soNav"></div>
+
+  <main id="main">
+  <div class="hub-wrap">
+    <div class="so-identity" id="identityBar" style="margin-bottom:22px">
+      <div class="so-avatar placeholder" id="idAvatar">?</div>
+      <div class="so-id-text" id="idText"><strong>Welcome</strong><span>Choose your profile to get started</span></div>
+      <button class="so-btn" id="idChangeBtn" type="button">Choose profile</button>
+    </div>
+
+    <div class="hub-cta" id="packageCta" hidden>
+      <div>
+        <h2 id="ctaTitle">Ready to lock in your spot?</h2>
+        <p id="ctaText">Approved vendors and sponsors can buy their package now.</p>
+        <p id="ctaPassword" hidden>Eventbrite access password: <strong id="ctaPasswordValue"></strong></p>
+      </div>
+      <a class="so-btn" id="ctaBtn" href="/packages">Buy your package →</a>
+    </div>
+
+    <h2 style="color:#fff;margin:0 0 14px">Create &amp; connect</h2>
+    <div class="hub-grid">
+      <a class="hub-card" href="/feed"><div class="hub-icon">📰</div><h3>Feed</h3><p>Share posts and see what the community is up to.</p></a>
+      <a class="hub-card" href="/reels"><div class="hub-icon">🎬</div><h3>Reels</h3><p>Short videos with filters and royalty-free music.</p></a>
+      <a class="hub-card" href="/stories"><div class="hub-icon">⭕</div><h3>Stories</h3><p>Moments that disappear after 24 hours.</p></a>
+      <a class="hub-card" href="/library"><div class="hub-icon">🖼️</div><h3>Media Library</h3><p>Your photos and videos, ready to reuse.</p></a>
+      <a class="hub-card" href="/groups"><div class="hub-icon">💬</div><h3>Groups</h3><p>Create chat groups and talk in real time.</p></a>
+      <a class="hub-card" href="/map"><div class="hub-icon">📍</div><h3>Map</h3><p>Share your location publicly or privately.</p></a>
+      <a class="hub-card" href="/messages"><div class="hub-icon">✉️</div><h3>Messages</h3><p>Direct-message anyone in the community — now with photos &amp; video.</p></a>
+      <a class="hub-card" href="/directory"><div class="hub-icon">📒</div><h3>Directory</h3><p>Browse vendors, sponsors, speakers and DJs.</p></a>
+    </div>
+
+    <section id="hubNotifications" style="margin-top:30px"></section>
+
+    <section class="apply-panel" id="applyPanel" hidden aria-labelledby="applyHeading">
+      <button class="apply-toggle" id="applyToggle" type="button" aria-expanded="false" aria-controls="applyBody">
+        <span class="apply-toggle-text">
+          <span id="applyHeading">Apply for a position</span>
+          <span class="apply-toggle-sub">Vendor, sponsor, speaker, DJ or entertainment</span>
+        </span>
+        <span class="apply-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="apply-body" id="applyBody" hidden>
+        <p class="apply-intro">Apply for any role right from your profile. You won’t be asked to create another account, and our team will review and approve or deny each application.</p>
+        <form id="applyForm" novalidate>
+          <label for="applyType">Position</label>
+          <select id="applyType" name="applyType">
+            <option value="vendor">Vendor booth</option>
+            <option value="sponsor">Sponsor</option>
+            <option value="speaker">Speaker</option>
+            <option value="dj">DJ / Entertainment</option>
+            <option value="other">Other</option>
+          </select>
+
+          <div id="applyBoothWrap" hidden>
+            <label for="applyBooth">Booth type</label>
+            <select id="applyBooth" name="applyBooth">
+              <option value="standard">Standard — 10×10 booth</option>
+              <option value="premium">Premium — 10×20 corner, prime location</option>
+            </select>
+          </div>
+
+          <label for="applyPitch">Tell us about your application</label>
+          <textarea id="applyPitch" name="applyPitch" placeholder="What would you bring to Bak'd On The Bay?"></textarea>
+
+          <div class="apply-contract" id="applyContract" hidden>
+            <p style="margin:0 0 10px">Review the agreement for this role before submitting.
+              <a id="applyContractLink" href="#" target="_blank" rel="noopener">Open agreement</a>
+            </p>
+            <label for="applySignature">Virtual signature</label>
+            <input type="text" id="applySignature" name="applySignature" placeholder="Type your full legal name">
+            <label class="apply-check">
+              <input type="checkbox" id="applyAccept" name="applyAccept">
+              <span>I have read and agree to the Bak'd On The Bay agreement for this role.</span>
+            </label>
+          </div>
+
+          <button class="so-btn" id="applySubmit" type="submit">Submit application →</button>
+          <div class="apply-msg" id="applyMsg" role="status" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <button class="so-fab" id="createFab" type="button" title="Create" aria-label="Create">+</button>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p style="margin-top:8px"><a href="/">Back to Home</a></p>
+  </footer>
+
+  <script src="/social-common.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/bay-session.js"></script>
+  <script src="/studio.js"></script>
+  <script src="/hub.js"></script>
+  <script src="/bay-notifications.js"></script>
+  <script>
+    // Render the full notifications panel inline in the hub once the helper loads.
+    (function () {
+      function mount() {
+        if (window.BayNotify && window.BayNotify.mountPanel) {
+          window.BayNotify.mountPanel(document.getElementById('hubNotifications'));
+        } else { setTimeout(mount, 150); }
+      }
+      mount();
+    })();
+  </script>
+</body>
+</html>

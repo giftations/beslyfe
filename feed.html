@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Feed — Bak'd On The Bay</title>
+  <meta name="description" content="The Bak'd On The Bay community feed — post updates, like, comment and follow vendors, sponsors, speakers, DJs and attendees.">
+  <link rel="stylesheet" href="/profiles.css">
+  <link rel="stylesheet" href="/social.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Community Feed — Bak'd On The Bay">
+  <meta property="og:description" content="The Bak'd On The Bay community feed — post updates, like, comment and follow vendors, sponsors, speakers, DJs and attendees.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/feed">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Community Feed — Bak'd On The Bay">
+  <meta name="twitter:description" content="The Bak'd On The Bay community feed — post updates, like, comment and follow vendors, sponsors, speakers, DJs and attendees.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/feed">
+</head>
+<body data-cms-page="feed">
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/directory">Directory</a></li>
+        <li><a href="/feed">Feed</a></li>
+        <li><a href="/messages">Messages</a></li>
+        <li><a href="/profile/new" class="btn-nav">Create Profile</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div id="soNav"></div>
+
+  <div class="page-hero" style="padding-bottom:8px">
+    <div class="event-badge" data-cms="hero.badge">Community</div>
+    <h1 data-cms="hero.title">The <span>Feed</span></h1>
+    <p class="lead" data-cms="hero.subtitle">Share updates, find collaborators and connect with everyone taking part — vendors, sponsors, speakers, DJs and attendees.</p>
+  </div>
+
+  <div class="so-wrap">
+    <div class="so-identity" id="identityBar">
+      <div class="so-avatar placeholder" id="idAvatar">?</div>
+      <div class="so-id-text" id="idText"><strong>Join the conversation</strong><span>Choose your profile to start posting</span></div>
+      <button class="so-btn" id="idChangeBtn" type="button">Choose profile</button>
+    </div>
+
+    <div class="so-composer" id="composer" hidden>
+      <textarea id="postBody" placeholder="What's happening at Bak'd On The Bay?" maxlength="2000"></textarea>
+      <img id="postPhotoPreview" class="so-post-img" alt="" hidden style="margin:8px 0;max-height:280px;object-fit:cover;border-radius:12px">
+      <div class="so-composer-row">
+        <input type="file" id="postPhoto" accept="image/*" hidden>
+        <button class="so-btn ghost" id="photoBtn" type="button">📷 Add photo</button>
+        <button class="so-btn ghost" id="studioBtn" type="button">🎬 Reel / Story / filters</button>
+        <input type="url" id="postImage" placeholder="…or paste an image URL">
+        <button class="so-btn" id="postBtn" type="button">Post</button>
+      </div>
+      <div class="so-error" id="composerError" hidden></div>
+    </div>
+
+    <div class="so-feed" id="feed"><p class="so-muted">Loading the feed…</p></div>
+  </div>
+
+  <button class="so-fab" id="createFab" type="button" title="Create" aria-label="Create">+</button>
+
+  <footer class="site-footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p style="margin-top:8px"><a href="/">Back to Home</a> · <a href="/directory">Directory</a></p>
+  </footer>
+
+  <script src="/social-common.js"></script>
+  <script src="/studio.js"></script>
+  <script src="/feed.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/bay-notifications.js"></script>
+</body>
+</html>

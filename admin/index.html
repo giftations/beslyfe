@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin OS · Bak'd On The Bay</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/admin-os.css" />
+  <script>
+    // Apply the saved theme before first paint to avoid a flash, and gate the
+    // page to admins only (mirrors the check in admin-os.js as a fast fail).
+    (function () {
+      try {
+        var t = localStorage.getItem('admin_theme'); if (t) document.documentElement.setAttribute('data-theme', t);
+        var s = JSON.parse(localStorage.getItem('bakd_session') || 'null');
+        if (!s || s.role !== 'admin') location.replace('/admin-login.html');
+      } catch (e) { location.replace('/admin-login.html'); }
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-root"></div>
+  <script src="/assets/js/admin-os.js" defer></script>
+</body>
+</html>

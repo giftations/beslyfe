@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Application — Bak'd On The Bay</title>
+  <meta name="description" content="Apply to be a vendor at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <link rel="stylesheet" href="/vendor-application.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Vendor Application — Bak'd On The Bay">
+  <meta property="og:description" content="Apply to be a vendor at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/vendor-application">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vendor Application — Bak'd On The Bay">
+  <meta name="twitter:description" content="Apply to be a vendor at Bak'd On The Bay, Erie's first cannabis-focused event at the Bayfront Convention Center.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/vendor-application">
+  <style>
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
+    .skip-link:focus{left:8px}
+  </style>
+</head>
+<body data-cms-page="vendor-application">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/#about">About</a></li>
+        <li><a href="/#education-station">Education</a></li>
+        <li><a href="/#sponsors">Sponsors</a></li>
+        <li><a href="/#vendors">Vendors</a></li>
+        <li><a href="/#venue">Venue</a></li>
+        <li><a href="/sponsors" class="btn-nav">Sponsor</a></li>
+        <li><a href="/speakers" class="btn-nav">Speak</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+  <div class="page-hero">
+    <div class="event-badge" data-cms="hero.badge">September 26 · Bayfront Convention Center · Erie, PA</div>
+    <h1 data-cms="hero.title">Become a <span>Vendor</span></h1>
+    <p data-cms="hero.subtitle">Secure your booth at Erie's first cannabis-focused convention and get your brand in front of 2,500+ attendees.</p>
+  </div>
+
+  <section class="form-section">
+    <div class="form-card">
+      <h2>Vendor Application</h2>
+
+      <form id="vendorForm" novalidate>
+
+        <div class="form-section-label">Business Information</div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="businessName">Business Name <span>*</span></label>
+            <input type="text" id="businessName" name="businessName" placeholder="Your business name" required>
+          </div>
+          <div class="field-group">
+            <label for="contactName">Contact Name <span>*</span></label>
+            <input type="text" id="contactName" name="contactName" placeholder="Your full name" required>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="email">Email Address <span>*</span></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field-group">
+            <label for="phone">Phone <span>(optional)</span></label>
+            <input type="tel" id="phone" name="phone" placeholder="(555) 000-0000">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="website">Website <span>(optional)</span></label>
+          <input type="url" id="website" name="website" placeholder="https://yourbusiness.com">
+        </div>
+
+        <div class="form-section-label">Profile & Sign In</div>
+
+        <div class="field-group">
+          <label for="displayName">Public Profile Name <span>*</span></label>
+          <input type="text" id="displayName" name="displayName" placeholder="Name shown in the member directory" required>
+        </div>
+
+        <div class="field-group">
+          <label for="tagline">Profile Tagline <span>*</span></label>
+          <input type="text" id="tagline" name="tagline" placeholder="Short description for your public profile" required>
+        </div>
+
+        <div class="field-group">
+          <label for="password">Create Password <span>*</span></label>
+          <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Minimum 8 characters" required>
+        </div>
+
+        <div class="form-section-label">Booth Selection</div>
+
+        <fieldset class="field-group" style="border:0;padding:0;margin:0;min-width:0">
+          <legend data-cms="vendor.booth.heading" style="padding:0">Booth Type <span>*</span></legend>
+          <div class="tier-cards">
+            <div class="tier-card">
+              <input type="radio" id="pkg-standard" name="package" value="standard" checked>
+              <label for="pkg-standard">
+                <span class="tier-name" data-cms="vendor.tier.standard.name">Standard</span>
+                <span class="tier-price" data-cms="vendor.tier.standard.price">$300</span>
+                <span class="tier-desc" data-cms="vendor.tier.standard.desc">10×10 booth space, 1 table, 2 chairs</span>
+              </label>
+            </div>
+            <div class="tier-card">
+              <input type="radio" id="pkg-premium" name="package" value="premium">
+              <label for="pkg-premium">
+                <span class="tier-name" data-cms="vendor.tier.premium.name">Premium</span>
+                <span class="tier-price" data-cms="vendor.tier.premium.price">$500</span>
+                <span class="tier-desc" data-cms="vendor.tier.premium.desc">10×20 corner space, prime location, extra signage</span>
+              </label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="field-group">
+          <label for="requestedBooth">Preferred Booth Number <span>(optional)</span></label>
+          <input type="text" id="requestedBooth" name="requestedBooth" placeholder="e.g. A12 — subject to availability">
+        </div>
+
+        <div class="form-section-label">About Your Business</div>
+
+        <div class="field-group">
+          <label for="description">Business Description <span>*</span></label>
+          <textarea id="description" name="description" placeholder="Tell us about your products or services, your target audience, and why you'd be a great fit for this event." required></textarea>
+        </div>
+
+        <div class="form-section-label">Contract</div>
+
+        <div class="contract-box">
+          <p>Review the Bak'd On The Bay vendor rules before submitting.</p>
+          <a href="/assets/contracts/bakd-on-the-bay-vendor-rules.pdf" target="_blank" rel="noopener">Open contract</a>
+        </div>
+
+        <div class="field-group">
+          <label for="contractSignature">Virtual Signature <span>*</span></label>
+          <input type="text" id="contractSignature" name="contractSignature" placeholder="Type your full legal name" required>
+        </div>
+
+        <label class="check-field">
+          <input type="checkbox" name="contractAccepted" value="yes" required>
+          <span>I have read and agree to the Bak'd On The Bay vendor rules contract.</span>
+        </label>
+
+        <div class="field-group">
+          <label for="logo">Logo link <span>(optional)</span></label>
+          <input type="url" id="logo" name="logoUrl" placeholder="Paste a link to your logo — Drive, Dropbox, your website…">
+          <p class="hint" style="margin-top:6px">We can’t take file uploads on this form yet — share a link and we’ll collect it during onboarding.</p>        </div>
+
+        <div class="submit-area">
+          <button type="submit" class="btn-submit" id="submitBtn">
+            Submit Application →
+          </button>
+          <span class="submit-note">We'll follow up within 2–3 business days.</span>
+        </div>
+
+        <div class="form-message success" id="successMsg">
+          <strong>🎉 Application received!</strong><br>
+          Thank you for applying to be a vendor at Bak'd On The Bay. Your account and profile are pending review. Once approved, you'll receive an email with a link to your profile and can sign in with the password you created.
+        </div>
+        <div class="form-message error" id="errorMsg">
+          Something went wrong. Please try again or email us directly.
+        </div>
+
+      </form>
+    </div>
+  </section>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong style="color:white">Bak'd On The Bay</strong></p>
+    <p>September 26 · Bayfront Convention Center · Erie, PA</p>
+    <p style="margin-top:10px"><a href="/">Back to Home</a></p>
+  </footer>
+
+  <script src="/vendor-application.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+</body>
+</html>
