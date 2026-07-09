@@ -10,6 +10,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.modules))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -30,6 +31,19 @@ test('person identity contract protects user-owned identity and data controls', 
   assert.ok(identity.dataControls.includes('export data'))
   assert.ok(identity.dataControls.includes('reset personalization'))
   assert.ok(identity.trustControls.includes('user-owned identity'))
+})
+
+test('organization identity contract protects ownership, verification, and member controls', () => {
+  const organizations = PLATFORM_CONTRACT_REGISTRY.organizationIdentity
+  assert.ok(organizations.identityRecords.some((record) => record.key === 'ownership'))
+  assert.ok(organizations.identityRecords.some((record) => record.key === 'verification'))
+  assert.ok(organizations.organizationTypes.includes('business'))
+  assert.ok(organizations.organizationTypes.includes('nonprofit'))
+  assert.ok(organizations.requiredFields.includes('ownerPersonIds'))
+  assert.ok(organizations.requiredFields.includes('verificationState'))
+  assert.ok(organizations.verificationStates.includes('verified'))
+  assert.ok(organizations.memberControls.includes('transfer ownership'))
+  assert.ok(organizations.trustControls.includes('sponsored visibility is labeled'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {
