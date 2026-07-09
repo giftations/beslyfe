@@ -271,6 +271,24 @@ export async function readSession(req, db = getDatabase()) {
     return null
   }
   const session = { token, accountId: row.account_id, profileId: row.profile_id, role: row.role }
+  // The account row is the source of truth for the actor's community profile.
+  // Older code paths and stale sessions may carry a profile_id that no longer
+  // belongs to the signed-in account. Heal that before any endpoint can post,
+  // comment, message or edit as the wrong profile.
+  try {
+    const accountRows = await db.sql`SELECT "profile_id" FROM accounts WHERE "id" = ${session.accountId} LIMIT 1`
+    const ownedProfileId = (accountRows[0] && accountRows[0].profile_id) || ''
+    if (ownedProfileId !== session.profileId) {
+      session.profileId = ownedProfileId
+      await db.sql`UPDATE sessions SET "profile_id" = ${ownedProfileId} WHERE "token" = ${token}`
+    }
+  } catch (error) {
+    session.profileId = ''
+    logWarn('session', 'could not verify session profile ownership', {
+      accountId: session.accountId,
+      error: error && error.message,
+    })
+  }
   // Sliding renewal, best-effort: extending the session must never fail the read.
   if (expires.getTime() - now < SESSION_RENEW_AFTER_MS) {
     const nextExpiry = new Date(now + SESSION_TTL_MS)
@@ -435,23 +453,28 @@ export async function ensureProfileForAccountId(db, accountId) {
 export async function ensureProfileForAccount(db, session) {
   if (!session) return ''
 
-  // Fast path: the session already points at a live profile.
-  if (session.profileId) {
-    try {
-      const rows = await db.sql`SELECT "id" FROM profiles WHERE "id" = ${session.profileId} LIMIT 1`
-      if (rows.length) return session.profileId
-    } catch { return session.profileId }
-  }
-
-  // Resolve the account behind this session.
+  // Resolve the account behind this session. Its profile_id is authoritative;
+  // the session row is only a cache that can drift and must be healed.
   let account
   try {
     const rows = await db.sql`SELECT "id", "name", "email", "role", "profile_id" FROM accounts WHERE "id" = ${session.accountId} LIMIT 1`
     account = rows[0]
   } catch {
-    return session.profileId || ''
+    session.profileId = ''
+    return ''
   }
-  if (!account) return session.profileId || ''
+  if (!account) {
+    session.profileId = ''
+    return ''
+  }
+
+  // Fast path: the session and account agree on a live profile.
+  if (session.profileId && session.profileId === account.profile_id) {
+    try {
+      const rows = await db.sql`SELECT "id" FROM profiles WHERE "id" = ${session.profileId} LIMIT 1`
+      if (rows.length) return session.profileId
+    } catch { return session.profileId }
+  }
 
   // The account already links a real profile the session lost track of: adopt it.
   if (account.profile_id) {
