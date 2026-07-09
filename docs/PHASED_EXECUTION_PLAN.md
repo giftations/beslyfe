@@ -137,6 +137,7 @@ Goal: turn the lessons from Bak'd On The Bay into reusable platform software.
 Status:
 
 - Initial reusable platform core contract is tracked in `docs/PLATFORM_CORE_CONTRACT.md`.
+- Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
 
 Tasks:
 
