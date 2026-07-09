@@ -21,6 +21,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.placesMaps.placeTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.contentCms.contentTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
@@ -151,6 +152,18 @@ test('places and maps contract protects published maps, private locations, and a
   assert.ok(places.userControls.includes('request location correction'))
   assert.ok(places.trustControls.includes('private addresses are hidden by default'))
   assert.ok(places.trustControls.includes('AI navigation uses published place data only'))
+})
+
+test('content CMS contract protects publishing, media, revision, and rollback controls', () => {
+  const content = PLATFORM_CONTRACT_REGISTRY.contentCms
+  assert.ok(content.contentTypes.some((type) => type.key === 'page'))
+  assert.ok(content.contentTypes.some((type) => type.key === 'media'))
+  assert.ok(content.requiredFields.includes('revisionId'))
+  assert.ok(content.requiredFields.includes('changeHistory'))
+  assert.ok(content.statusStates.includes('review-needed'))
+  assert.ok(content.editorControls.includes('rollback revision'))
+  assert.ok(content.trustControls.includes('alt text is required for meaningful images'))
+  assert.ok(content.trustControls.includes('private content is excluded from public search'))
 })
 
 test('conversation contract requires consent, safety controls, and AI boundaries', () => {
