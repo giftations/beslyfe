@@ -155,6 +155,7 @@ Status:
 - Reusable opportunity contract is tracked in `platform/opportunities/contract.mjs`.
 - Reusable knowledge contract is tracked in `platform/knowledge/contract.mjs`.
 - Reusable marketplace contract is tracked in `platform/marketplace/contract.mjs`.
+- Reusable advertising and sponsorship contract is tracked in `platform/advertising/sponsorship-contract.mjs`.
 - Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
 - Explainable AI recommendation contract is tracked in `platform/ai/recommendation-contract.mjs`.
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.

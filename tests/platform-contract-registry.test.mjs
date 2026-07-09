@@ -25,6 +25,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
@@ -184,6 +185,18 @@ test('marketplace contract requires disclosure, terms, payment, and audit contro
   assert.ok(marketplace.requiredFields.includes('terms'))
   assert.ok(marketplace.priceModels.includes('application-gated'))
   assert.ok(marketplace.trustControls.includes('approval audit trail'))
+})
+
+test('advertising sponsorship contract protects disclosure, delivery, and guardrails', () => {
+  const ads = PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship
+  assert.ok(ads.offerTypes.some((type) => type.key === 'sponsorship-package'))
+  assert.ok(ads.offerTypes.some((type) => type.key === 'delivery-log'))
+  assert.ok(ads.requiredFields.includes('disclosureLabel'))
+  assert.ok(ads.requiredFields.includes('guardrailMetrics'))
+  assert.ok(ads.placementTypes.includes('directory-feature'))
+  assert.ok(ads.operatorControls.includes('cap frequency'))
+  assert.ok(ads.trustControls.includes('sponsored visibility is labeled'))
+  assert.ok(ads.trustControls.includes('AI optimization cannot use engagement-only metrics'))
 })
 
 test('knowledge contract preserves source, review, trust, and AI boundaries', () => {
