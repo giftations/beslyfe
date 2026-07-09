@@ -31,6 +31,7 @@ import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
 import { aiRecommendationContractSummary } from './ai/recommendation-contract.mjs'
 import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
 import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract.mjs'
+import { themeContractSummary } from './themes/contract.mjs'
 
 export const PLATFORM_CONTRACT_REGISTRY = {
   modules: MODULES,
@@ -60,6 +61,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   aiRecommendations: aiRecommendationContractSummary(),
   outcomeAnalytics: analyticsContractSummary(),
   dataBoundaries: dataBoundaryContractSummary(),
+  themes: themeContractSummary(),
 }
 
 export function platformContractRegistrySummary() {
@@ -95,5 +97,6 @@ export function platformContractRegistrySummary() {
     outcomeMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes.length,
     guardrailMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.guardrails.length,
     dataBoundaryScopeCount: PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes.length,
+    themeRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.themes.recordTypes.length,
   }
 }
