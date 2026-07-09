@@ -21,8 +21,8 @@ npm test          # runs node --test over tests/**/*.test.mjs
 - **`readJsonBody`** — request-body parsing rejects malformed / non-object input.
 - **`requestId` / `logEvent`** — structured logging is safe and never throws.
 
-These are hermetic (no database, no network) and are **not** run by the Netlify
-build; wire `npm test` into CI to gate merges.
+These are hermetic (no database, no network) and are run in GitHub Actions by
+`.github/workflows/node-tests.yml` on pull requests and pushes to `main`.
 
 ## Manual permission / CSRF smoke checks
 
