@@ -24,6 +24,7 @@ import { knowledgeContractSummary } from './knowledge/contract.mjs'
 import { marketplaceContractSummary } from './marketplace/contract.mjs'
 import { advertisingSponsorshipContractSummary } from './advertising/sponsorship-contract.mjs'
 import { commercePaymentsContractSummary } from './commerce/payments-contract.mjs'
+import { integrationsWebhooksContractSummary } from './integrations/webhooks-contract.mjs'
 import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
 import { aiRecommendationContractSummary } from './ai/recommendation-contract.mjs'
 import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
@@ -50,6 +51,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   marketplace: marketplaceContractSummary(),
   advertisingSponsorship: advertisingSponsorshipContractSummary(),
   commercePayments: commercePaymentsContractSummary(),
+  integrationsWebhooks: integrationsWebhooksContractSummary(),
   consentAndAi: consentAiChecklist(),
   aiRecommendations: aiRecommendationContractSummary(),
   outcomeAnalytics: analyticsContractSummary(),
@@ -80,6 +82,7 @@ export function platformContractRegistrySummary() {
     advertisingOfferTypeCount:
       PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes.length,
     commerceRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.commercePayments.recordTypes.length,
+    integrationTypeCount: PLATFORM_CONTRACT_REGISTRY.integrationsWebhooks.integrationTypes.length,
     consentPurposeCount: PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes.length,
     aiRecommendationTargetCount: PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets.length,
     outcomeMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes.length,

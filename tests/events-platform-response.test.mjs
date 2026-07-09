@@ -33,6 +33,7 @@ test('events platform response exposes the contract registry without database se
   assert.ok(Array.isArray(body.contracts.marketplace.offerTypes))
   assert.ok(Array.isArray(body.contracts.advertisingSponsorship.offerTypes))
   assert.ok(Array.isArray(body.contracts.commercePayments.recordTypes))
+  assert.ok(Array.isArray(body.contracts.integrationsWebhooks.integrationTypes))
   assert.ok(Array.isArray(body.contracts.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(body.contracts.aiRecommendations.targets))
   assert.ok(Array.isArray(body.contracts.outcomeAnalytics.outcomes))
@@ -67,6 +68,10 @@ test('events platform response exposes the contract registry without database se
     body.contracts.advertisingSponsorship.offerTypes.length,
   )
   assert.equal(body.contractsSummary.commerceRecordTypeCount, body.contracts.commercePayments.recordTypes.length)
+  assert.equal(
+    body.contractsSummary.integrationTypeCount,
+    body.contracts.integrationsWebhooks.integrationTypes.length,
+  )
   assert.equal(body.contractsSummary.aiRecommendationTargetCount, body.contracts.aiRecommendations.targets.length)
   assert.equal(body.contractsSummary.dataBoundaryScopeCount, body.contracts.dataBoundaries.scopes.length)
 })
