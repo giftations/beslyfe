@@ -143,6 +143,7 @@ Status:
 - Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.
 - Tenant and data-boundary contract is tracked in `platform/boundaries/data-boundary-contract.mjs`.
+- Platform core contract registry is tracked in `platform/contracts.mjs`.
 
 Tasks:
 
