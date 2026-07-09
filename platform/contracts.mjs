@@ -9,6 +9,7 @@ import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
 import { relationshipContractSummary } from './relationships/contract.mjs'
 import { opportunityContractSummary } from './opportunities/contract.mjs'
 import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
+import { aiRecommendationContractSummary } from './ai/recommendation-contract.mjs'
 import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
 import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract.mjs'
 
@@ -18,6 +19,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   relationships: relationshipContractSummary(),
   opportunities: opportunityContractSummary(),
   consentAndAi: consentAiChecklist(),
+  aiRecommendations: aiRecommendationContractSummary(),
   outcomeAnalytics: analyticsContractSummary(),
   dataBoundaries: dataBoundaryContractSummary(),
 }
@@ -29,6 +31,7 @@ export function platformContractRegistrySummary() {
     relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
     opportunityTypeCount: PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes.length,
     consentPurposeCount: PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes.length,
+    aiRecommendationTargetCount: PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets.length,
     outcomeMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes.length,
     guardrailMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.guardrails.length,
     dataBoundaryScopeCount: PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes.length,

@@ -1495,6 +1495,7 @@
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
       ['Opportunities', platformSummaryCount(summary.opportunityTypeCount, contracts.opportunities && contracts.opportunities.opportunityTypes), 'Discoverable, actionable, and measurable ways people can build better lives.'],
       ['Consent and AI', platformSummaryCount(summary.consentPurposeCount, contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
+      ['AI recommendations', platformSummaryCount(summary.aiRecommendationTargetCount, contracts.aiRecommendations && contracts.aiRecommendations.targets), 'Explainable opportunity recommendations with user controls and guardrails.'],
       ['Outcome analytics', platformSummaryCount(summary.outcomeMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
       ['Guardrails', platformSummaryCount(summary.guardrailMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
       ['Data boundaries', platformSummaryCount(summary.dataBoundaryScopeCount, contracts.dataBoundaries && contracts.dataBoundaries.scopes), 'Ownership, visibility, portability, retention, and AI-use scopes.'],

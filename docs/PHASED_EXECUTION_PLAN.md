@@ -142,6 +142,7 @@ Status:
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
 - Reusable opportunity contract is tracked in `platform/opportunities/contract.mjs`.
 - Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
+- Explainable AI recommendation contract is tracked in `platform/ai/recommendation-contract.mjs`.
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.
 - Tenant and data-boundary contract is tracked in `platform/boundaries/data-boundary-contract.mjs`.
 - Platform core contract registry is tracked in `platform/contracts.mjs`.

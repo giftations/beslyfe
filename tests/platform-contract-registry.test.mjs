@@ -12,8 +12,18 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('AI recommendation contract requires explanation, controls, and guardrails', () => {
+  const recommendations = PLATFORM_CONTRACT_REGISTRY.aiRecommendations
+  assert.ok(recommendations.targets.includes('opportunity'))
+  assert.ok(recommendations.requiredFields.includes('explanation'))
+  assert.ok(recommendations.requiredFields.includes('consentPurposes'))
+  assert.ok(recommendations.userControls.includes('why am I seeing this'))
+  assert.ok(recommendations.guardrails.includes('no engagement-only ranking'))
 })
 
 test('opportunity contract names types, states, required fields, and trust controls', () => {
