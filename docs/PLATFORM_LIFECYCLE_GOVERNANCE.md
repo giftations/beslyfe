@@ -38,3 +38,10 @@ directory visibility, notifications, mobile navigation, redirects, and rollback.
 
 The production checklist remains the operational checklist. Lifecycle contracts
 make those checks reusable as platform data.
+
+## Admin Visibility
+
+The Admin OS System view reads `GET events?platform` and displays imports,
+migrations, and release gates alongside the rest of the platform contract
+registry. Operators should be able to see these lifecycle rules before future
+runtime workflows are added.
