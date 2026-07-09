@@ -8,6 +8,7 @@ without hiding risk in a large file set.
 - Keep every pull request under 20 changed files.
 - Give every pull request one phase, one purpose, and one reason.
 - Test before opening the pull request.
+- Keep GitHub Actions green before merging.
 - After merge, pull main and test again before starting the next phase.
 - If the post-merge test fails, the next pull request fixes that regression
   before new feature work continues.
@@ -44,6 +45,7 @@ Every PR should state:
 - Why it supports the Beslyfe Manifesto, Constitution, or platform roadmap.
 - Which files changed and whether the count is under 20.
 - What tests were run.
+- Whether GitHub Actions is passing.
 - Whether follow-up work is intentionally left for a future phase.
 
 ## Merge Checklist
