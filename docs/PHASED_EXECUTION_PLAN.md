@@ -150,6 +150,7 @@ Status:
 - The platform response is regression-tested without requiring database setup.
 - The platform response exposes registry-owned summary counts for admin and future tooling.
 - Repository structure ownership is documented in `docs/REPO_STRUCTURE.md`.
+- Pull request workflow guardrails are documented in `docs/PULL_REQUEST_WORKFLOW.md` and the GitHub PR template.
 
 Tasks:
 
