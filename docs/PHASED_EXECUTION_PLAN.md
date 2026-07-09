@@ -141,6 +141,7 @@ Status:
 - Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
 - Reusable opportunity contract is tracked in `platform/opportunities/contract.mjs`.
+- Reusable knowledge contract is tracked in `platform/knowledge/contract.mjs`.
 - Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
 - Explainable AI recommendation contract is tracked in `platform/ai/recommendation-contract.mjs`.
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.

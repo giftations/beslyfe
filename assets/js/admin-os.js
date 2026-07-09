@@ -1494,6 +1494,7 @@
       ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
       ['Opportunities', platformSummaryCount(summary.opportunityTypeCount, contracts.opportunities && contracts.opportunities.opportunityTypes), 'Discoverable, actionable, and measurable ways people can build better lives.'],
+      ['Knowledge', platformSummaryCount(summary.knowledgeTypeCount, contracts.knowledge && contracts.knowledge.knowledgeTypes), 'Reusable learning, resources, community memory, and AI-readable context.'],
       ['Consent and AI', platformSummaryCount(summary.consentPurposeCount, contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
       ['AI recommendations', platformSummaryCount(summary.aiRecommendationTargetCount, contracts.aiRecommendations && contracts.aiRecommendations.targets), 'Explainable opportunity recommendations with user controls and guardrails.'],
       ['Outcome analytics', platformSummaryCount(summary.outcomeMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
