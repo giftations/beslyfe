@@ -146,6 +146,7 @@ Status:
 - Platform core contract registry is tracked in `platform/contracts.mjs`.
 - Existing `GET events?platform` response exposes the platform contract registry as `contracts`.
 - Admin System view displays the platform contract registry from the existing platform response.
+- The platform response is regression-tested without requiring database setup.
 
 Tasks:
 

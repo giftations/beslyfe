@@ -122,13 +122,8 @@ async function activate(db, id) {
 }
 
 export default async (req) => {
-  const db = getDatabase()
   const url = new URL(req.url)
   const id = url.searchParams.get('id')
-
-  // Every request guarantees the flagship edition exists (cheap). The heavier
-  // backfill of legacy records only runs on writes, below.
-  await ensureSeed(db)
 
   // ── Read ──
   if (req.method === 'GET') {
@@ -150,6 +145,12 @@ export default async (req) => {
 
     // The current edition — used by public/admin surfaces that need "which event
     // are we running right now" without listing them all.
+    const db = getDatabase()
+
+    // Every database-backed request guarantees the flagship edition exists
+    // (cheap). The heavier backfill of legacy records only runs on writes, below.
+    await ensureSeed(db)
+
     if (url.searchParams.get('active') !== null) {
       const activeId = await getActiveEventId(db)
       const item = activeId ? await getEvent(db, activeId) : null
@@ -177,6 +178,12 @@ export default async (req) => {
   }
 
   // ── Create a new edition (admin) ──
+  const db = getDatabase()
+
+  // Every database-backed request guarantees the flagship edition exists
+  // (cheap). The heavier backfill of legacy records only runs on writes, below.
+  await ensureSeed(db)
+
   if (req.method === 'POST') {
     const admin = await requireAdmin(req, db)
     if (admin instanceof Response) return admin
