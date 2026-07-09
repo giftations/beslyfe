@@ -9,6 +9,7 @@ import {
 test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.modules))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -19,6 +20,16 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('person identity contract protects user-owned identity and data controls', () => {
+  const identity = PLATFORM_CONTRACT_REGISTRY.personIdentity
+  assert.ok(identity.identityRecords.some((record) => record.key === 'profile'))
+  assert.ok(identity.identityRecords.some((record) => record.key === 'consent'))
+  assert.ok(identity.requiredFields.includes('consentPurposes'))
+  assert.ok(identity.dataControls.includes('export data'))
+  assert.ok(identity.dataControls.includes('reset personalization'))
+  assert.ok(identity.trustControls.includes('user-owned identity'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {
