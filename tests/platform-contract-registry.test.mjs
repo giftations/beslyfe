@@ -15,6 +15,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -101,6 +102,19 @@ test('notification contract protects preferences, reasons, and private channels'
   assert.ok(notifications.userControls.includes('set quiet hours'))
   assert.ok(notifications.trustControls.includes('marketing requires explicit opt-in'))
   assert.ok(notifications.trustControls.includes('private message content is not exposed in public channels'))
+})
+
+test('moderation trust safety contract protects reporting, appeals, and AI boundaries', () => {
+  const moderation = PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety
+  assert.ok(moderation.caseTypes.some((type) => type.key === 'content-report'))
+  assert.ok(moderation.caseTypes.some((type) => type.key === 'ai-safety-review'))
+  assert.ok(moderation.requiredFields.includes('decisionReason'))
+  assert.ok(moderation.requiredFields.includes('appealState'))
+  assert.ok(moderation.statusStates.includes('appealed'))
+  assert.ok(moderation.actionTypes.includes('restore content'))
+  assert.ok(moderation.userControls.includes('appeal decision'))
+  assert.ok(moderation.trustControls.includes('AI may assist triage but not decide'))
+  assert.ok(moderation.trustControls.includes('private reports stay confidential by default'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {

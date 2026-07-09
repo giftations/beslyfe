@@ -12,6 +12,7 @@ import { organizationIdentityContractSummary } from './identity/organization-con
 import { communityContractSummary } from './communities/contract.mjs'
 import { directoryDiscoveryContractSummary } from './discovery/directory-contract.mjs'
 import { notificationContractSummary } from './notifications/contract.mjs'
+import { moderationTrustSafetyContractSummary } from './moderation/trust-safety-contract.mjs'
 import { relationshipContractSummary } from './relationships/contract.mjs'
 import { conversationContractSummary } from './conversations/contract.mjs'
 import { experienceContractSummary } from './experiences/contract.mjs'
@@ -34,6 +35,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   communities: communityContractSummary(),
   directoryDiscovery: directoryDiscoveryContractSummary(),
   notifications: notificationContractSummary(),
+  moderationTrustSafety: moderationTrustSafetyContractSummary(),
   relationships: relationshipContractSummary(),
   conversations: conversationContractSummary(),
   experiences: experienceContractSummary(),
@@ -59,6 +61,7 @@ export function platformContractRegistrySummary() {
     communityTypeCount: PLATFORM_CONTRACT_REGISTRY.communities.communityTypes.length,
     discoverySurfaceCount: PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces.length,
     notificationTypeCount: PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes.length,
+    moderationCaseTypeCount: PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes.length,
     relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
     conversationTypeCount: PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes.length,
     experienceTypeCount: PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes.length,
