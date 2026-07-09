@@ -45,3 +45,7 @@ The Admin OS System view reads `GET events?platform` and displays imports,
 migrations, and release gates alongside the rest of the platform contract
 registry. Operators should be able to see these lifecycle rules before future
 runtime workflows are added.
+
+The same view also surfaces the operating guardrails for imports, migrations,
+and releases so operators can see the safety rules before running future
+workflow tools.

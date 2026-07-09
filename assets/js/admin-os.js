@@ -1539,7 +1539,8 @@
         rows.map(function (row) {
           return '<tr><td><b>' + esc(row[0]) + '</b></td><td><span class="badge neutral">' + row[1] + '</span></td><td>' + esc(row[2]) + '</td></tr>';
         }).join('') +
-      '</tbody></table></div>';
+      '</tbody></table></div>' +
+      paintLifecycleOperatingRules(contracts);
   }
 
   function platformCount(value) {
@@ -1548,6 +1549,24 @@
 
   function platformSummaryCount(value, fallback) {
     return Number.isFinite(Number(value)) ? Number(value) : platformCount(fallback);
+  }
+
+  function platformRuleList(items) {
+    if (!Array.isArray(items) || !items.length) return '<p class="muted small">No rules published yet.</p>';
+    return '<ul class="mini-list">' + items.map(function (item) { return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>';
+  }
+
+  function paintLifecycleOperatingRules(contracts) {
+    var imports = contracts.imports || {};
+    var migrations = contracts.migrations || {};
+    var releases = contracts.releaseGates || {};
+    return '<div class="mt-4"><div class="card-title">Lifecycle operating rules</div>' +
+      '<div class="grid cols-3">' +
+      '<div><h3 class="section-subtitle">Import guardrails</h3><p class="muted small">Data enters an ecosystem only with source, consent, validation, and rollback context.</p>' + platformRuleList(imports.governanceControls) + '</div>' +
+      '<div><h3 class="section-subtitle">Migration guardrails</h3><p class="muted small">Platform changes stay additive, observable, reversible, and compatible while users depend on them.</p>' + platformRuleList(migrations.safetyControls) + '</div>' +
+      '<div><h3 class="section-subtitle">Release guardrails</h3><p class="muted small">Launch and deploy decisions preserve evidence, manual checks, double testing, and rollback readiness.</p>' + platformRuleList(releases.trustControls) + '</div>' +
+      '</div>' +
+    '</div>';
   }
 
   var CRM_ROLES = ['attendee', 'vendor', 'sponsor', 'speaker', 'dj', 'organizer', 'media', 'staff', 'partner', 'other'];
