@@ -54,6 +54,9 @@ AI, analytics, and data-boundary contracts behind one registry. The same
 admin surfaces can inspect the whole platform contract without adding a second
 endpoint.
 
+Theme shape, override behavior, and accessibility/trust controls are captured in
+`themes/contract.mjs` and registered through `contracts.mjs`.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the

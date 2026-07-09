@@ -34,6 +34,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.themes.recordTypes))
 })
 
 test('access application contract supports reviewable participation gates', () => {
@@ -280,6 +281,16 @@ test('opportunity contract names types, states, required fields, and trust contr
   assert.ok(opportunities.states.includes('discoverable'))
   assert.ok(opportunities.requiredFields.includes('outcomeMetric'))
   assert.ok(opportunities.trustControls.includes('explain recommendation source'))
+})
+
+test('theme contract keeps ecosystem presentation configurable', () => {
+  const themes = PLATFORM_CONTRACT_REGISTRY.themes
+  assert.ok(themes.recordTypes.some((type) => type.key === 'theme-preset'))
+  assert.ok(themes.requiredFields.includes('branding'))
+  assert.ok(themes.brandingFields.includes('brand'))
+  assert.ok(themes.overrideFields.includes('sectionOrder'))
+  assert.ok(themes.resolutionRules.includes('event theme is the base presentation layer'))
+  assert.ok(themes.trustControls.includes('theme defaults must be overrideable per ecosystem'))
 })
 
 test('platform contract registry is serializable', () => {
