@@ -166,6 +166,7 @@ Status:
 - Tenant and data-boundary contract is tracked in `platform/boundaries/data-boundary-contract.mjs`.
 - Reusable theme contract is tracked in `platform/themes/contract.mjs`.
 - Reusable Admin OS contract is tracked in `platform/admin/os-contract.mjs`.
+- Reusable authentication and access-control contract is tracked in `platform/auth/access-control-contract.mjs`.
 - Platform core contract registry is tracked in `platform/contracts.mjs`.
 - Existing `GET events?platform` response exposes the platform contract registry as `contracts`.
 - Admin System view displays the platform contract registry from the existing platform response.

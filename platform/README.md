@@ -60,6 +60,9 @@ Theme shape, override behavior, and accessibility/trust controls are captured in
 Operator workspace shape, navigation, mutation policies, and Admin OS trust
 controls are captured in `admin/os-contract.mjs`.
 
+Authentication, sessions, roles, same-origin writes, password policy, rate
+limits, and server-derived identity are captured in `auth/access-control-contract.mjs`.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the
