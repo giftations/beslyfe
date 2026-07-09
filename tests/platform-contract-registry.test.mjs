@@ -17,6 +17,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
@@ -95,6 +96,19 @@ test('experience contract requires time, place, ownership, and change controls',
   assert.ok(experiences.requiredFields.includes('location'))
   assert.ok(experiences.requiredFields.includes('changeHistory'))
   assert.ok(experiences.trustControls.includes('change visibility'))
+})
+
+test('scheduling contract requires time, capacity, registration, and change controls', () => {
+  const scheduling = PLATFORM_CONTRACT_REGISTRY.scheduling
+  assert.ok(scheduling.entryTypes.some((type) => type.key === 'event-session'))
+  assert.ok(scheduling.entryTypes.some((type) => type.key === 'appointment'))
+  assert.ok(scheduling.requiredFields.includes('timezone'))
+  assert.ok(scheduling.requiredFields.includes('capacity'))
+  assert.ok(scheduling.requiredFields.includes('changeHistory'))
+  assert.ok(scheduling.registrationStates.includes('approval-required'))
+  assert.ok(scheduling.changeControls.includes('sync external calendar only with consent'))
+  assert.ok(scheduling.userControls.includes('cancel reservation'))
+  assert.ok(scheduling.trustControls.includes('calendar sync is opt-in'))
 })
 
 test('conversation contract requires consent, safety controls, and AI boundaries', () => {
