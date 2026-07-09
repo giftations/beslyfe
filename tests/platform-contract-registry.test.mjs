@@ -11,10 +11,21 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('knowledge contract preserves source, review, trust, and AI boundaries', () => {
+  const knowledge = PLATFORM_CONTRACT_REGISTRY.knowledge
+  assert.ok(knowledge.knowledgeTypes.some((type) => type.key === 'guide'))
+  assert.ok(knowledge.knowledgeTypes.some((type) => type.key === 'summary'))
+  assert.ok(knowledge.requiredFields.includes('provenance'))
+  assert.ok(knowledge.requiredFields.includes('aiUse'))
+  assert.ok(knowledge.reviewStates.includes('review-needed'))
+  assert.ok(knowledge.trustControls.includes('cite source in recommendations'))
 })
 
 test('AI recommendation contract requires explanation, controls, and guardrails', () => {
