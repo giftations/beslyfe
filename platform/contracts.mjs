@@ -9,6 +9,7 @@ import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
 import { relationshipContractSummary } from './relationships/contract.mjs'
 import { opportunityContractSummary } from './opportunities/contract.mjs'
 import { knowledgeContractSummary } from './knowledge/contract.mjs'
+import { marketplaceContractSummary } from './marketplace/contract.mjs'
 import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
 import { aiRecommendationContractSummary } from './ai/recommendation-contract.mjs'
 import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
@@ -20,6 +21,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   relationships: relationshipContractSummary(),
   opportunities: opportunityContractSummary(),
   knowledge: knowledgeContractSummary(),
+  marketplace: marketplaceContractSummary(),
   consentAndAi: consentAiChecklist(),
   aiRecommendations: aiRecommendationContractSummary(),
   outcomeAnalytics: analyticsContractSummary(),
@@ -33,6 +35,7 @@ export function platformContractRegistrySummary() {
     relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
     opportunityTypeCount: PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes.length,
     knowledgeTypeCount: PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes.length,
+    marketplaceOfferTypeCount: PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes.length,
     consentPurposeCount: PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes.length,
     aiRecommendationTargetCount: PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets.length,
     outcomeMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes.length,
