@@ -1500,6 +1500,8 @@
       ['Notifications', platformSummaryCount(summary.notificationTypeCount, contracts.notifications && contracts.notifications.notificationTypes), 'Respectful alerts, reminders, status updates, opportunity nudges, delivery preferences, reasons, and frequency controls.'],
       ['Moderation and trust safety', platformSummaryCount(summary.moderationCaseTypeCount, contracts.moderationTrustSafety && contracts.moderationTrustSafety.caseTypes), 'Reusable reporting, review, enforcement, appeals, transparency, policy, and AI-assist boundaries.'],
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
+      ['CRM relationships', platformSummaryCount(summary.crmRecordTypeCount, contracts.crmRelationships && contracts.crmRelationships.recordTypes), 'Reusable people, companies, roles, event links, activity timelines, pipeline stages, and follow-up controls.'],
+      ['CRM pipeline stages', platformSummaryCount(summary.crmPipelineStageCount, contracts.crmRelationships && contracts.crmRelationships.pipelineStages), 'Configurable relationship stages for sponsors, vendors, advertisers, partners, speakers, attendees, and future ecosystems.'],
       ['Conversations', platformSummaryCount(summary.conversationTypeCount, contracts.conversations && contracts.conversations.conversationTypes), 'Consent-based messages, intros, groups, support, comments, and opportunity follow-up.'],
       ['Experiences', platformSummaryCount(summary.experienceTypeCount, contracts.experiences && contracts.experiences.experienceTypes), 'Time, place, and program moments where opportunity can happen.'],
       ['Scheduling', platformSummaryCount(summary.schedulingEntryTypeCount, contracts.scheduling && contracts.scheduling.entryTypes), 'Reusable sessions, appointments, office hours, programs, availability, registration, reminders, and calendar controls.'],
@@ -1517,6 +1519,13 @@
       ['Outcome analytics', platformSummaryCount(summary.outcomeMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
       ['Guardrails', platformSummaryCount(summary.guardrailMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
       ['Data boundaries', platformSummaryCount(summary.dataBoundaryScopeCount, contracts.dataBoundaries && contracts.dataBoundaries.scopes), 'Ownership, visibility, portability, retention, and AI-use scopes.'],
+      ['Themes', platformSummaryCount(summary.themeRecordTypeCount, contracts.themes && contracts.themes.recordTypes), 'Reusable ecosystem presentation, branding, module intent, overrides, and accessibility controls.'],
+      ['Admin OS', platformSummaryCount(summary.adminWorkspaceTypeCount, contracts.adminOs && contracts.adminOs.workspaceTypes), 'Reusable operator workspaces, navigation, mutation policies, system surfaces, and audit boundaries.'],
+      ['Auth and access control', platformSummaryCount(summary.authRecordTypeCount, contracts.authAccessControl && contracts.authAccessControl.recordTypes), 'Reusable authentication, sessions, roles, password policy, same-origin writes, and server-derived identity.'],
+      ['Data portability', platformSummaryCount(summary.dataPortabilityScopeCount, contracts.dataPortability && contracts.dataPortability.exportScopes), 'Portable export scopes, redaction rules, package expiry, consent boundaries, and secret-safe export evidence.'],
+      ['Imports', platformSummaryCount(summary.importTargetCount, contracts.imports && contracts.imports.targets), 'Reusable import targets, field mapping, validation, consent basis, dry runs, audit evidence, and rollback plans.'],
+      ['Migrations', platformSummaryCount(summary.migrationChangeTypeCount, contracts.migrations && contracts.migrations.changeTypes), 'Additive schema, data, configuration, and policy changes with compatibility windows and rollback paths.'],
+      ['Release gates', platformSummaryCount(summary.releaseGateAreaCount, contracts.releaseGates && contracts.releaseGates.gateAreas), 'Production readiness areas, manual checks, double testing, rollback references, and release decisions.'],
     ];
     var total = rows.reduce(function (sum, row) { return sum + row[1]; }, 0);
     el.innerHTML =
