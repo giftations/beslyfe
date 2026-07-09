@@ -1492,6 +1492,7 @@
     var rows = [
       ['Modules', platformSummaryCount(summary.moduleCount, contracts.modules), 'Reusable capabilities available to every ecosystem.'],
       ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
+      ['Access and applications', platformSummaryCount(summary.accessRequestTypeCount, contracts.accessApplications && contracts.accessApplications.requestTypes), 'Reusable intake, review, approval, role request, ticket unlock, and capability gating workflows.'],
       ['Person identity', platformSummaryCount(summary.personIdentityRecordCount, contracts.personIdentity && contracts.personIdentity.identityRecords), 'User-owned identity, profiles, roles, preferences, consent, and data controls.'],
       ['Organization identity', platformSummaryCount(summary.organizationIdentityRecordCount, contracts.organizationIdentity && contracts.organizationIdentity.identityRecords), 'Businesses, nonprofits, venues, sponsors, vendors, teams, verification, ownership, and member controls.'],
       ['Communities', platformSummaryCount(summary.communityTypeCount, contracts.communities && contracts.communities.communityTypes), 'Reusable ecosystems where members, organizations, experiences, knowledge, opportunity, governance, and AI policy connect.'],

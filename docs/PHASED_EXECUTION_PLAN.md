@@ -139,6 +139,7 @@ Status:
 - Initial reusable platform core contract is tracked in `docs/PLATFORM_CORE_CONTRACT.md`.
 - Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
 - Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
+- Reusable access and application contract is tracked in `platform/access/application-contract.mjs`.
 - Reusable person identity contract is tracked in `platform/identity/person-contract.mjs`.
 - Reusable organization identity contract is tracked in `platform/identity/organization-contract.mjs`.
 - Reusable community contract is tracked in `platform/communities/contract.mjs`.
