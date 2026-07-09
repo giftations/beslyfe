@@ -4,7 +4,7 @@ Beslyfe is the Community Operating System.
 
 The platform exists to help every person build their best life through intelligent communities. It connects people, organizations, businesses, events, opportunities, and ideas in ways that strengthen human relationships instead of replacing them.
 
-Bak'd On The Bay is the flagship implementation built on top of the platform. It is not the final product. It is the first living ecosystem proving the platform model.
+Bak'd On The Bay is the first ecosystem product created with the Beslyfe software. It is not the full platform. It is the first living proof that the platform can turn an event into a connected ecosystem of people, businesses, communities, opportunities, and experiences.
 
 ## North Star
 
@@ -61,9 +61,9 @@ Never optimize for short-term development speed when it sacrifices long-term arc
 
 Build ecosystems, not websites.
 
-## Current Implementation
+## First Ecosystem Product
 
-The current codebase contains the Bak'd On The Bay event ecosystem, including the public site, community surfaces, admin workflows, Netlify functions, database migrations, and reusable platform theme structure.
+The current codebase contains the Bak'd On The Bay event ecosystem product, including the public site, community surfaces, admin workflows, Netlify functions, database migrations, and reusable platform theme structure.
 
 ## Local Development
 

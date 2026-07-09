@@ -2,9 +2,11 @@
 
 Beslyfe replaces Cannadispo as the long-term platform vision.
 
-Bak'd On The Bay is no longer the product.
+Bak'd On The Bay is not the whole product vision.
 
-Bak'd On The Bay is the flagship implementation built on top of the Beslyfe platform.
+Bak'd On The Bay is the first ecosystem product created with the Beslyfe software.
+
+It is the first proof that the platform can transform an event into a living ecosystem of people, businesses, communities, opportunities, and experiences.
 
 The platform's purpose is much larger.
 
