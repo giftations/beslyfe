@@ -27,6 +27,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.commercePayments.recordTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.integrationsWebhooks.integrationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
@@ -211,6 +212,19 @@ test('commerce payments contract protects provider references, refunds, and fina
   assert.ok(commerce.operatorControls.includes('reconcile provider totals'))
   assert.ok(commerce.trustControls.includes('raw payment credentials are never stored'))
   assert.ok(commerce.trustControls.includes('provider errors do not expose secrets'))
+})
+
+test('integrations webhooks contract protects signatures, idempotency, and secret-safe sync', () => {
+  const integrations = PLATFORM_CONTRACT_REGISTRY.integrationsWebhooks
+  assert.ok(integrations.integrationTypes.some((type) => type.key === 'email-provider'))
+  assert.ok(integrations.integrationTypes.some((type) => type.key === 'ticketing-provider'))
+  assert.ok(integrations.requiredFields.includes('credentialReference'))
+  assert.ok(integrations.requiredFields.includes('idempotencyKey'))
+  assert.ok(integrations.directions.includes('bidirectional'))
+  assert.ok(integrations.webhookDeliveryStates.includes('ignored-duplicate'))
+  assert.ok(integrations.operatorControls.includes('rotate credential'))
+  assert.ok(integrations.trustControls.includes('webhook signatures are verified'))
+  assert.ok(integrations.trustControls.includes('provider errors do not expose secrets'))
 })
 
 test('knowledge contract preserves source, review, trust, and AI boundaries', () => {
