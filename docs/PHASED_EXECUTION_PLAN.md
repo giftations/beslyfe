@@ -144,6 +144,7 @@ Status:
 - Reusable organization identity contract is tracked in `platform/identity/organization-contract.mjs`.
 - Reusable community contract is tracked in `platform/communities/contract.mjs`.
 - Reusable discovery and directory contract is tracked in `platform/discovery/directory-contract.mjs`.
+- Reusable notification contract is tracked in `platform/notifications/contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
 - Reusable conversation contract is tracked in `platform/conversations/contract.mjs`.
 - Reusable experience contract is tracked in `platform/experiences/contract.mjs`.

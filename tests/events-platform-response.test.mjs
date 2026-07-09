@@ -20,6 +20,7 @@ test('events platform response exposes the contract registry without database se
   assert.ok(Array.isArray(body.contracts.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(body.contracts.communities.communityTypes))
   assert.ok(Array.isArray(body.contracts.directoryDiscovery.discoverySurfaces))
+  assert.ok(Array.isArray(body.contracts.notifications.notificationTypes))
   assert.ok(Array.isArray(body.contracts.relationships.relationshipTypes))
   assert.ok(Array.isArray(body.contracts.conversations.conversationTypes))
   assert.ok(Array.isArray(body.contracts.experiences.experienceTypes))
@@ -44,6 +45,7 @@ test('events platform response exposes the contract registry without database se
     body.contractsSummary.discoverySurfaceCount,
     body.contracts.directoryDiscovery.discoverySurfaces.length,
   )
+  assert.equal(body.contractsSummary.notificationTypeCount, body.contracts.notifications.notificationTypes.length)
   assert.equal(body.contractsSummary.conversationTypeCount, body.contracts.conversations.conversationTypes.length)
   assert.equal(body.contractsSummary.experienceTypeCount, body.contracts.experiences.experienceTypes.length)
   assert.equal(body.contractsSummary.schedulingEntryTypeCount, body.contracts.scheduling.entryTypes.length)

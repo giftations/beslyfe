@@ -14,6 +14,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -87,6 +88,19 @@ test('directory discovery contract protects visibility, explanations, and person
   assert.ok(discovery.userControls.includes('disable discovery personalization'))
   assert.ok(discovery.trustControls.includes('sponsored placement is labeled'))
   assert.ok(discovery.trustControls.includes('engagement-only ranking is disallowed'))
+})
+
+test('notification contract protects preferences, reasons, and private channels', () => {
+  const notifications = PLATFORM_CONTRACT_REGISTRY.notifications
+  assert.ok(notifications.notificationTypes.some((type) => type.key === 'status-update'))
+  assert.ok(notifications.notificationTypes.some((type) => type.key === 'opportunity'))
+  assert.ok(notifications.requiredFields.includes('reason'))
+  assert.ok(notifications.requiredFields.includes('deliveryChannels'))
+  assert.ok(notifications.deliveryChannels.includes('email'))
+  assert.ok(notifications.statusStates.includes('suppressed'))
+  assert.ok(notifications.userControls.includes('set quiet hours'))
+  assert.ok(notifications.trustControls.includes('marketing requires explicit opt-in'))
+  assert.ok(notifications.trustControls.includes('private message content is not exposed in public channels'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {
