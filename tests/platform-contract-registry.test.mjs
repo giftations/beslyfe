@@ -28,6 +28,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.commercePayments.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.integrationsWebhooks.integrationTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.operationsAudit.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
@@ -225,6 +226,19 @@ test('integrations webhooks contract protects signatures, idempotency, and secre
   assert.ok(integrations.operatorControls.includes('rotate credential'))
   assert.ok(integrations.trustControls.includes('webhook signatures are verified'))
   assert.ok(integrations.trustControls.includes('provider errors do not expose secrets'))
+})
+
+test('operations audit contract protects audit trails, exports, incidents, and rollback evidence', () => {
+  const operations = PLATFORM_CONTRACT_REGISTRY.operationsAudit
+  assert.ok(operations.recordTypes.some((type) => type.key === 'audit-event'))
+  assert.ok(operations.recordTypes.some((type) => type.key === 'rollback-record'))
+  assert.ok(operations.requiredFields.includes('requestId'))
+  assert.ok(operations.requiredFields.includes('evidence'))
+  assert.ok(operations.statusStates.includes('rolled-back'))
+  assert.ok(operations.exportScopes.includes('audit-log'))
+  assert.ok(operations.operatorControls.includes('redact sensitive metadata'))
+  assert.ok(operations.trustControls.includes('secrets are never logged'))
+  assert.ok(operations.trustControls.includes('audit records are append-only by default'))
 })
 
 test('knowledge contract preserves source, review, trust, and AI boundaries', () => {

@@ -158,6 +158,7 @@ Status:
 - Reusable advertising and sponsorship contract is tracked in `platform/advertising/sponsorship-contract.mjs`.
 - Reusable commerce and payments contract is tracked in `platform/commerce/payments-contract.mjs`.
 - Reusable integrations and webhooks contract is tracked in `platform/integrations/webhooks-contract.mjs`.
+- Reusable operations and audit contract is tracked in `platform/operations/audit-contract.mjs`.
 - Consent and AI-use boundaries are tracked in `platform/trust/consent-ai-contract.mjs`.
 - Explainable AI recommendation contract is tracked in `platform/ai/recommendation-contract.mjs`.
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.
