@@ -118,6 +118,10 @@ Output:
 
 Goal: make the platform trustworthy before making it smarter.
 
+Status:
+
+- Initial trust, data ownership, consent, analytics, and AI launch gate standards are tracked in `docs/TRUST_DATA_AI_FOUNDATION.md`.
+
 Tasks:
 
 - Define user data ownership rules.
