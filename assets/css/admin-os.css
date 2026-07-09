@@ -252,6 +252,9 @@ select { appearance: none; background-image: linear-gradient(45deg, transparent 
 .card.pad-lg { padding: 24px; }
 .card-title { font-size: .95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .card-title .sub { margin-left: auto; font-weight: 500; font-size: .8rem; color: var(--text-3); }
+.section-subtitle { margin: 0 0 6px; font-size: .86rem; font-weight: 800; color: var(--text); }
+.mini-list { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); font-size: .82rem; line-height: 1.55; }
+.mini-list li + li { margin-top: 5px; }
 
 .grid { display: grid; gap: 16px; }
 .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }

@@ -170,6 +170,7 @@ Status:
 - Reusable data portability and export contract is tracked in `platform/data/portability-contract.mjs`.
 - Reusable import, migration, and release gate contracts are tracked in `platform/lifecycle/`.
 - Admin OS System view exposes lifecycle contracts through the platform registry.
+- Admin OS System view surfaces lifecycle operating guardrails for imports, migrations, and releases.
 - Platform core contract registry is tracked in `platform/contracts.mjs`.
 - Existing `GET events?platform` response exposes the platform contract registry as `contracts`.
 - Admin System view displays the platform contract registry from the existing platform response.
