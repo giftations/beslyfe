@@ -1493,6 +1493,7 @@
       ['Modules', platformSummaryCount(summary.moduleCount, contracts.modules), 'Reusable capabilities available to every ecosystem.'],
       ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
+      ['Conversations', platformSummaryCount(summary.conversationTypeCount, contracts.conversations && contracts.conversations.conversationTypes), 'Consent-based messages, intros, groups, support, comments, and opportunity follow-up.'],
       ['Opportunities', platformSummaryCount(summary.opportunityTypeCount, contracts.opportunities && contracts.opportunities.opportunityTypes), 'Discoverable, actionable, and measurable ways people can build better lives.'],
       ['Knowledge', platformSummaryCount(summary.knowledgeTypeCount, contracts.knowledge && contracts.knowledge.knowledgeTypes), 'Reusable learning, resources, community memory, and AI-readable context.'],
       ['Marketplace', platformSummaryCount(summary.marketplaceOfferTypeCount, contracts.marketplace && contracts.marketplace.offerTypes), 'Transparent exchange surfaces for tickets, packages, ads, services, products, jobs, and sponsorships.'],

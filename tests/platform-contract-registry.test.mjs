@@ -10,6 +10,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.modules))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
@@ -17,6 +18,16 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('conversation contract requires consent, safety controls, and AI boundaries', () => {
+  const conversations = PLATFORM_CONTRACT_REGISTRY.conversations
+  assert.ok(conversations.conversationTypes.some((type) => type.key === 'direct-message'))
+  assert.ok(conversations.conversationTypes.some((type) => type.key === 'opportunity-followup'))
+  assert.ok(conversations.states.includes('pending-consent'))
+  assert.ok(conversations.requiredFields.includes('participantIds'))
+  assert.ok(conversations.requiredFields.includes('aiUse'))
+  assert.ok(conversations.safetyControls.includes('private AI opt-in from all participants'))
 })
 
 test('marketplace contract requires disclosure, terms, payment, and audit controls', () => {

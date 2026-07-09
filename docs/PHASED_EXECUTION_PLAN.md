@@ -140,6 +140,7 @@ Status:
 - Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
 - Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
+- Reusable conversation contract is tracked in `platform/conversations/contract.mjs`.
 - Reusable opportunity contract is tracked in `platform/opportunities/contract.mjs`.
 - Reusable knowledge contract is tracked in `platform/knowledge/contract.mjs`.
 - Reusable marketplace contract is tracked in `platform/marketplace/contract.mjs`.
