@@ -47,6 +47,16 @@ Events are only one implementation.
 
 The platform must scale to every industry.
 
+## Repository Model
+
+Beslyfe and Bak'd On The Bay have different responsibilities.
+
+`giftations/beslyfe` is the parent platform and company repository. It is where the long-term platform vision, Constitution, Manifesto, AI philosophy, trust model, and reusable ecosystem architecture are defined.
+
+`giftations/bakd-on-the-bay` is the first ecosystem product repository. It is where the active Bak'd On The Bay product implementation lives.
+
+Bak'd On The Bay proves the software by turning one event into a living ecosystem. Beslyfe generalizes that software into a platform that can support many ecosystems across many industries.
+
 ## Enterprise Expectation
 
 This repository is expected to become enterprise software.

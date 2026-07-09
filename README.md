@@ -45,6 +45,14 @@ Every community can gain:
 
 Events are only one implementation. The platform must scale to every industry.
 
+## Repository Relationship
+
+This repository is the parent Beslyfe platform and company repository. It defines the Constitution, Manifesto, platform vision, opportunity philosophy, AI principles, trust standards, ecosystem architecture, and long-term product direction.
+
+The active first ecosystem product lives in [`giftations/bakd-on-the-bay`](https://github.com/giftations/bakd-on-the-bay).
+
+Bak'd On The Bay is not separate from Beslyfe. It is the first ecosystem product created with Beslyfe software. Product-specific implementation work belongs there. Platform-wide principles, architecture, and reusable ecosystem strategy belong here.
+
 ## Founding Documents
 
 - [MANIFESTO.md](MANIFESTO.md)
