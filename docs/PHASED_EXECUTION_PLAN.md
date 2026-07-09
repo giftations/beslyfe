@@ -134,6 +134,10 @@ Tasks:
 
 Goal: turn the lessons from Bak'd On The Bay into reusable platform software.
 
+Status:
+
+- Initial reusable platform core contract is tracked in `docs/PLATFORM_CORE_CONTRACT.md`.
+
 Tasks:
 
 - Create reusable ecosystem configuration.
