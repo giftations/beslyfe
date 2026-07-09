@@ -138,6 +138,7 @@ Status:
 
 - Initial reusable platform core contract is tracked in `docs/PLATFORM_CORE_CONTRACT.md`.
 - Reusable module manifest contract fields are tracked in `platform/modules/manifest.mjs`.
+- Reusable ecosystem configuration contract is tracked in `platform/ecosystems/config-contract.mjs`.
 
 Tasks:
 
