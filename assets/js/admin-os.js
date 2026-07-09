@@ -1473,7 +1473,7 @@
       '</div>';
     host.insertAdjacentHTML('beforeend', '<div class="card mt-4"><div class="card-title">Platform contracts</div><div id="platformContracts">' + loadingList() + '</div></div>');
     api(API.events + '?platform')
-      .then(function (d) { paintPlatformContracts($('#platformContracts', host), d.contracts || {}); })
+      .then(function (d) { paintPlatformContracts($('#platformContracts', host), d.contracts || {}, d.contractsSummary || {}); })
       .catch(function (e) { $('#platformContracts', host).innerHTML = errorBox(e.message); });
     Array.prototype.forEach.call(host.querySelectorAll('[data-ep]'), function (row) {
       var dot = row.querySelector('[data-dot]');
@@ -1488,15 +1488,15 @@
   // roles) and one canonical company (with unlimited events); a person references
   // their company by id, so nothing is copied between the two. Backed by the crm
   // function — see netlify/functions/crm.mjs.
-  function paintPlatformContracts(el, contracts) {
+  function paintPlatformContracts(el, contracts, summary) {
     var rows = [
-      ['Modules', platformCount(contracts.modules), 'Reusable capabilities available to every ecosystem.'],
-      ['Ecosystem configuration', platformCount(contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
-      ['Relationships', platformCount(contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
-      ['Consent and AI', platformCount(contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
-      ['Outcome analytics', platformCount(contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
-      ['Guardrails', platformCount(contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
-      ['Data boundaries', platformCount(contracts.dataBoundaries && contracts.dataBoundaries.scopes), 'Ownership, visibility, portability, retention, and AI-use scopes.'],
+      ['Modules', platformSummaryCount(summary.moduleCount, contracts.modules), 'Reusable capabilities available to every ecosystem.'],
+      ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
+      ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
+      ['Consent and AI', platformSummaryCount(summary.consentPurposeCount, contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
+      ['Outcome analytics', platformSummaryCount(summary.outcomeMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
+      ['Guardrails', platformSummaryCount(summary.guardrailMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
+      ['Data boundaries', platformSummaryCount(summary.dataBoundaryScopeCount, contracts.dataBoundaries && contracts.dataBoundaries.scopes), 'Ownership, visibility, portability, retention, and AI-use scopes.'],
     ];
     var total = rows.reduce(function (sum, row) { return sum + row[1]; }, 0);
     el.innerHTML =
@@ -1504,7 +1504,7 @@
       '<div class="stats mb-4">' +
         stat(total, 'Tracked contract items', '◆', 'accent') +
         stat(rows.length, 'Contract groups', '▦', '') +
-        stat(platformCount(contracts.modules), 'Platform modules', '◇', '') +
+        stat(platformSummaryCount(summary.moduleCount, contracts.modules), 'Platform modules', '◇', '') +
       '</div>' +
       '<div class="table-wrap"><table class="data"><thead><tr><th>Contract group</th><th>Items</th><th>Purpose</th></tr></thead><tbody>' +
         rows.map(function (row) {
@@ -1515,6 +1515,10 @@
 
   function platformCount(value) {
     return Array.isArray(value) ? value.length : 0;
+  }
+
+  function platformSummaryCount(value, fallback) {
+    return Number.isFinite(Number(value)) ? Number(value) : platformCount(fallback);
   }
 
   var CRM_ROLES = ['attendee', 'vendor', 'sponsor', 'speaker', 'dj', 'organizer', 'media', 'staff', 'partner', 'other'];

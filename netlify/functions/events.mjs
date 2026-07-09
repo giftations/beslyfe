@@ -3,7 +3,7 @@ import { requireAdmin, requireSameOrigin, recordAudit, json, str, iso, toDate } 
 import { listThemes, resolveThemeSettings, getTheme, DEFAULT_THEME_KEY } from '../../platform/themes/registry.mjs'
 import { CORE } from '../../platform/core/manifest.mjs'
 import { MODULES } from '../../platform/modules/manifest.mjs'
-import { PLATFORM_CONTRACT_REGISTRY } from '../../platform/contracts.mjs'
+import { PLATFORM_CONTRACT_REGISTRY, platformContractRegistrySummary } from '../../platform/contracts.mjs'
 
 // The events registry — the top-level tenant of the Event OS. Every edition of
 // Bak'd On The Bay (and every future expo, venue or partner production) is a row
@@ -137,7 +137,13 @@ export default async (req) => {
     // data). Read-only; surfaced in the Admin OS System view.
     if (url.searchParams.get('platform') !== null) {
       return json(
-        { core: CORE, modules: MODULES, themes: listThemes(), contracts: PLATFORM_CONTRACT_REGISTRY },
+        {
+          core: CORE,
+          modules: MODULES,
+          themes: listThemes(),
+          contracts: PLATFORM_CONTRACT_REGISTRY,
+          contractsSummary: platformContractRegistrySummary(),
+        },
         200,
         { 'Cache-Control': 'no-store' }
       )
