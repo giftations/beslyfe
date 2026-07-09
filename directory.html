@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Directory — Bak'd On The Bay</title>
+  <meta name="description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
+  <link rel="stylesheet" href="/profiles.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Community Directory — Bak'd On The Bay">
+  <meta property="og:description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
+  <meta property="og:url" content="https://bakdonthebay.netlify.app/directory">
+  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Community Directory — Bak'd On The Bay">
+  <meta name="twitter:description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
+  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <link rel="canonical" href="https://bakdonthebay.netlify.app/directory">
+  <style>
+    .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
+    .skip-link:focus{left:8px}
+  </style>
+</head>
+<body data-cms-page="directory">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+
+  <header class="site-header">
+    <nav>
+      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#about">About</a></li>
+        <li><a href="/sponsors">Sponsors</a></li>
+        <li><a href="/vendors">Vendors</a></li>
+        <li><a href="/speakers">Speakers</a></li>
+        <li><a href="/feed">Feed</a></li>
+        <li><a href="/hub" data-auth-only hidden>My Hub</a></li>
+        <li><a href="/profile/new" class="btn-nav">Create Profile</a></li>
+        <li><a href="#" data-logout="/" data-auth-only hidden>Log out</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+  <div class="page-hero">
+    <div class="event-badge" data-cms="hero.badge">Community Directory</div>
+    <h1 data-cms="hero.title">Meet the <span>Community</span></h1>
+    <p class="lead" data-cms="hero.subtitle">Everyone taking part in Bak'd On The Bay — vendors, sponsors, speakers and attendees. Click any profile to learn more.</p>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-role="">Everyone</button>
+    <button class="filter-btn" data-role="vendor">Vendors</button>
+    <button class="filter-btn" data-role="sponsor">Sponsors</button>
+    <button class="filter-btn" data-role="speaker">Speakers</button>
+    <button class="filter-btn" data-role="dj">DJs &amp; Entertainment</button>
+    <button class="filter-btn" data-role="attendee">Attendees</button>
+  </div>
+
+  <div class="directory-tools bubble" aria-label="Directory search and sorting">
+    <label class="directory-search">
+      <span>Search directory</span>
+      <input id="directorySearch" type="search" placeholder="Search names, companies, categories, booths" autocomplete="off">
+    </label>
+    <label>
+      <span>Sort</span>
+      <select id="directorySort">
+        <option value="featured">Featured first</option>
+        <option value="alpha">Alphabetical</option>
+        <option value="role">Category</option>
+      </select>
+    </label>
+    <label>
+      <span>Category</span>
+      <select id="directoryCategory">
+        <option value="">All categories</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="content content-wide">
+    <div class="directory-summary" id="directorySummary"></div>
+    <!-- Directory ad slot — hides itself when no directory campaign is live. -->
+    <div data-ad-slot="directory" data-ad-count="2" hidden style="margin:0 0 20px"></div>
+    <div id="profileList"><p class="loading">Loading profiles…</p></div>
+    <div class="pagination" id="directoryPagination" hidden></div>
+  </div>
+  </main>
+
+  <footer class="site-footer">
+    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p style="margin-top:8px"><a href="/">Back to Home</a> · <a href="/profile/new">Create your profile</a></p>
+  </footer>
+
+  <script src="/directory.js"></script>
+  <script src="/homepage-admin-state.js"></script>
+  <script src="/bay-session.js"></script>
+  <script src="/assets/js/ads.js" defer></script>
+</body>
+</html>

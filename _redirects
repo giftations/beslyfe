@@ -1,0 +1,55 @@
+# Public application forms — these POST to the applications DB function,
+# so submissions show up on the admin page.
+/vendors             /vendor-application.html             200
+/sponsors            /sponsor-application.html            200
+/speakers            /speaker-application.html            200
+/djs                 /dj-application.html                 200
+/dj                  /dj-application.html                 200
+/entertainment       /dj-application.html                 200
+/apply/vendor        /vendor-application.html             200
+/apply/sponsor       /sponsor-application.html            200
+/apply/speaker       /speaker-application.html            200
+/apply/dj            /dj-application.html                 200
+/attendees           /attendees.html                     200
+
+# Approval-gated package purchase (Eventbrite link unlocked after approval)
+/packages            /package-access.html                200
+/buy                 /package-access.html                200
+/access              /package-access.html                200
+
+# Community profiles (create, browse, view)
+/profile/new         /profile-new.html                   200
+/profiles/new        /profile-new.html                   200
+/profile/edit        /profile-edit.html                  200
+/profiles/edit       /profile-edit.html                  200
+/directory           /directory.html                     200
+/profiles            /directory.html                     200
+/profile             /profile-view.html                  200
+
+# Social platform — member hub and community feed
+/hub                 /hub.html                           200
+/feed                /feed.html                          200
+/community           /feed.html                          200
+/reels               /reels.html                         200
+/stories             /stories.html                       200
+/library             /library.html                       200
+/groups              /groups.html                        200
+/map                 /map.html                           200
+
+# Direct messages
+/messages            /messages.html                      200
+
+/education           /education-schedule.html            200
+/manifesto           /manifesto.html                     200
+
+# Interactive, to-scale floor plan
+/floorplan           /floorplan.html                     200
+/floorplan/editor    /floorplan-editor.html              200
+
+/admin               /admin/index.html                   200
+# Deep links to any workspace resolve inside the single Admin OS shell. The
+# 200 rewrite keeps the URL in the bar so the shell opens the right module.
+# (The legacy admin pages remain reachable directly and are embedded by the OS.)
+/admin/*             /admin/index.html                   200
+
+/*                   /404.html                           404
