@@ -90,11 +90,9 @@ async function sha256Hex(value) {
 const RESET_TTL_MS = 60 * 60 * 1000 // reset links are valid for one hour
 const VERIFY_TTL_MS = 24 * 60 * 60 * 1000 // email-verification links are valid for 24 hours
 
-// Send the reset link by e-mail through the shared multi-provider helper
-// (`sendEmail`), which prefers SendGrid — this project's configured provider —
-// and falls back to Resend, matching the approval flow. Previously this hard-
-// coded Resend and silently never sent under a SendGrid-only environment. When
-// no provider is configured the send is a no-op, so the caller still can't
+// Send the reset link by email through the shared helper. Resend is the primary
+// expected provider; SendGrid remains only as optional legacy fallback. When no
+// provider is configured the send is a no-op, so the caller still cannot
 // distinguish "no such account" from "email not sent".
 async function sendResetEmail(toEmail, name, link) {
   const subject = 'Reset your Bak’d On The Bay password'
@@ -292,10 +290,9 @@ function generateStrongPassword() {
   return out.join('')
 }
 
-// E-mail the administrator credentials through the shared multi-provider helper
-// (`sendEmail`: SendGrid preferred, Resend fallback — the same path the approval
-// and password-reset flows use). Returns true only on a confirmed send, so the
-// caller can gate account creation on delivery.
+// Email the administrator credentials through the shared helper (`sendEmail`:
+// Resend preferred, legacy SendGrid fallback). Returns true only on a confirmed
+// send, so the caller can gate account creation on delivery.
 async function sendAdminCredentialsEmail(to, creds) {
   if (!to) return false
   const from = envStr('APPROVAL_EMAIL_FROM') || `CannaDispo <${VERIFIED_SENDER}>`

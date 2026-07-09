@@ -4,6 +4,9 @@ import { newId } from './session.mjs'
 // Facebook/Instagram. Every function that produces something a member should
 // know about — a new direct or group message, a followed member's new post, a
 // like/comment on their post, a new follower — calls in here to record it.
+// These are in-site notifications only. Do not send message/comment email from
+// this helper unless an explicit email delivery path and preference model is
+// added.
 //
 // Two invariants make this safe to call from the request path:
 //   • Best-effort. A notification write must never fail the action that caused it
