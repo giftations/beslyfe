@@ -148,6 +148,7 @@ Status:
 - Reusable conversation contract is tracked in `platform/conversations/contract.mjs`.
 - Reusable experience contract is tracked in `platform/experiences/contract.mjs`.
 - Reusable scheduling contract is tracked in `platform/scheduling/contract.mjs`.
+- Reusable places and maps contract is tracked in `platform/places/maps-contract.mjs`.
 - Reusable opportunity contract is tracked in `platform/opportunities/contract.mjs`.
 - Reusable knowledge contract is tracked in `platform/knowledge/contract.mjs`.
 - Reusable marketplace contract is tracked in `platform/marketplace/contract.mjs`.

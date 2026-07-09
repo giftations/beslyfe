@@ -15,6 +15,7 @@ import { relationshipContractSummary } from './relationships/contract.mjs'
 import { conversationContractSummary } from './conversations/contract.mjs'
 import { experienceContractSummary } from './experiences/contract.mjs'
 import { schedulingContractSummary } from './scheduling/contract.mjs'
+import { placesMapsContractSummary } from './places/maps-contract.mjs'
 import { opportunityContractSummary } from './opportunities/contract.mjs'
 import { knowledgeContractSummary } from './knowledge/contract.mjs'
 import { marketplaceContractSummary } from './marketplace/contract.mjs'
@@ -35,6 +36,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   conversations: conversationContractSummary(),
   experiences: experienceContractSummary(),
   scheduling: schedulingContractSummary(),
+  placesMaps: placesMapsContractSummary(),
   opportunities: opportunityContractSummary(),
   knowledge: knowledgeContractSummary(),
   marketplace: marketplaceContractSummary(),
@@ -58,6 +60,7 @@ export function platformContractRegistrySummary() {
     conversationTypeCount: PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes.length,
     experienceTypeCount: PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes.length,
     schedulingEntryTypeCount: PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes.length,
+    placeTypeCount: PLATFORM_CONTRACT_REGISTRY.placesMaps.placeTypes.length,
     opportunityTypeCount: PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes.length,
     knowledgeTypeCount: PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes.length,
     marketplaceOfferTypeCount: PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes.length,
