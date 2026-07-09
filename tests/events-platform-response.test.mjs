@@ -15,6 +15,7 @@ test('events platform response exposes the contract registry without database se
   assert.ok(body.contractsSummary)
   assert.ok(Array.isArray(body.contracts.modules))
   assert.ok(Array.isArray(body.contracts.ecosystemConfiguration))
+  assert.ok(Array.isArray(body.contracts.accessApplications.requestTypes))
   assert.ok(Array.isArray(body.contracts.personIdentity.identityRecords))
   assert.ok(Array.isArray(body.contracts.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(body.contracts.communities.communityTypes))
@@ -30,6 +31,7 @@ test('events platform response exposes the contract registry without database se
   assert.ok(Array.isArray(body.contracts.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(body.contracts.dataBoundaries.scopes))
   assert.equal(body.contractsSummary.moduleCount, body.contracts.modules.length)
+  assert.equal(body.contractsSummary.accessRequestTypeCount, body.contracts.accessApplications.requestTypes.length)
   assert.equal(body.contractsSummary.personIdentityRecordCount, body.contracts.personIdentity.identityRecords.length)
   assert.equal(
     body.contractsSummary.organizationIdentityRecordCount,

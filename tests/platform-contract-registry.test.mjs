@@ -9,6 +9,7 @@ import {
 test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.modules))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.accessApplications.requestTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
@@ -23,6 +24,18 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('access application contract supports reviewable participation gates', () => {
+  const access = PLATFORM_CONTRACT_REGISTRY.accessApplications
+  assert.ok(access.requestTypes.some((type) => type.key === 'participant-application'))
+  assert.ok(access.requestTypes.some((type) => type.key === 'ticket-unlock'))
+  assert.ok(access.requiredFields.includes('decisionReason'))
+  assert.ok(access.requiredFields.includes('auditTrail'))
+  assert.ok(access.statusStates.includes('approved-with-conditions'))
+  assert.ok(access.reviewControls.includes('request more information'))
+  assert.ok(access.applicantControls.includes('appeal decision'))
+  assert.ok(access.trustControls.includes('automated decisions are disallowed'))
 })
 
 test('person identity contract protects user-owned identity and data controls', () => {

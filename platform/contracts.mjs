@@ -6,6 +6,7 @@
 
 import { MODULES } from './modules/manifest.mjs'
 import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
+import { accessApplicationContractSummary } from './access/application-contract.mjs'
 import { personIdentityContractSummary } from './identity/person-contract.mjs'
 import { organizationIdentityContractSummary } from './identity/organization-contract.mjs'
 import { communityContractSummary } from './communities/contract.mjs'
@@ -24,6 +25,7 @@ import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract
 export const PLATFORM_CONTRACT_REGISTRY = {
   modules: MODULES,
   ecosystemConfiguration: ecosystemConfigChecklist(),
+  accessApplications: accessApplicationContractSummary(),
   personIdentity: personIdentityContractSummary(),
   organizationIdentity: organizationIdentityContractSummary(),
   communities: communityContractSummary(),
@@ -44,6 +46,7 @@ export function platformContractRegistrySummary() {
   return {
     moduleCount: PLATFORM_CONTRACT_REGISTRY.modules.length,
     ecosystemSectionCount: PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration.length,
+    accessRequestTypeCount: PLATFORM_CONTRACT_REGISTRY.accessApplications.requestTypes.length,
     personIdentityRecordCount: PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords.length,
     organizationIdentityRecordCount:
       PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords.length,
