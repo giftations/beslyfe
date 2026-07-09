@@ -42,6 +42,7 @@ Status:
 - Live domain check shows `beslyfe.com` currently redirects to `cannadispo.com`.
 - Live domain check shows `cannadispo.com` currently serves Bak'd On The Bay.
 - Beslyfe domain launch requirements are tracked in `docs/DOMAIN_LAUNCH_READINESS.md`.
+- Product identity boundaries are tracked in `docs/PRODUCT_IDENTITY_BOUNDARIES.md`.
 
 ## Phase 1: Live Site Scrub
 
@@ -74,10 +75,12 @@ Goal: align the product with the new platform model.
 
 Tasks:
 
+- Use the product identity boundary guide before renaming public copy, metadata, credentials, routing, or configuration.
 - Replace Cannadispo language where it represents the old platform identity.
 - Preserve Cannadispo references only where they are still operationally required, such as verified sender addresses or legacy admin configuration.
 - Ensure Bak'd On The Bay is described as the first ecosystem product.
 - Ensure Beslyfe is described as the parent software platform.
+- Update identity cleanup status after each product repository PR.
 
 ## Phase 3: Platform Extraction Map
 
