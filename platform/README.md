@@ -57,6 +57,9 @@ endpoint.
 Theme shape, override behavior, and accessibility/trust controls are captured in
 `themes/contract.mjs` and registered through `contracts.mjs`.
 
+Operator workspace shape, navigation, mutation policies, and Admin OS trust
+controls are captured in `admin/os-contract.mjs`.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the

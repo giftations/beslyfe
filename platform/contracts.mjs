@@ -32,6 +32,7 @@ import { aiRecommendationContractSummary } from './ai/recommendation-contract.mj
 import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
 import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract.mjs'
 import { themeContractSummary } from './themes/contract.mjs'
+import { adminOsContractSummary } from './admin/os-contract.mjs'
 
 export const PLATFORM_CONTRACT_REGISTRY = {
   modules: MODULES,
@@ -62,6 +63,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   outcomeAnalytics: analyticsContractSummary(),
   dataBoundaries: dataBoundaryContractSummary(),
   themes: themeContractSummary(),
+  adminOs: adminOsContractSummary(),
 }
 
 export function platformContractRegistrySummary() {
@@ -98,5 +100,6 @@ export function platformContractRegistrySummary() {
     guardrailMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.guardrails.length,
     dataBoundaryScopeCount: PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes.length,
     themeRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.themes.recordTypes.length,
+    adminWorkspaceTypeCount: PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes.length,
   }
 }
