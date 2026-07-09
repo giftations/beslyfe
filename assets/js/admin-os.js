@@ -1492,6 +1492,7 @@
     var rows = [
       ['Modules', platformSummaryCount(summary.moduleCount, contracts.modules), 'Reusable capabilities available to every ecosystem.'],
       ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
+      ['Person identity', platformSummaryCount(summary.personIdentityRecordCount, contracts.personIdentity && contracts.personIdentity.identityRecords), 'User-owned identity, profiles, roles, preferences, consent, and data controls.'],
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
       ['Conversations', platformSummaryCount(summary.conversationTypeCount, contracts.conversations && contracts.conversations.conversationTypes), 'Consent-based messages, intros, groups, support, comments, and opportunity follow-up.'],
       ['Experiences', platformSummaryCount(summary.experienceTypeCount, contracts.experiences && contracts.experiences.experienceTypes), 'Time, place, and program moments where opportunity can happen.'],
