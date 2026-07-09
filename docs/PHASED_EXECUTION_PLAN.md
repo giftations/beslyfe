@@ -41,6 +41,7 @@ Status:
 - Bak'd On The Bay repository is the active first ecosystem product.
 - Live domain check shows `beslyfe.com` currently redirects to `cannadispo.com`.
 - Live domain check shows `cannadispo.com` currently serves Bak'd On The Bay.
+- Beslyfe domain launch requirements are tracked in `docs/DOMAIN_LAUNCH_READINESS.md`.
 
 ## Phase 1: Live Site Scrub
 
@@ -64,6 +65,8 @@ Phase 1 pull requests must stay under 20 files and should be ordered:
 3. Fix application and community page metadata.
 4. Fix domain redirect behavior after confirming DNS and hosting ownership.
 5. Re-crawl live routes and browser console after each merge.
+
+Do not make `beslyfe.com` official until the launch readiness checklist is satisfied.
 
 ## Phase 2: Product Identity Cleanup
 
