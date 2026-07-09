@@ -36,6 +36,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.themes.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.authAccessControl.recordTypes))
 })
 
 test('access application contract supports reviewable participation gates', () => {
@@ -302,6 +303,16 @@ test('Admin OS contract keeps operator workspaces reusable and trusted', () => {
   assert.ok(admin.mutationPolicies.includes('same-origin-required'))
   assert.ok(admin.systemSurfaces.includes('platform contract registry'))
   assert.ok(admin.trustControls.includes('no second admin app for a module'))
+})
+
+test('auth access contract keeps identity server-derived and guarded', () => {
+  const auth = PLATFORM_CONTRACT_REGISTRY.authAccessControl
+  assert.ok(auth.recordTypes.some((type) => type.key === 'session'))
+  assert.ok(auth.recordTypes.some((type) => type.key === 'auth-attempt'))
+  assert.ok(auth.sessionControls.includes('httpOnly cookie'))
+  assert.ok(auth.mutationControls.includes('state-changing browser requests require same-origin checks'))
+  assert.ok(auth.passwordControls.includes('password hashes compare in constant time'))
+  assert.ok(auth.trustControls.includes('identity is derived from session rows only'))
 })
 
 test('platform contract registry is serializable', () => {
