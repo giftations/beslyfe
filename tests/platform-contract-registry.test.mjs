@@ -11,6 +11,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
@@ -18,6 +19,16 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('experience contract requires time, place, ownership, and change controls', () => {
+  const experiences = PLATFORM_CONTRACT_REGISTRY.experiences
+  assert.ok(experiences.experienceTypes.some((type) => type.key === 'event'))
+  assert.ok(experiences.experienceTypes.some((type) => type.key === 'session'))
+  assert.ok(experiences.requiredFields.includes('startsAt'))
+  assert.ok(experiences.requiredFields.includes('location'))
+  assert.ok(experiences.requiredFields.includes('changeHistory'))
+  assert.ok(experiences.trustControls.includes('change visibility'))
 })
 
 test('conversation contract requires consent, safety controls, and AI boundaries', () => {

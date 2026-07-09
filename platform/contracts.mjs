@@ -8,6 +8,7 @@ import { MODULES } from './modules/manifest.mjs'
 import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
 import { relationshipContractSummary } from './relationships/contract.mjs'
 import { conversationContractSummary } from './conversations/contract.mjs'
+import { experienceContractSummary } from './experiences/contract.mjs'
 import { opportunityContractSummary } from './opportunities/contract.mjs'
 import { knowledgeContractSummary } from './knowledge/contract.mjs'
 import { marketplaceContractSummary } from './marketplace/contract.mjs'
@@ -21,6 +22,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   ecosystemConfiguration: ecosystemConfigChecklist(),
   relationships: relationshipContractSummary(),
   conversations: conversationContractSummary(),
+  experiences: experienceContractSummary(),
   opportunities: opportunityContractSummary(),
   knowledge: knowledgeContractSummary(),
   marketplace: marketplaceContractSummary(),
@@ -36,6 +38,7 @@ export function platformContractRegistrySummary() {
     ecosystemSectionCount: PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration.length,
     relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
     conversationTypeCount: PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes.length,
+    experienceTypeCount: PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes.length,
     opportunityTypeCount: PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes.length,
     knowledgeTypeCount: PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes.length,
     marketplaceOfferTypeCount: PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes.length,
