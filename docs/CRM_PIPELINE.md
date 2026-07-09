@@ -2,6 +2,8 @@
 
 Beslyfe uses one CRM model for every ecosystem. Bak'd On The Bay is the first implementation, but the records are designed for future events, sponsors, vendors, advertisers, speakers, partners, and attendees.
 
+The reusable platform contract for this model lives in `platform/crm/relationship-contract.mjs`. Product-specific labels can vary by ecosystem, but the underlying people, companies, activities, stages, sources, automation events, and trust controls should remain consistent.
+
 ## People
 
 `crm_people` stores one row per human. A person may have many roles through `crm_person_roles`, and may be linked to one canonical company through `company_id`. People carry pipeline fields for relationship work: status, tags, lead source, pipeline stage, owner, follow-up date, last contacted date, lifetime value, priority, and flexible `details`.

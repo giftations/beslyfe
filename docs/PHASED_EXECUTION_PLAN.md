@@ -147,6 +147,7 @@ Status:
 - Reusable notification contract is tracked in `platform/notifications/contract.mjs`.
 - Reusable moderation and trust safety contract is tracked in `platform/moderation/trust-safety-contract.mjs`.
 - Reusable relationship contract is tracked in `platform/relationships/contract.mjs`.
+- Reusable CRM relationship contract is tracked in `platform/crm/relationship-contract.mjs`.
 - Reusable conversation contract is tracked in `platform/conversations/contract.mjs`.
 - Reusable experience contract is tracked in `platform/experiences/contract.mjs`.
 - Reusable scheduling contract is tracked in `platform/scheduling/contract.mjs`.

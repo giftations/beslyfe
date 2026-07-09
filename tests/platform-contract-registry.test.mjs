@@ -17,6 +17,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.crmRelationships.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes))
@@ -178,6 +179,17 @@ test('conversation contract requires consent, safety controls, and AI boundaries
   assert.ok(conversations.requiredFields.includes('participantIds'))
   assert.ok(conversations.requiredFields.includes('aiUse'))
   assert.ok(conversations.safetyControls.includes('private AI opt-in from all participants'))
+})
+
+test('CRM relationship contract keeps pipeline labels configurable and trusted', () => {
+  const crm = PLATFORM_CONTRACT_REGISTRY.crmRelationships
+  assert.ok(crm.recordTypes.some((type) => type.key === 'person'))
+  assert.ok(crm.recordTypes.some((type) => type.key === 'activity'))
+  assert.ok(crm.pipelineStages.includes('follow_up_needed'))
+  assert.ok(crm.leadSources.includes('sponsor_application'))
+  assert.ok(crm.activityKinds.includes('task'))
+  assert.ok(crm.trustControls.includes('pipeline labels are configurable per ecosystem'))
+  assert.ok(crm.trustControls.includes('admin identity is derived from session only'))
 })
 
 test('marketplace contract requires disclosure, terms, payment, and audit controls', () => {
