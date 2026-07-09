@@ -11,6 +11,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -44,6 +45,18 @@ test('organization identity contract protects ownership, verification, and membe
   assert.ok(organizations.verificationStates.includes('verified'))
   assert.ok(organizations.memberControls.includes('transfer ownership'))
   assert.ok(organizations.trustControls.includes('sponsored visibility is labeled'))
+})
+
+test('community contract connects membership, governance, AI boundaries, and outcomes', () => {
+  const communities = PLATFORM_CONTRACT_REGISTRY.communities
+  assert.ok(communities.communityTypes.some((type) => type.key === 'event-community'))
+  assert.ok(communities.communityTypes.some((type) => type.key === 'local-community'))
+  assert.ok(communities.requiredFields.includes('membershipPolicy'))
+  assert.ok(communities.requiredFields.includes('aiPolicy'))
+  assert.ok(communities.membershipStates.includes('application-required'))
+  assert.ok(communities.governanceControls.includes('review reported activity'))
+  assert.ok(communities.aiBoundaries.includes('no rage-driven engagement ranking'))
+  assert.ok(communities.successOutcomes.includes('meaningful introductions'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {
