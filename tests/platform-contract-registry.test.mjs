@@ -12,6 +12,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
@@ -57,6 +58,20 @@ test('community contract connects membership, governance, AI boundaries, and out
   assert.ok(communities.governanceControls.includes('review reported activity'))
   assert.ok(communities.aiBoundaries.includes('no rage-driven engagement ranking'))
   assert.ok(communities.successOutcomes.includes('meaningful introductions'))
+})
+
+test('directory discovery contract protects visibility, explanations, and personalization controls', () => {
+  const discovery = PLATFORM_CONTRACT_REGISTRY.directoryDiscovery
+  assert.ok(discovery.discoverySurfaces.some((surface) => surface.key === 'people-directory'))
+  assert.ok(discovery.discoverySurfaces.some((surface) => surface.key === 'opportunity-discovery'))
+  assert.ok(discovery.discoverableEntityTypes.includes('organization'))
+  assert.ok(discovery.requiredFields.includes('visibility'))
+  assert.ok(discovery.requiredFields.includes('explanation'))
+  assert.ok(discovery.visibilityStates.includes('hidden-by-owner'))
+  assert.ok(discovery.userControls.includes('why am I seeing this'))
+  assert.ok(discovery.userControls.includes('disable discovery personalization'))
+  assert.ok(discovery.trustControls.includes('sponsored placement is labeled'))
+  assert.ok(discovery.trustControls.includes('engagement-only ranking is disallowed'))
 })
 
 test('experience contract requires time, place, ownership, and change controls', () => {
