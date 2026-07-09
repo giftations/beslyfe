@@ -26,6 +26,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.commercePayments.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
@@ -197,6 +198,19 @@ test('advertising sponsorship contract protects disclosure, delivery, and guardr
   assert.ok(ads.operatorControls.includes('cap frequency'))
   assert.ok(ads.trustControls.includes('sponsored visibility is labeled'))
   assert.ok(ads.trustControls.includes('AI optimization cannot use engagement-only metrics'))
+})
+
+test('commerce payments contract protects provider references, refunds, and financial exports', () => {
+  const commerce = PLATFORM_CONTRACT_REGISTRY.commercePayments
+  assert.ok(commerce.recordTypes.some((type) => type.key === 'order'))
+  assert.ok(commerce.recordTypes.some((type) => type.key === 'ledger-entry'))
+  assert.ok(commerce.requiredFields.includes('providerReference'))
+  assert.ok(commerce.requiredFields.includes('netCents'))
+  assert.ok(commerce.statusStates.includes('partially-refunded'))
+  assert.ok(commerce.providerTypes.includes('eventbrite'))
+  assert.ok(commerce.operatorControls.includes('reconcile provider totals'))
+  assert.ok(commerce.trustControls.includes('raw payment credentials are never stored'))
+  assert.ok(commerce.trustControls.includes('provider errors do not expose secrets'))
 })
 
 test('knowledge contract preserves source, review, trust, and AI boundaries', () => {
