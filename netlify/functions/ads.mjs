@@ -1,5 +1,6 @@
 import { getDatabase } from '@netlify/database'
 import { requireAdmin, requireSameOrigin, recordAudit, json, str, iso, newId, toDate, logWarn } from './lib/session.mjs'
+import { createCrmActivity } from './crm.mjs'
 
 // ── Advertising platform ──
 //
@@ -414,6 +415,16 @@ export default async (req) => {
       if (!str(body.name, 200).trim()) return json({ error: 'A campaign needs a name.' }, 400)
       if (!str(body.companyId, 80).trim()) return json({ error: 'Choose the advertiser (a CRM company).' }, 400)
       const cid = await createCampaign(db, body)
+      await createCrmActivity(db, {
+        subjectType: 'company',
+        subjectId: str(body.companyId, 80),
+        eventId: str(body.eventId, 80),
+        actorAccountId: admin.accountId || '',
+        kind: 'advertising',
+        title: 'Ad campaign created',
+        body: str(body.name, 200),
+        details: { campaignId: cid, status: body.status || 'draft' },
+      })
       await recordAudit(db, req, admin, { action: 'ad.campaign.create', resourceType: 'ad_campaign', resourceId: cid, details: { name: str(body.name, 200), actorName: admin && admin.name } })
       return json({ ok: true, item: await getCampaign(db, cid) })
     }

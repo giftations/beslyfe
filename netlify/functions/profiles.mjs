@@ -1,6 +1,7 @@
 import { getDatabase } from '@netlify/database'
 import { readSession, requireSession, requireAdmin, isLiveAdmin, newId, requireSameOrigin, recordAudit, readJsonBody } from './lib/session.mjs'
 import { sendEmail } from './lib/email.mjs'
+import { createCrmActivityForContact } from './crm.mjs'
 
 // Public, self-authored profiles for vendors, sponsors, speakers and attendees.
 // Anyone can POST a profile from the site; the public directory lists approved
@@ -320,6 +321,16 @@ export default async (req) => {
         action: 'profile.status', resourceType: 'profile', resourceId: targetId,
         details: { name: current.displayName, statusBefore: current.status, statusAfter: body.status },
       })
+      await createCrmActivityForContact(db, {
+        email: current.email,
+        companyName: current.company,
+        eventId: current.eventId,
+        actorAccountId: session.accountId || '',
+        kind: 'status_change',
+        title: `Profile ${body.status}`,
+        body: `${current.status} -> ${body.status}`,
+        details: { profileId: targetId, role: current.role, statusBefore: current.status, statusAfter: body.status },
+      })
       return json({ ok: true, item: normalizeRow(rows[0]), approvalEmailSent: email.sent })
     }
 
@@ -337,6 +348,16 @@ export default async (req) => {
       await recordAudit(db, req, session, {
         action: 'profile.featured', resourceType: 'profile', resourceId: targetId,
         details: { name: current.displayName, featured: body.featured ? 'true' : 'false' },
+      })
+      await createCrmActivityForContact(db, {
+        email: current.email,
+        companyName: current.company,
+        eventId: current.eventId,
+        actorAccountId: session.accountId || '',
+        kind: 'status_change',
+        title: body.featured ? 'Profile featured' : 'Profile unfeatured',
+        body: current.displayName || current.company || current.email,
+        details: { profileId: targetId, role: current.role, featured: body.featured ? 'true' : 'false' },
       })
       return json({ ok: true, item: normalizeRow(rows[0]) })
     }

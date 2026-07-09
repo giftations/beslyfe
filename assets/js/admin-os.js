@@ -1543,9 +1543,17 @@
 
   var CRM_ROLES = ['attendee', 'vendor', 'sponsor', 'speaker', 'dj', 'organizer', 'media', 'staff', 'partner', 'other'];
   var CRM_RELS = ['exhibitor', 'sponsor', 'partner', 'speaker', 'vendor', 'media', 'other'];
+  var CRM_STAGES = ['new', 'contacted', 'interested', 'application_started', 'application_submitted', 'approved', 'payment_pending', 'paid', 'onboarded', 'active', 'follow_up_needed', 'closed_won', 'closed_lost'];
+  var CRM_LEAD_SOURCES = ['website', 'vendor_application', 'sponsor_application', 'speaker_application', 'attendee_signup', 'directory_profile', 'admin_created', 'import', 'social', 'referral', 'advertising', 'other'];
+  var CRM_STATUSES = ['new', 'open', 'active', 'inactive', 'won', 'lost', 'archived'];
+  var CRM_PRIORITIES = ['low', 'normal', 'high', 'urgent'];
   var crmCache = { events: null, companies: null };
   function cap(s) { return String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1); }
   function fld(label, inputHtml, hint) { return '<div class="field"><label>' + esc(label) + '</label>' + inputHtml + (hint ? '<span class="hint">' + esc(hint) + '</span>' : '') + '</div>'; }
+  function niceCrm(v) { return cap(String(v || '').replace(/_/g, ' ')); }
+  function crmSelect(id, list, selected, empty) {
+    return '<select id="' + id + '"><option value="">' + esc(empty || 'None') + '</option>' + list.map(function (v) { return '<option value="' + esc(v) + '"' + (v === selected ? ' selected' : '') + '>' + esc(niceCrm(v)) + '</option>'; }).join('') + '</select>';
+  }
 
   function crmEvents() {
     if (crmCache.events) return Promise.resolve(crmCache.events);
@@ -1579,10 +1587,42 @@
       events.map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.name) + '</option>'; }).join('') + '</select>';
   }
   function selectOpts(list) { return list.map(function (r) { return '<option value="' + r + '">' + cap(r) + '</option>'; }).join(''); }
+  function crmQuery(state) {
+    var q = [];
+    ['role', 'q', 'pipelineStage', 'tag', 'status', 'ownerAccountId', 'followUp'].forEach(function (k) { if (state[k]) q.push(encodeURIComponent(k) + '=' + encodeURIComponent(state[k])); });
+    return q.length ? '&' + q.join('&') : '';
+  }
+  function crmStageBoard(items, kind) {
+    var shown = CRM_STAGES.slice(0, 8);
+    return '<div class="grid cols-4 mb-4">' + shown.map(function (stage) {
+      var rows = items.filter(function (x) { return x.pipelineStage === stage; }).slice(0, 8);
+      return '<div class="card"><div class="card-title">' + esc(niceCrm(stage)) + ' <span class="sub">' + rows.length + '</span></div>' +
+        (rows.length ? rows.map(function (x) {
+          var name = kind === 'company' ? x.name : (x.fullName || x.email || '(no name)');
+          return '<div class="row compact" style="cursor:pointer" data-open="' + esc(x.id) + '"><div class="grow"><div class="name">' + esc(name) + '</div><div class="meta">' + esc((x.priority || 'normal') + (x.followUpAt ? ' · follow-up set' : '')) + '</div></div></div>';
+        }).join('') : '<div class="muted small">Empty</div>') + '</div>';
+    }).join('') + '</div>';
+  }
+  function crmFollowUps(items) {
+    var rows = items.filter(function (x) { return x.followUpAt; }).sort(function (a, b) { return String(a.followUpAt).localeCompare(String(b.followUpAt)); }).slice(0, 12);
+    return '<div class="card mb-4"><div class="card-title">Follow-ups</div>' + (rows.length ? '<div class="list">' + rows.map(function (x) {
+      var name = x.name || x.fullName || x.email || '(untitled)';
+      return '<div class="row compact" style="cursor:pointer" data-open="' + esc(x.id) + '"><div class="grow"><div class="name">' + esc(name) + '</div><div class="meta">' + esc(x.followUpAt || '') + ' · ' + esc(niceCrm(x.pipelineStage || 'new')) + '</div></div></div>';
+    }).join('') + '</div>' : '<div class="muted small">No follow-ups scheduled.</div>') + '</div>';
+  }
+  function crmTimeline(subjectType, item) {
+    var acts = item.activities || [];
+    return '<div class="card mt-4"><div class="card-title">Timeline</div>' +
+      '<div class="hstack mb-4"><select id="crmActKind" style="width:auto"><option value="note">Note</option><option value="task">Task</option><option value="call">Call</option><option value="email">Email</option><option value="meeting">Meeting</option></select><input id="crmActTitle" placeholder="Title"><input id="crmActDue" type="datetime-local" style="width:auto"><button class="btn brand sm" id="crmActAdd">Add</button></div>' +
+      '<textarea id="crmActBody" rows="2" placeholder="Details"></textarea>' +
+      '<div id="crmActs" class="list mt-4">' + (acts.length ? acts.map(function (a) {
+        return '<div class="row"><div class="grow"><div class="name">' + esc(a.title || niceCrm(a.kind)) + ' <span class="badge neutral">' + esc(niceCrm(a.kind)) + '</span></div><div class="meta">' + esc(a.body || '') + (a.dueAt ? ' · due ' + esc(a.dueAt) : '') + (a.completedAt ? ' · completed' : '') + '</div></div>' + (!a.completedAt && a.kind === 'task' ? '<button class="btn sm ghost" data-complete="' + esc(a.id) + '">Done</button>' : '') + '</div>';
+      }).join('') : '<div class="muted small">No activity yet.</div>') + '</div></div>';
+  }
 
   // People workspace ----------------------------------------------------------
   function renderCrmPeople(host) {
-    var state = { items: [], role: '', q: '' };
+    var state = { items: [], role: '', q: '', pipelineStage: '', status: '', tag: '', ownerAccountId: '', followUp: '' };
     host.innerHTML = pageHead('People', 'One canonical record per human — deduplicated by email, with unlimited roles across every event. People and companies never copy each other’s data.',
       '<button class="btn brand sm" id="crmNewPerson">+ Person</button><button class="btn ghost sm" id="crmSync">⟲ Sync from site</button><button class="btn ghost sm" id="crmPRefresh">↻ Refresh</button>') +
       '<div class="stats" id="crmStats">' + statSkeletons(5) + '</div>' +
@@ -1590,11 +1630,21 @@
         '<div class="seg" id="crmRole">' + seg('', 'All') + CRM_ROLES.map(function (r) { return seg(r, cap(r)); }).join('') + '</div>' +
         '<div class="search-box"><input type="search" id="crmPSearch" placeholder="Search name, email or company…"></div>' +
       '</div>' +
+      '<div class="toolbar">' +
+        crmSelect('crmPStage', CRM_STAGES, '', 'Any stage') +
+        crmSelect('crmPStatus', CRM_STATUSES, '', 'Any status') +
+        '<input id="crmPTag" placeholder="Tag" style="width:120px">' +
+        '<select id="crmPFollow" style="width:auto"><option value="">Any follow-up</option><option value="overdue">Overdue</option><option value="today">Today</option><option value="upcoming">Upcoming</option><option value="none">None</option></select>' +
+      '</div>' +
       '<div id="crmPBody">' + loadingList() + '</div>';
 
     crmStatsStrip(host);
     $('#crmRole', host).onclick = function (e) { var b = e.target.closest('button'); if (!b) return; state.role = b.getAttribute('data-v'); segActive($('#crmRole', host), b); load(); };
-    $('#crmPSearch', host).oninput = debounce(function (e) { state.q = e.target.value.trim().toLowerCase(); paint(); }, 150);
+    $('#crmPSearch', host).oninput = debounce(function (e) { state.q = e.target.value.trim().toLowerCase(); load(); }, 250);
+    $('#crmPStage', host).onchange = function (e) { state.pipelineStage = e.target.value; load(); };
+    $('#crmPStatus', host).onchange = function (e) { state.status = e.target.value; load(); };
+    $('#crmPTag', host).oninput = debounce(function (e) { state.tag = e.target.value.trim(); load(); }, 250);
+    $('#crmPFollow', host).onchange = function (e) { state.followUp = e.target.value; load(); };
     $('#crmPRefresh', host).onclick = function () { crmCache.companies = null; load(); crmStatsStrip(host); };
     $('#crmNewPerson', host).onclick = function () { openPersonDrawer(null, load); };
     $('#crmSync', host).onclick = function () {
@@ -1609,14 +1659,14 @@
 
     function load() {
       $('#crmPBody', host).innerHTML = loadingList();
-      api(API.crm + '?resource=people' + (state.role ? '&role=' + encodeURIComponent(state.role) : '')).then(function (d) { state.items = d.items || []; paint(); })
+      api(API.crm + '?resource=people' + crmQuery(state)).then(function (d) { state.items = d.items || []; paint(); })
         .catch(function (e) { $('#crmPBody', host).innerHTML = errorBox(e.message); });
     }
     function paint() {
-      var items = state.items.filter(function (p) { return !state.q || (p.fullName + ' ' + p.email + ' ' + (p.companyName || '')).toLowerCase().indexOf(state.q) >= 0; });
+      var items = state.items;
       var body = $('#crmPBody', host);
       if (!items.length) { body.innerHTML = emptyState('🧑‍🤝‍🧑', 'No people yet', 'Add a person, or Sync from the site to import existing profiles & applications.'); return; }
-      body.innerHTML = '<div class="list">' + items.map(function (p) {
+      body.innerHTML = crmStageBoard(items, 'person') + crmFollowUps(items) + '<div class="list">' + items.map(function (p) {
         return '<div class="row" style="cursor:pointer" data-open="' + esc(p.id) + '">' + avatar('', p.fullName) +
           '<div class="grow"><div class="name">' + esc(p.fullName || '(no name)') + ' ' + roleChips(p.roles) + '</div>' +
           '<div class="meta">' + (p.companyName ? '🏢 ' + esc(p.companyName) + ' · ' : '') + esc(p.email || 'no email') + '</div></div>' +
@@ -1634,7 +1684,7 @@
     ]).then(function (r) { showPerson(r[0], r[1], r[2], onChange); }).catch(function (e) { toast(e.message, { type: 'err' }); });
   }
   function showPerson(p, companies, events, onChange) {
-    var isNew = !p; p = p || { id: '', fullName: '', email: '', phone: '', title: '', companyId: '', notes: '', roles: [] };
+    var isNew = !p; p = p || { id: '', fullName: '', email: '', phone: '', title: '', companyId: '', notes: '', roles: [], tags: [], activities: [] };
     var body = h('<div></div>');
     body.innerHTML =
       '<div class="card mb-4"><div class="card-title">👤 Details</div>' +
@@ -1643,6 +1693,14 @@
         fld('Phone', '<input id="pPhone" value="' + esc(p.phone) + '">') +
         fld('Company', companySelect(companies, p.companyId), 'The one organization this person represents — stored once, referenced here.') +
         fld('Title', '<input id="pTitle" value="' + esc(p.title) + '" placeholder="Head of Sales">') +
+        fld('Status', crmSelect('pStatus', CRM_STATUSES, p.status || 'new', 'Status')) +
+        fld('Pipeline stage', crmSelect('pStage', CRM_STAGES, p.pipelineStage || 'new', 'Stage')) +
+        fld('Owner account id', '<input id="pOwner" value="' + esc(p.ownerAccountId || '') + '">') +
+        fld('Tags', '<input id="pTags" value="' + esc((p.tags || []).join(', ')) + '" placeholder="sponsor, vip">') +
+        fld('Lead source', crmSelect('pLeadSource', CRM_LEAD_SOURCES, p.leadSource || 'other', 'Lead source')) +
+        fld('Priority', crmSelect('pPriority', CRM_PRIORITIES, p.priority || 'normal', 'Priority')) +
+        fld('Follow-up at', '<input id="pFollowUpAt" type="datetime-local" value="' + esc((p.followUpAt || '').slice(0, 16)) + '">') +
+        fld('Lifetime value cents', '<input id="pLifetime" type="number" min="0" step="1" value="' + esc(p.lifetimeValueCents || 0) + '">') +
         fld('Notes', '<textarea id="pNotes" rows="3">' + esc(p.notes) + '</textarea>') +
       '</div>' +
       (isNew ? '' :
@@ -1652,7 +1710,7 @@
           '<select id="pAddRole" style="width:auto">' + selectOpts(CRM_ROLES) + '</select>' +
           eventSelect('pAddRoleEvent', events) +
           '<button class="btn brand sm" id="pAddRoleBtn">+ Add role</button>' +
-        '</div></div>');
+        '</div></div>' + crmTimeline('person', p));
 
     function rolesList(roles) {
       return (roles && roles.length) ? roles.map(function (r) {
@@ -1670,12 +1728,17 @@
         api(API.crm + '?resource=role', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ personId: p.id, role: $('#pAddRole', body).value, eventId: $('#pAddRoleEvent', body).value }) })
           .then(reloadPerson).catch(function (err) { toast(err.message, { type: 'err' }); });
       };
+      $('#crmActAdd', body).onclick = function () {
+        api(API.crm + '?resource=activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subjectType: 'person', subjectId: p.id, kind: $('#crmActKind', body).value, title: $('#crmActTitle', body).value, body: $('#crmActBody', body).value, dueAt: $('#crmActDue', body).value }) })
+          .then(function () { openPersonDrawer(p.id, onChange); }).catch(function (err) { toast(err.message, { type: 'err' }); });
+      };
+      $('#crmActs', body).onclick = function (e) { var b = e.target.closest('[data-complete]'); if (!b) return; api(API.crm + '?resource=activity&id=' + encodeURIComponent(b.getAttribute('data-complete')), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(function () { openPersonDrawer(p.id, onChange); }).catch(function (err) { toast(err.message, { type: 'err' }); }); };
     }
 
     var foot = h('<div style="flex-wrap:wrap"></div>');
     foot.innerHTML = '<button class="btn brand" id="pSave">' + (isNew ? 'Create person' : 'Save') + '</button>' + (isNew ? '' : '<div style="flex:1"></div><button class="btn ghost sm" id="pDel">🗑 Delete</button>');
     $('#pSave', foot).onclick = function () {
-      var payload = { id: p.id || undefined, fullName: $('#pName', body).value.trim(), email: $('#pEmail', body).value.trim(), phone: $('#pPhone', body).value.trim(), companyId: $('#pCompany', body).value, title: $('#pTitle', body).value.trim(), notes: $('#pNotes', body).value };
+      var payload = { id: p.id || undefined, fullName: $('#pName', body).value.trim(), email: $('#pEmail', body).value.trim(), phone: $('#pPhone', body).value.trim(), companyId: $('#pCompany', body).value, title: $('#pTitle', body).value.trim(), status: $('#pStatus', body).value, pipelineStage: $('#pStage', body).value, ownerAccountId: $('#pOwner', body).value.trim(), tags: $('#pTags', body).value, leadSource: $('#pLeadSource', body).value, priority: $('#pPriority', body).value, followUpAt: $('#pFollowUpAt', body).value, lifetimeValueCents: Number($('#pLifetime', body).value || 0), notes: $('#pNotes', body).value };
       api(API.crm + '?resource=person', { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(function () { toast(isNew ? 'Person created' : 'Saved', { type: 'ok' }); closeDrawer(); if (onChange) onChange(); })
         .catch(function (err) { toast(err.message, { type: 'err' }); });
@@ -1691,23 +1754,33 @@
 
   // Companies workspace --------------------------------------------------------
   function renderCrmCompanies(host) {
-    var state = { items: [], q: '' };
+    var state = { items: [], q: '', pipelineStage: '', status: '', tag: '', ownerAccountId: '', followUp: '' };
     host.innerHTML = pageHead('Companies', 'One canonical record per organization — deduplicated by name and linked to unlimited events. People reference a company, so its details live in exactly one place.',
       '<button class="btn brand sm" id="crmNewCo">+ Company</button><button class="btn ghost sm" id="crmCRefresh">↻ Refresh</button>') +
       '<div class="toolbar"><div class="search-box"><input type="search" id="crmCSearch" placeholder="Search name, industry or website…"></div></div>' +
+      '<div class="toolbar">' +
+        crmSelect('crmCStage', CRM_STAGES, '', 'Any stage') +
+        crmSelect('crmCStatus', CRM_STATUSES, '', 'Any status') +
+        '<input id="crmCTag" placeholder="Tag" style="width:120px">' +
+        '<select id="crmCFollow" style="width:auto"><option value="">Any follow-up</option><option value="overdue">Overdue</option><option value="today">Today</option><option value="upcoming">Upcoming</option><option value="none">None</option></select>' +
+      '</div>' +
       '<div id="crmCBody">' + loadingList() + '</div>';
-    $('#crmCSearch', host).oninput = debounce(function (e) { state.q = e.target.value.trim().toLowerCase(); paint(); }, 150);
+    $('#crmCSearch', host).oninput = debounce(function (e) { state.q = e.target.value.trim().toLowerCase(); load(); }, 250);
+    $('#crmCStage', host).onchange = function (e) { state.pipelineStage = e.target.value; load(); };
+    $('#crmCStatus', host).onchange = function (e) { state.status = e.target.value; load(); };
+    $('#crmCTag', host).oninput = debounce(function (e) { state.tag = e.target.value.trim(); load(); }, 250);
+    $('#crmCFollow', host).onchange = function (e) { state.followUp = e.target.value; load(); };
     $('#crmCRefresh', host).onclick = load;
     $('#crmNewCo', host).onclick = function () { openCompanyDrawer(null, load); };
     function load() {
       $('#crmCBody', host).innerHTML = loadingList();
-      api(API.crm + '?resource=companies').then(function (d) { state.items = d.items || []; crmCache.companies = state.items; paint(); }).catch(function (e) { $('#crmCBody', host).innerHTML = errorBox(e.message); });
+      api(API.crm + '?resource=companies' + crmQuery(state)).then(function (d) { state.items = d.items || []; crmCache.companies = state.items; paint(); }).catch(function (e) { $('#crmCBody', host).innerHTML = errorBox(e.message); });
     }
     function paint() {
-      var items = state.items.filter(function (c) { return !state.q || (c.name + ' ' + c.industry + ' ' + c.website).toLowerCase().indexOf(state.q) >= 0; });
+      var items = state.items;
       var body = $('#crmCBody', host);
       if (!items.length) { body.innerHTML = emptyState('🏢', 'No companies yet', 'Add a company, or Sync from the site on the People tab.'); return; }
-      body.innerHTML = '<div class="list">' + items.map(function (c) {
+      body.innerHTML = crmStageBoard(items, 'company') + crmFollowUps(items) + '<div class="list">' + items.map(function (c) {
         return '<div class="row" style="cursor:pointer" data-open="' + esc(c.id) + '">' + avatar('', c.name, true) +
           '<div class="grow"><div class="name">' + esc(c.name) + (c.industry ? ' <span class="badge neutral">' + esc(c.industry) + '</span>' : '') + '</div>' +
           '<div class="meta">' + (c.website ? esc(c.website) + ' · ' : '') + (c.peopleCount || 0) + ' people · ' + (c.eventCount || 0) + ' events</div></div></div>';
@@ -1726,13 +1799,21 @@
     ]).then(function (r) { showCompany(r[0], r[1], onChange); }).catch(function (e) { toast(e.message, { type: 'err' }); });
   }
   function showCompany(c, events, onChange) {
-    var isNew = !c; c = c || { id: '', name: '', website: '', industry: '', notes: '', events: [], people: [] };
+    var isNew = !c; c = c || { id: '', name: '', website: '', industry: '', notes: '', events: [], people: [], tags: [], activities: [] };
     var body = h('<div></div>');
     body.innerHTML =
       '<div class="card mb-4"><div class="card-title">🏢 Details</div>' +
         fld('Name', '<input id="cName" value="' + esc(c.name) + '" placeholder="Acme Foods">', 'The dedup key — a second company can never share this name.') +
         fld('Website', '<input id="cWebsite" value="' + esc(c.website) + '" placeholder="https://…">') +
         fld('Industry', '<input id="cIndustry" value="' + esc(c.industry) + '">') +
+        fld('Status', crmSelect('cStatus', CRM_STATUSES, c.status || 'new', 'Status')) +
+        fld('Pipeline stage', crmSelect('cStage', CRM_STAGES, c.pipelineStage || 'new', 'Stage')) +
+        fld('Owner account id', '<input id="cOwner" value="' + esc(c.ownerAccountId || '') + '">') +
+        fld('Tags', '<input id="cTags" value="' + esc((c.tags || []).join(', ')) + '" placeholder="sponsor, vendor, advertiser">') +
+        fld('Lead source', crmSelect('cLeadSource', CRM_LEAD_SOURCES, c.leadSource || 'other', 'Lead source')) +
+        fld('Priority', crmSelect('cPriority', CRM_PRIORITIES, c.priority || 'normal', 'Priority')) +
+        fld('Follow-up at', '<input id="cFollowUpAt" type="datetime-local" value="' + esc((c.followUpAt || '').slice(0, 16)) + '">') +
+        fld('Lifetime value cents', '<input id="cLifetime" type="number" min="0" step="1" value="' + esc(c.lifetimeValueCents || 0) + '">') +
         fld('Notes', '<textarea id="cNotes" rows="3">' + esc(c.notes) + '</textarea>') +
       '</div>' +
       (isNew ? '' :
@@ -1743,6 +1824,7 @@
           '<button class="btn brand sm" id="cAddEventBtn">+ Link</button></div></div>' +
       '<div class="card"><div class="card-title">🧑‍🤝‍🧑 People here</div><div id="cPeople"></div></div>');
 
+    if (!isNew) body.innerHTML += crmTimeline('company', c);
     function eventsList(evs) {
       return (evs && evs.length) ? '<div class="list">' + evs.map(function (e) {
         return '<div class="row"><div class="grow"><div class="name">' + esc(e.eventName) + ' ' + roleBadge(e.relationship) + '</div></div><button class="btn red sm" data-cev="' + esc(e.id) + '">Remove</button></div>';
@@ -1765,12 +1847,17 @@
         api(API.crm + '?resource=companyEvent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ companyId: c.id, eventId: ev, relationship: $('#cAddRel', body).value }) }).then(reloadCompany).catch(function (err) { toast(err.message, { type: 'err' }); });
       };
       $('#cPeople', body).onclick = function (e) { var b = e.target.closest('[data-person]'); if (!b) return; openPersonDrawer(b.getAttribute('data-person'), onChange); };
+      $('#crmActAdd', body).onclick = function () {
+        api(API.crm + '?resource=activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subjectType: 'company', subjectId: c.id, kind: $('#crmActKind', body).value, title: $('#crmActTitle', body).value, body: $('#crmActBody', body).value, dueAt: $('#crmActDue', body).value }) })
+          .then(function () { openCompanyDrawer(c.id, onChange); }).catch(function (err) { toast(err.message, { type: 'err' }); });
+      };
+      $('#crmActs', body).onclick = function (e) { var b = e.target.closest('[data-complete]'); if (!b) return; api(API.crm + '?resource=activity&id=' + encodeURIComponent(b.getAttribute('data-complete')), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' }).then(function () { openCompanyDrawer(c.id, onChange); }).catch(function (err) { toast(err.message, { type: 'err' }); }); };
     }
 
     var foot = h('<div style="flex-wrap:wrap"></div>');
     foot.innerHTML = '<button class="btn brand" id="cSave">' + (isNew ? 'Create company' : 'Save') + '</button>' + (isNew ? '' : '<div style="flex:1"></div><button class="btn ghost sm" id="cDel">🗑 Delete</button>');
     $('#cSave', foot).onclick = function () {
-      var payload = { id: c.id || undefined, name: $('#cName', body).value.trim(), website: $('#cWebsite', body).value.trim(), industry: $('#cIndustry', body).value.trim(), notes: $('#cNotes', body).value };
+      var payload = { id: c.id || undefined, name: $('#cName', body).value.trim(), website: $('#cWebsite', body).value.trim(), industry: $('#cIndustry', body).value.trim(), status: $('#cStatus', body).value, pipelineStage: $('#cStage', body).value, ownerAccountId: $('#cOwner', body).value.trim(), tags: $('#cTags', body).value, leadSource: $('#cLeadSource', body).value, priority: $('#cPriority', body).value, followUpAt: $('#cFollowUpAt', body).value, lifetimeValueCents: Number($('#cLifetime', body).value || 0), notes: $('#cNotes', body).value };
       api(API.crm + '?resource=company', { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(function (res) {
           toast(isNew ? 'Company created' : 'Saved', { type: 'ok' }); crmCache.companies = null; if (onChange) onChange();
