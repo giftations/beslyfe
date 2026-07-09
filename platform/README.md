@@ -66,6 +66,9 @@ limits, and server-derived identity are captured in `auth/access-control-contrac
 Data export scope, redaction, package expiry, and portability trust controls are
 captured in `data/portability-contract.mjs`.
 
+Import governance, additive migration rules, release gates, rollback evidence,
+and post-merge verification are captured in `lifecycle/`.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the

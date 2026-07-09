@@ -38,6 +38,9 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.authAccessControl.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataPortability.exportScopes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.imports.targets))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.migrations.changeTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.releaseGates.gateAreas))
 })
 
 test('access application contract supports reviewable participation gates', () => {
@@ -328,6 +331,26 @@ test('data portability contract protects export scope, redaction, and expiry', (
   assert.ok(portability.trustControls.includes('exports require authenticated requester'))
   assert.ok(portability.trustControls.includes('secrets are redacted'))
   assert.ok(portability.trustControls.includes('generated packages expire'))
+})
+
+test('lifecycle contracts protect imports, migrations, and release gates', () => {
+  const imports = PLATFORM_CONTRACT_REGISTRY.imports
+  const migrations = PLATFORM_CONTRACT_REGISTRY.migrations
+  const releaseGates = PLATFORM_CONTRACT_REGISTRY.releaseGates
+
+  assert.ok(imports.targets.includes('crm-people'))
+  assert.ok(imports.governanceControls.includes('dry run before write'))
+  assert.ok(imports.governanceControls.includes('rollback plan required before run'))
+
+  assert.ok(migrations.changeTypes.includes('add-column'))
+  assert.ok(migrations.changeTypes.includes('rename-with-compatibility'))
+  assert.ok(migrations.safetyControls.includes('additive migrations first'))
+  assert.ok(migrations.safetyControls.includes('rollback path required'))
+
+  assert.ok(releaseGates.gateAreas.includes('netlify-deploy'))
+  assert.ok(releaseGates.gateAreas.includes('mobile-navigation'))
+  assert.ok(releaseGates.trustControls.includes('double test after merge'))
+  assert.ok(releaseGates.trustControls.includes('secrets are not copied into evidence'))
 })
 
 test('platform contract registry is serializable', () => {

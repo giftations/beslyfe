@@ -35,6 +35,9 @@ import { themeContractSummary } from './themes/contract.mjs'
 import { adminOsContractSummary } from './admin/os-contract.mjs'
 import { authAccessControlContractSummary } from './auth/access-control-contract.mjs'
 import { dataPortabilityContractSummary } from './data/portability-contract.mjs'
+import { importContractSummary } from './lifecycle/import-contract.mjs'
+import { migrationContractSummary } from './lifecycle/migration-contract.mjs'
+import { releaseGateContractSummary } from './lifecycle/release-gate-contract.mjs'
 
 export const PLATFORM_CONTRACT_REGISTRY = {
   modules: MODULES,
@@ -68,6 +71,9 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   adminOs: adminOsContractSummary(),
   authAccessControl: authAccessControlContractSummary(),
   dataPortability: dataPortabilityContractSummary(),
+  imports: importContractSummary(),
+  migrations: migrationContractSummary(),
+  releaseGates: releaseGateContractSummary(),
 }
 
 export function platformContractRegistrySummary() {
@@ -107,5 +113,8 @@ export function platformContractRegistrySummary() {
     adminWorkspaceTypeCount: PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes.length,
     authRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.authAccessControl.recordTypes.length,
     dataPortabilityScopeCount: PLATFORM_CONTRACT_REGISTRY.dataPortability.exportScopes.length,
+    importTargetCount: PLATFORM_CONTRACT_REGISTRY.imports.targets.length,
+    migrationChangeTypeCount: PLATFORM_CONTRACT_REGISTRY.migrations.changeTypes.length,
+    releaseGateAreaCount: PLATFORM_CONTRACT_REGISTRY.releaseGates.gateAreas.length,
   }
 }
