@@ -1471,6 +1471,10 @@
       '<div class="card"><div class="card-title">ℹ️ Environment</div><dl class="kv"><dt>Signed in</dt><dd>' + esc(session.name || '') + '</dd><dt>Role</dt><dd>' + esc(session.role) + '</dd><dt>Site</dt><dd>bakdonthebay</dd><dt>Runtime</dt><dd>Netlify Functions</dd></dl>' +
         '<a class="btn ghost mt-4" href="https://app.netlify.com/projects/bakdonthebay" target="_blank">Open Netlify dashboard ↗</a></div>' +
       '</div>';
+    host.insertAdjacentHTML('beforeend', '<div class="card mt-4"><div class="card-title">Platform contracts</div><div id="platformContracts">' + loadingList() + '</div></div>');
+    api(API.events + '?platform')
+      .then(function (d) { paintPlatformContracts($('#platformContracts', host), d.contracts || {}); })
+      .catch(function (e) { $('#platformContracts', host).innerHTML = errorBox(e.message); });
     Array.prototype.forEach.call(host.querySelectorAll('[data-ep]'), function (row) {
       var dot = row.querySelector('[data-dot]');
       fetch(row.getAttribute('data-ep'), { method: 'GET' }).then(function (r) {
@@ -1484,6 +1488,35 @@
   // roles) and one canonical company (with unlimited events); a person references
   // their company by id, so nothing is copied between the two. Backed by the crm
   // function — see netlify/functions/crm.mjs.
+  function paintPlatformContracts(el, contracts) {
+    var rows = [
+      ['Modules', platformCount(contracts.modules), 'Reusable capabilities available to every ecosystem.'],
+      ['Ecosystem configuration', platformCount(contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
+      ['Relationships', platformCount(contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
+      ['Consent and AI', platformCount(contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
+      ['Outcome analytics', platformCount(contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
+      ['Guardrails', platformCount(contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
+      ['Data boundaries', platformCount(contracts.dataBoundaries && contracts.dataBoundaries.scopes), 'Ownership, visibility, portability, retention, and AI-use scopes.'],
+    ];
+    var total = rows.reduce(function (sum, row) { return sum + row[1]; }, 0);
+    el.innerHTML =
+      '<p class="muted small mb-4">Read-only registry served by <span class="mono">GET events?platform</span>. It names reusable platform contracts without gating runtime behavior.</p>' +
+      '<div class="stats mb-4">' +
+        stat(total, 'Tracked contract items', '◆', 'accent') +
+        stat(rows.length, 'Contract groups', '▦', '') +
+        stat(platformCount(contracts.modules), 'Platform modules', '◇', '') +
+      '</div>' +
+      '<div class="table-wrap"><table class="data"><thead><tr><th>Contract group</th><th>Items</th><th>Purpose</th></tr></thead><tbody>' +
+        rows.map(function (row) {
+          return '<tr><td><b>' + esc(row[0]) + '</b></td><td><span class="badge neutral">' + row[1] + '</span></td><td>' + esc(row[2]) + '</td></tr>';
+        }).join('') +
+      '</tbody></table></div>';
+  }
+
+  function platformCount(value) {
+    return Array.isArray(value) ? value.length : 0;
+  }
+
   var CRM_ROLES = ['attendee', 'vendor', 'sponsor', 'speaker', 'dj', 'organizer', 'media', 'staff', 'partner', 'other'];
   var CRM_RELS = ['exhibitor', 'sponsor', 'partner', 'speaker', 'vendor', 'media', 'other'];
   var crmCache = { events: null, companies: null };
