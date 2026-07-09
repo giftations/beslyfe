@@ -144,6 +144,7 @@ Status:
 - Outcome analytics contract is tracked in `platform/analytics/outcome-contract.mjs`.
 - Tenant and data-boundary contract is tracked in `platform/boundaries/data-boundary-contract.mjs`.
 - Platform core contract registry is tracked in `platform/contracts.mjs`.
+- Existing `GET events?platform` response exposes the platform contract registry as `contracts`.
 
 Tasks:
 

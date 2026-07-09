@@ -48,6 +48,12 @@ Admin OS *System* view reads them). Nothing here gates behavior — the platform
 layer describes the real system so future work extends it instead of forking a
 parallel one. Module flags on a theme record *intent*, not access control.
 
+`contracts.mjs` gathers the reusable ecosystem, module, relationship, consent,
+AI, analytics, and data-boundary contracts behind one registry. The same
+`GET events?platform` response exposes it as `contracts` so tools and future
+admin surfaces can inspect the whole platform contract without adding a second
+endpoint.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the
