@@ -458,10 +458,23 @@ export const crmCompanies = pgTable("crm_companies", {
   industry: text("industry").notNull().default(""),
   notes: text("notes").notNull().default(""),
   details: jsonb("details").notNull().default({}),
+  status: text("status").notNull().default("new"),
+  tags: jsonb("tags").notNull().default([]),
+  leadSource: text("lead_source").notNull().default("other"),
+  pipelineStage: text("pipeline_stage").notNull().default("new"),
+  ownerAccountId: text("owner_account_id").notNull().default(""),
+  followUpAt: timestamp("follow_up_at", { withTimezone: true }),
+  lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+  lifetimeValueCents: integer("lifetime_value_cents").notNull().default(0),
+  priority: text("priority").notNull().default("normal"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex("crm_companies_name_key_idx").on(t.nameKey),
+  index("crm_companies_pipeline_idx").on(t.pipelineStage),
+  index("crm_companies_status_idx").on(t.status),
+  index("crm_companies_owner_idx").on(t.ownerAccountId),
+  index("crm_companies_follow_up_idx").on(t.followUpAt),
 ]);
 
 export const crmPeople = pgTable("crm_people", {
@@ -478,11 +491,47 @@ export const crmPeople = pgTable("crm_people", {
   title: text("title").notNull().default(""),
   notes: text("notes").notNull().default(""),
   details: jsonb("details").notNull().default({}),
+  status: text("status").notNull().default("new"),
+  tags: jsonb("tags").notNull().default([]),
+  leadSource: text("lead_source").notNull().default("other"),
+  pipelineStage: text("pipeline_stage").notNull().default("new"),
+  ownerAccountId: text("owner_account_id").notNull().default(""),
+  followUpAt: timestamp("follow_up_at", { withTimezone: true }),
+  lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+  lifetimeValueCents: integer("lifetime_value_cents").notNull().default(0),
+  priority: text("priority").notNull().default("normal"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex("crm_people_email_key_idx").on(t.emailKey),
   index("crm_people_company_idx").on(t.companyId),
+  index("crm_people_pipeline_idx").on(t.pipelineStage),
+  index("crm_people_status_idx").on(t.status),
+  index("crm_people_owner_idx").on(t.ownerAccountId),
+  index("crm_people_follow_up_idx").on(t.followUpAt),
+]);
+
+// Unified CRM timeline. Notes, calls, emails, tasks, payments, applications,
+// sponsorships and ad context all land here so a person or company detail view
+// tells the whole relationship story without duplicating workflows.
+export const crmActivities = pgTable("crm_activities", {
+  id: text("id").primaryKey(),
+  subjectType: text("subject_type").notNull().default("person"),
+  subjectId: text("subject_id").notNull().default(""),
+  eventId: text("event_id").notNull().default(""),
+  actorAccountId: text("actor_account_id").notNull().default(""),
+  kind: text("kind").notNull().default("note"),
+  title: text("title").notNull().default(""),
+  body: text("body").notNull().default(""),
+  dueAt: timestamp("due_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  details: jsonb("details").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("crm_activities_subject_idx").on(t.subjectType, t.subjectId, t.createdAt),
+  index("crm_activities_due_idx").on(t.dueAt, t.completedAt),
+  index("crm_activities_event_idx").on(t.eventId),
 ]);
 
 // A person's roles — attendee, vendor, sponsor, speaker, dj, organizer, … — with

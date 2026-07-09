@@ -3,6 +3,7 @@ import {
   requireAdmin, requireSameOrigin, recordAudit, json, str, iso, newId,
   toDate, logError, logWarn, timingSafeEqualHex,
 } from './lib/session.mjs'
+import { createCrmActivityForContact } from './crm.mjs'
 
 // ── Ticketing ingestion & reporting ──
 //
@@ -195,6 +196,7 @@ async function ingest(req, db) {
 
   const eventId = provider.event_id || (await activeEventId(db))
   let ingested = 0, updated = 0, skipped = 0
+  let crmActivities = 0
   const now = new Date().toISOString()
   for (const rawOrder of orders) {
     const o = normalizeOrder(rawOrder)
@@ -231,6 +233,17 @@ async function ingest(req, db) {
       `
       if (res[0] && res[0].inserted) ingested += 1
       else updated += 1
+      if (crmActivities < 25) {
+        const activity = await createCrmActivityForContact(db, {
+          email: o.buyerEmail,
+          eventId,
+          kind: 'payment',
+          title: 'Ticket order imported',
+          body: `${o.tierName || 'Ticket'} x${o.quantity || 0}`,
+          details: { provider: provider.provider, externalOrderId: o.externalOrderId, status: o.status, grossCents: o.grossCents },
+        })
+        if (activity.created) crmActivities += 1
+      }
     } catch (error) {
       skipped += 1
       logWarn('tickets', 'order ingest failed', { provider: provider.id, error: error && error.message })
@@ -399,6 +412,7 @@ async function adminWrite(req, db, admin) {
     if (orders.length > MAX_ORDERS_PER_DELIVERY) return json({ error: `Too many orders (max ${MAX_ORDERS_PER_DELIVERY}).` }, 413)
     const eventId = provider.event_id || (await activeEventId(db))
     let ingested = 0, updated = 0, skipped = 0
+    let crmActivities = 0
     const now = new Date().toISOString()
     for (const rawOrder of orders) {
       const o = normalizeOrder(rawOrder)
@@ -426,6 +440,18 @@ async function adminWrite(req, db, admin) {
           RETURNING (xmax = 0) AS inserted
         `
         if (res[0] && res[0].inserted) ingested += 1; else updated += 1
+        if (crmActivities < 25) {
+          const activity = await createCrmActivityForContact(db, {
+            email: o.buyerEmail,
+            eventId,
+            actorAccountId: admin.accountId || '',
+            kind: 'payment',
+            title: 'Ticket order imported',
+            body: `${o.tierName || 'Ticket'} x${o.quantity || 0}`,
+            details: { provider: provider.provider, externalOrderId: o.externalOrderId, status: o.status, grossCents: o.grossCents },
+          })
+          if (activity.created) crmActivities += 1
+        }
       } catch (error) {
         skipped += 1
         logWarn('tickets', 'manual import row failed', { error: error && error.message })

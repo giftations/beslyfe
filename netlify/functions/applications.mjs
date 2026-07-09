@@ -4,6 +4,7 @@ import {
   requireSameOrigin, recordAudit, passwordPolicyError, readSession,
 } from './lib/session.mjs'
 import { sendEmail } from './lib/email.mjs'
+import { createCrmActivityForContact } from './crm.mjs'
 
 // Persistent store of public applications (vendor / sponsor / speaker / etc.).
 // The public application forms POST here; the admin dashboard lists them and
@@ -580,6 +581,16 @@ export default async (req) => {
       INSERT INTO applications ("id", "event_id", "type", "name", "email", "status", "fields", "timeline", "created_at", "updated_at")
       VALUES (${applicationId}, ${eventId}, ${type}, ${name}, ${email}, 'pending', ${JSON.stringify(fields)}::jsonb, ${initialTimeline}::jsonb, ${now}, ${now})
     `
+    const companyName = firstOf(fields, ['businessName', 'company', 'organization'])
+    await createCrmActivityForContact(db, {
+      email,
+      companyName,
+      eventId,
+      kind: 'application',
+      title: `${type} application submitted`,
+      body: name || email || companyName,
+      details: { applicationId, type, status: 'pending' },
+    })
     // Immediate receipt to the applicant's own email. Best-effort — the
     // submission has already succeeded, so a failed/skipped send never errors.
     const confirmation = await sendConfirmationEmail({ type, name, email }, req)
@@ -671,6 +682,19 @@ export default async (req) => {
         timelineNoteAdded: !!hasEntry,
       },
     })
+    if (hasStatus && body.status !== current.status) {
+      const companyName = firstOf(next.fields || {}, ['businessName', 'company', 'organization'])
+      await createCrmActivityForContact(db, {
+        email: next.email,
+        companyName,
+        eventId: next.eventId,
+        actorAccountId: admin.accountId || '',
+        kind: 'status_change',
+        title: `Application ${nextStatus}`,
+        body: `${current.status} -> ${nextStatus}`,
+        details: { applicationId: targetId, type: next.type, statusBefore: current.status, statusAfter: nextStatus },
+      })
+    }
     return json({ ok: true, item: next, profileId, approvalEmailSent: email.sent })
   }
 
