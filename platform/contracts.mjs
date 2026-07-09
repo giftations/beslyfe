@@ -1,0 +1,33 @@
+// platform/contracts.mjs - central registry for Beslyfe platform contracts.
+//
+// This file gives future implementation work one stable import path for the
+// reusable platform contracts. It stays documentation-as-data: no runtime
+// behavior is gated here yet.
+
+import { MODULES } from './modules/manifest.mjs'
+import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
+import { relationshipContractSummary } from './relationships/contract.mjs'
+import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
+import { analyticsContractSummary } from './analytics/outcome-contract.mjs'
+import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract.mjs'
+
+export const PLATFORM_CONTRACT_REGISTRY = {
+  modules: MODULES,
+  ecosystemConfiguration: ecosystemConfigChecklist(),
+  relationships: relationshipContractSummary(),
+  consentAndAi: consentAiChecklist(),
+  outcomeAnalytics: analyticsContractSummary(),
+  dataBoundaries: dataBoundaryContractSummary(),
+}
+
+export function platformContractRegistrySummary() {
+  return {
+    moduleCount: PLATFORM_CONTRACT_REGISTRY.modules.length,
+    ecosystemSectionCount: PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration.length,
+    relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
+    consentPurposeCount: PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes.length,
+    outcomeMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes.length,
+    guardrailMetricCount: PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.guardrails.length,
+    dataBoundaryScopeCount: PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes.length,
+  }
+}
