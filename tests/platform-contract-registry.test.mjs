@@ -10,9 +10,20 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.modules))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('opportunity contract names types, states, required fields, and trust controls', () => {
+  const opportunities = PLATFORM_CONTRACT_REGISTRY.opportunities
+  assert.ok(opportunities.opportunityTypes.some((type) => type.key === 'introduction'))
+  assert.ok(opportunities.opportunityTypes.some((type) => type.key === 'employment'))
+  assert.ok(opportunities.opportunityTypes.some((type) => type.key === 'mentorship'))
+  assert.ok(opportunities.states.includes('discoverable'))
+  assert.ok(opportunities.requiredFields.includes('outcomeMetric'))
+  assert.ok(opportunities.trustControls.includes('explain recommendation source'))
 })
 
 test('platform contract registry is serializable', () => {

@@ -1493,6 +1493,7 @@
       ['Modules', platformSummaryCount(summary.moduleCount, contracts.modules), 'Reusable capabilities available to every ecosystem.'],
       ['Ecosystem configuration', platformSummaryCount(summary.ecosystemSectionCount, contracts.ecosystemConfiguration), 'Sections required to launch a configurable community or event.'],
       ['Relationships', platformSummaryCount(summary.relationshipTypeCount, contracts.relationships && contracts.relationships.relationshipTypes), 'Data-driven connection types between people, organizations, communities, experiences, and opportunities.'],
+      ['Opportunities', platformSummaryCount(summary.opportunityTypeCount, contracts.opportunities && contracts.opportunities.opportunityTypes), 'Discoverable, actionable, and measurable ways people can build better lives.'],
       ['Consent and AI', platformSummaryCount(summary.consentPurposeCount, contracts.consentAndAi && contracts.consentAndAi.consentPurposes), 'Consent purposes and AI boundaries that protect trust before automation grows.'],
       ['Outcome analytics', platformSummaryCount(summary.outcomeMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.outcomes), 'Meaningful outcomes the platform can measure beyond clicks.'],
       ['Guardrails', platformSummaryCount(summary.guardrailMetricCount, contracts.outcomeAnalytics && contracts.outcomeAnalytics.guardrails), 'Risk signals that prevent unhealthy optimization.'],
