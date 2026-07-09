@@ -12,10 +12,21 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.aiRecommendations.targets))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
+})
+
+test('marketplace contract requires disclosure, terms, payment, and audit controls', () => {
+  const marketplace = PLATFORM_CONTRACT_REGISTRY.marketplace
+  assert.ok(marketplace.offerTypes.some((type) => type.key === 'ticket'))
+  assert.ok(marketplace.offerTypes.some((type) => type.key === 'sponsorship'))
+  assert.ok(marketplace.requiredFields.includes('disclosure'))
+  assert.ok(marketplace.requiredFields.includes('terms'))
+  assert.ok(marketplace.priceModels.includes('application-gated'))
+  assert.ok(marketplace.trustControls.includes('approval audit trail'))
 })
 
 test('knowledge contract preserves source, review, trust, and AI boundaries', () => {
