@@ -34,6 +34,7 @@ import { dataBoundaryContractSummary } from './boundaries/data-boundary-contract
 import { themeContractSummary } from './themes/contract.mjs'
 import { adminOsContractSummary } from './admin/os-contract.mjs'
 import { authAccessControlContractSummary } from './auth/access-control-contract.mjs'
+import { dataPortabilityContractSummary } from './data/portability-contract.mjs'
 
 export const PLATFORM_CONTRACT_REGISTRY = {
   modules: MODULES,
@@ -66,6 +67,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   themes: themeContractSummary(),
   adminOs: adminOsContractSummary(),
   authAccessControl: authAccessControlContractSummary(),
+  dataPortability: dataPortabilityContractSummary(),
 }
 
 export function platformContractRegistrySummary() {
@@ -104,5 +106,6 @@ export function platformContractRegistrySummary() {
     themeRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.themes.recordTypes.length,
     adminWorkspaceTypeCount: PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes.length,
     authRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.authAccessControl.recordTypes.length,
+    dataPortabilityScopeCount: PLATFORM_CONTRACT_REGISTRY.dataPortability.exportScopes.length,
   }
 }

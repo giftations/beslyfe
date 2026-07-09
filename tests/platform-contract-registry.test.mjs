@@ -37,6 +37,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.themes.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.authAccessControl.recordTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataPortability.exportScopes))
 })
 
 test('access application contract supports reviewable participation gates', () => {
@@ -313,6 +314,20 @@ test('auth access contract keeps identity server-derived and guarded', () => {
   assert.ok(auth.mutationControls.includes('state-changing browser requests require same-origin checks'))
   assert.ok(auth.passwordControls.includes('password hashes compare in constant time'))
   assert.ok(auth.trustControls.includes('identity is derived from session rows only'))
+})
+
+test('data portability contract protects export scope, redaction, and expiry', () => {
+  const portability = PLATFORM_CONTRACT_REGISTRY.dataPortability
+  assert.ok(portability.recordTypes.some((type) => type.key === 'export-request'))
+  assert.ok(portability.recordTypes.some((type) => type.key === 'redaction-rule'))
+  assert.ok(portability.exportScopes.includes('crm'))
+  assert.ok(portability.exportScopes.includes('media'))
+  assert.ok(portability.exportScopes.includes('audit-log'))
+  assert.ok(portability.statusStates.includes('ready'))
+  assert.ok(portability.statusStates.includes('expired'))
+  assert.ok(portability.trustControls.includes('exports require authenticated requester'))
+  assert.ok(portability.trustControls.includes('secrets are redacted'))
+  assert.ok(portability.trustControls.includes('generated packages expire'))
 })
 
 test('platform contract registry is serializable', () => {

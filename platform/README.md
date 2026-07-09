@@ -63,6 +63,9 @@ controls are captured in `admin/os-contract.mjs`.
 Authentication, sessions, roles, same-origin writes, password policy, rate
 limits, and server-derived identity are captured in `auth/access-control-contract.mjs`.
 
+Data export scope, redaction, package expiry, and portability trust controls are
+captured in `data/portability-contract.mjs`.
+
 ## Why this and not more folders
 
 The biggest risk called out for this project was bolting on features until the
