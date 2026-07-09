@@ -18,6 +18,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.placesMaps.placeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.opportunities.opportunityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.knowledge.knowledgeTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.marketplace.offerTypes))
@@ -109,6 +110,19 @@ test('scheduling contract requires time, capacity, registration, and change cont
   assert.ok(scheduling.changeControls.includes('sync external calendar only with consent'))
   assert.ok(scheduling.userControls.includes('cancel reservation'))
   assert.ok(scheduling.trustControls.includes('calendar sync is opt-in'))
+})
+
+test('places and maps contract protects published maps, private locations, and accessibility', () => {
+  const places = PLATFORM_CONTRACT_REGISTRY.placesMaps
+  assert.ok(places.placeTypes.some((type) => type.key === 'venue'))
+  assert.ok(places.placeTypes.some((type) => type.key === 'booth'))
+  assert.ok(places.requiredFields.includes('accessibility'))
+  assert.ok(places.requiredFields.includes('publishedState'))
+  assert.ok(places.mapArtifactTypes.includes('floor-plan'))
+  assert.ok(places.visibilityStates.includes('operator-only'))
+  assert.ok(places.userControls.includes('request location correction'))
+  assert.ok(places.trustControls.includes('private addresses are hidden by default'))
+  assert.ok(places.trustControls.includes('AI navigation uses published place data only'))
 })
 
 test('conversation contract requires consent, safety controls, and AI boundaries', () => {
