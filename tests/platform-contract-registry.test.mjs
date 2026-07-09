@@ -35,6 +35,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.outcomeAnalytics.outcomes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.dataBoundaries.scopes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.themes.recordTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.adminOs.workspaceTypes))
 })
 
 test('access application contract supports reviewable participation gates', () => {
@@ -291,6 +292,16 @@ test('theme contract keeps ecosystem presentation configurable', () => {
   assert.ok(themes.overrideFields.includes('sectionOrder'))
   assert.ok(themes.resolutionRules.includes('event theme is the base presentation layer'))
   assert.ok(themes.trustControls.includes('theme defaults must be overrideable per ecosystem'))
+})
+
+test('Admin OS contract keeps operator workspaces reusable and trusted', () => {
+  const admin = PLATFORM_CONTRACT_REGISTRY.adminOs
+  assert.ok(admin.workspaceTypes.some((type) => type.key === 'operations'))
+  assert.ok(admin.workspaceTypes.some((type) => type.key === 'relationships'))
+  assert.ok(admin.requiredFields.includes('mutationPolicy'))
+  assert.ok(admin.mutationPolicies.includes('same-origin-required'))
+  assert.ok(admin.systemSurfaces.includes('platform contract registry'))
+  assert.ok(admin.trustControls.includes('no second admin app for a module'))
 })
 
 test('platform contract registry is serializable', () => {
