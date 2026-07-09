@@ -67,6 +67,7 @@ Bak'd On The Bay is not separate from Beslyfe. It is the first ecosystem product
 - [docs/PLATFORM_ARCHITECTURE.md](docs/PLATFORM_ARCHITECTURE.md)
 - [docs/FRONTEND_ARCHITECTURE.md](docs/FRONTEND_ARCHITECTURE.md)
 - [docs/REPO_STRUCTURE.md](docs/REPO_STRUCTURE.md)
+- [docs/PULL_REQUEST_WORKFLOW.md](docs/PULL_REQUEST_WORKFLOW.md)
 
 ## Engineering Standard
 
