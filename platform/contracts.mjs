@@ -14,6 +14,7 @@ import { directoryDiscoveryContractSummary } from './discovery/directory-contrac
 import { notificationContractSummary } from './notifications/contract.mjs'
 import { moderationTrustSafetyContractSummary } from './moderation/trust-safety-contract.mjs'
 import { relationshipContractSummary } from './relationships/contract.mjs'
+import { crmRelationshipContractSummary } from './crm/relationship-contract.mjs'
 import { conversationContractSummary } from './conversations/contract.mjs'
 import { experienceContractSummary } from './experiences/contract.mjs'
 import { schedulingContractSummary } from './scheduling/contract.mjs'
@@ -42,6 +43,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   notifications: notificationContractSummary(),
   moderationTrustSafety: moderationTrustSafetyContractSummary(),
   relationships: relationshipContractSummary(),
+  crmRelationships: crmRelationshipContractSummary(),
   conversations: conversationContractSummary(),
   experiences: experienceContractSummary(),
   scheduling: schedulingContractSummary(),
@@ -73,6 +75,8 @@ export function platformContractRegistrySummary() {
     notificationTypeCount: PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes.length,
     moderationCaseTypeCount: PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes.length,
     relationshipTypeCount: PLATFORM_CONTRACT_REGISTRY.relationships.relationshipTypes.length,
+    crmRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.crmRelationships.recordTypes.length,
+    crmPipelineStageCount: PLATFORM_CONTRACT_REGISTRY.crmRelationships.pipelineStages.length,
     conversationTypeCount: PLATFORM_CONTRACT_REGISTRY.conversations.conversationTypes.length,
     experienceTypeCount: PLATFORM_CONTRACT_REGISTRY.experiences.experienceTypes.length,
     schedulingEntryTypeCount: PLATFORM_CONTRACT_REGISTRY.scheduling.entryTypes.length,
