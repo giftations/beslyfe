@@ -1,32 +1,30 @@
 # Beslyfe
 
-Beslyfe is the parent platform. Bak'd On The Bay is the first live event
-ecosystem built on top of it.
+Beslyfe is the parent platform and long-term vision repository.
 
-This repository contains the current Bak'd On The Bay product, Netlify
-Functions, Netlify Database migrations, GitHub CI, and reusable Beslyfe platform
-architecture.
+The production Bak'd On The Bay implementation lives in
+[`giftations/bakd-on-the-bay`](https://github.com/giftations/bakd-on-the-bay).
+Do not connect Netlify production to this repository.
 
-## Production Readiness
+This repo should stay focused on the Beslyfe Constitution, Manifesto, AI
+principles, platform architecture, ecosystem contracts, roadmap, governance, and
+other reusable platform decisions.
 
-Before live production changes, use
-[`docs/PRODUCTION_READINESS_CHECKLIST.md`](docs/PRODUCTION_READINESS_CHECKLIST.md).
-
-Required email configuration is documented in `.env.example`. Resend is the
-primary expected email provider; SendGrid is optional legacy fallback only.
+Completed implementation work that belongs in production should be moved into
+`giftations/bakd-on-the-bay` through a focused pull request, then validated
+against the live Netlify assumptions for `cannadispo.com`.
 
 ## Development
 
-Install dependencies and run the smoke test suite:
+Install dependencies and run tests when changing contracts or docs with runnable
+checks:
 
 ```sh
 npm install
 npm test
 ```
 
-GitHub Actions runs `npm test` on pull requests and pushes to `main`.
-
-## Architecture
+## Platform References
 
 - [`docs/PLATFORM_ARCHITECTURE.md`](docs/PLATFORM_ARCHITECTURE.md)
 - [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md)
