@@ -1,235 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bak'd On The Bay | Be Part Of History</title>
-  <meta name="description" content="The first cannabis-focused event ever hosted at the Bayfront Convention Center in Erie, Pennsylvania.">
-  <meta name="robots" content="index, follow">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Beslyfe — The Community Operating System</title>
+  <meta name="description" content="Beslyfe helps communities turn relationships, knowledge, and intelligent automation into real human opportunity.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://beslyfe.com/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Bak'd On The Bay | Be Part Of History">
-  <meta property="og:description" content="The first cannabis-focused event ever hosted at the Bayfront Convention Center in Erie, Pennsylvania.">
-  <meta property="og:url" content="https://bakdonthebay.netlify.app/">
-  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta property="og:site_name" content="Beslyfe">
+  <meta property="og:title" content="Beslyfe — The Community Operating System">
+  <meta property="og:description" content="Software for communities that creates opportunity instead of maximizing attention.">
+  <meta property="og:url" content="https://beslyfe.com/">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Bak'd On The Bay | Be Part Of History">
-  <meta name="twitter:description" content="The first cannabis-focused event ever hosted at the Bayfront Convention Center in Erie, Pennsylvania.">
-  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
-  <link rel="canonical" href="https://bakdonthebay.netlify.app/">
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-  <link rel="apple-touch-icon" href="/assets/favicon.svg">
-  <style>
-    /* Critical menu styles, inlined so the floating "Menu" button never paints
-       unstyled (it is the last element in <body>) before the main stylesheet
-       applies. Mirrors the #menuToggle rules in assets/css/style.css. The
-       breakpoint must match the one in assets/css/style.css so the button and
-       the collapsed nav appear together across phones and tablets. */
-    #menuToggle{display:none;}
-    @media (max-width:1024px){
-      #menuToggle{
-        display:inline-block;position:fixed;top:14px;right:16px;z-index:10002;
-        border:none;border-radius:10px;padding:10px 14px;font-weight:700;
-        cursor:pointer;background:#9FE22D;color:#000;
-      }
-    }
-  </style>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <script>
-    /* Hero preload — runs before first paint.
-       Applies the last-published hero media, overlay and position that this
-       browser cached on a previous visit, so a returning visitor sees the saved
-       hero on the very first frame. Without this, the page paints with the CSS
-       default hero image and then swaps to the saved one once the async settings
-       fetch in homepage-admin-state.js resolves — the "homepage loads twice"
-       flash. homepage-admin-state.js refreshes this cache after every successful
-       fetch. First-ever visit has no cache, so this is a silent no-op and the
-       CSS defaults apply. Values are validated the same way the CMS loader
-       validates them, so the cache can never become a CSS-injection sink. */
-    (function () {
-      try {
-        var raw = localStorage.getItem('bayfront.hero.cache.homepage');
-        if (!raw) return;
-        var c = JSON.parse(raw);
-        if (!c || typeof c !== 'object') return;
-        var root = document.documentElement;
-        var bg = c.heroBackground;
-        if (c.heroBackgroundKind === 'video') {
-          /* The CMS loader inserts the <video> after the fetch; suppress the
-             default CSS image now so it does not flash before the video paints. */
-          root.style.setProperty('--hero-image', 'none');
-        } else if (typeof bg === 'string' && /^(\/|https?:\/\/)[^'"()\s]+$/i.test(bg)) {
-          root.style.setProperty('--hero-image', "url('" + bg + "')");
-        }
-        if (typeof c.heroOverlay === 'number') {
-          var a = Math.max(0, Math.min(90, c.heroOverlay)) / 100;
-          var bottom = Math.min(0.95, a + 0.15);
-          root.style.setProperty('--site-bg-overlay-top', 'rgba(0,0,0,' + a.toFixed(2) + ')');
-          root.style.setProperty('--site-bg-overlay-bottom', 'rgba(0,0,0,' + bottom.toFixed(2) + ')');
-        }
-        if (typeof c.heroPosition === 'string' && /^[a-z ]{1,20}$/.test(c.heroPosition)) {
-          root.style.setProperty('--hero-position', c.heroPosition);
-        }
-      } catch (_e) { /* ignore: fall back to CSS defaults */ }
-    })();
-  </script>
+  <meta name="twitter:title" content="Beslyfe — The Community Operating System">
+  <meta name="twitter:description" content="Build communities that help people move forward.">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/beslyfe.css">
 </head>
-<body data-cms-page="homepage">
-  <a class="skip-link" href="#main-content">Skip to main content</a>
-
-  <header id="siteHeader" role="banner">
-    <nav aria-label="Primary" class="container">
-      <a class="logo" href="/" aria-label="Bak'd On The Bay home" data-cms="brand.logo">BAK'D ON THE BAY</a>
-      <div id="navLinks">
-        <a href="#about" data-cms="nav.about">About</a>
-        <a href="/manifesto.html">Manifesto</a>
-        <a href="#education-station" data-cms="nav.education">Education</a>
-        <a href="#sponsors" data-cms="nav.sponsors">Sponsors</a>
-        <a href="#vendors" data-cms="nav.vendors">Vendors</a>
-        <a href="#entertainment" data-cms="nav.entertainment">Entertainment</a>
-        <a href="#venue" data-cms="nav.venue">Venue</a>
-        <a href="#schedule" data-cms="nav.schedule">Schedule</a>
-        <a href="/directory" data-cms="nav.directory">Directory</a>
-        <a href="/feed" data-cms="nav.feed">Community</a>
-        <a href="https://www.axs.com/events/1498004/bakd-on-the-bay-tickets" target="_blank" rel="noopener" class="btn btn-secondary" data-cms-btn="nav.tickets">Get Tickets</a>
-        <a href="/admin-login.html" id="login-btn" class="btn btn-secondary" data-cms-btn="nav.login">Login / Sign Up</a>
-      </div>
-    </nav>
-  </header>
-
-  <main id="main-content" tabindex="-1">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-content container">
-        <p class="badge" data-cms="hero.badge">September 26 • Bayfront Convention Center • Erie, PA</p>
-        <h1 id="hero-title" data-cms="hero.title">Be Part Of History</h1>
-        <p class="subtitle" data-cms="hero.subtitle">The First Cannabis-Focused Event Ever Hosted At The Bayfront Convention Center</p>
-
-        <div id="countdown" aria-live="polite" aria-atomic="true"></div>
-
-        <div class="buttons" role="group" aria-label="Primary calls to action">
-          <a href="https://www.axs.com/events/1498004/bakd-on-the-bay-tickets" target="_blank" rel="noopener" class="btn" data-cms-btn="hero.tickets">Get Tickets</a>
-          <a href="#join" class="btn" data-cms-btn="hero.cta1">Be A Part of History</a>
-          <a href="/vendors" class="btn" data-cms-btn="hero.cta2">Become A Vendor</a>
-          <a href="/sponsors" class="btn" data-cms-btn="hero.cta3">Become A Sponsor</a>
-          <a href="/speakers" class="btn" data-cms-btn="hero.cta4">Apply To Speak</a>
-          <a href="/floorplan" class="btn btn-secondary" data-cms-btn="hero.cta5">View Floor Plan</a>
-        </div>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header><nav class="shell" aria-label="Primary"><a class="brand" href="/">beslyfe<span>.</span></a><div><a href="#platform">Platform</a><a href="#proof">Proof</a><a href="/manifesto">Manifesto</a><a href="#principles">Principles</a></div></nav></header>
+  <main id="main">
+    <section class="hero shell">
+      <p class="eyebrow">The Community Operating System</p>
+      <h1>Build a community that helps people <em>move forward.</em></h1>
+      <p class="lead">Beslyfe connects people, businesses, knowledge, and opportunities—then uses transparent automation to make the next useful action effortless.</p>
+      <div class="actions"><a class="button" href="#platform">Explore the platform</a><a class="button secondary" href="/constitution">Read the Constitution</a></div>
+      <div class="promise"><strong>Our measure of success:</strong> more meaningful opportunity, not more time spent scrolling.</div>
+    </section>
+    <section id="platform" class="section shell">
+      <p class="eyebrow">One connected system</p><h2>Everything a living ecosystem needs.</h2>
+      <div class="grid">
+        <article><span>01</span><h3>People & relationships</h3><p>Identity, profiles, organizations, CRM, introductions, and a durable relationship graph.</p></article>
+        <article><span>02</span><h3>Community & knowledge</h3><p>Directories, groups, messaging, schedules, places, and knowledge that remains useful.</p></article>
+        <article><span>03</span><h3>Opportunity engine</h3><p>Applications, events, marketplaces, sponsorships, and recommendations tied to outcomes.</p></article>
+        <article><span>04</span><h3>Action automation</h3><p>Internal, external, and hybrid workflows with approvals, audit history, and duplicate protection.</p></article>
       </div>
     </section>
-    <section id="featured-event" class="section section-muted-2" hidden aria-labelledby="featured-event-title">
-      <div class="container" style="text-align:center;">
-        <p class="badge" data-cms="featured.badge">&#9733; Featured</p>
-        <h2 id="featured-event-title" class="featured-event-name" data-cms="featured.title">Featured Event</h2>
-      </div>
-    </section>
-    <section id="about" class="section">
-      <div class="container">
-        <h2 data-cms="about.title">Why Bak'd On The Bay?</h2>
-        <p data-cms="about.line1">Education • Exploration • Elevation</p>
-        <p data-cms="about.line2">Bringing together industry leaders, advocates, educators, businesses and consumers on the Erie waterfront.</p>
-        <p class="buttons">
-          <a href="/manifesto.html" class="btn btn-secondary">Read The Beslyfe Manifesto</a>
-        </p>
-      </div>
-    </section>
-    <section id="education-station" class="section section-muted">
-      <div class="container">
-        <h2 data-cms="education.title">Education Station</h2>
-        <div id="featured-speakers"></div>
-        <div id="upcoming-presentations"></div>
-        <a href="/education-schedule.html" class="btn" data-cms-btn="education.cta">View Full Schedule</a>
-      </div>
-    </section>
-    <section id="sponsors" class="section">
-      <div class="container">
-        <h2 data-cms="sponsors.title">Featured Sponsors</h2>
-        <div id="homepage-sponsors"></div>
-        <a href="/sponsors" class="btn" data-cms-btn="sponsors.cta">View Sponsorship Packages</a>
-      </div>
-    </section>
-    <section id="vendors" class="section">
-      <div class="container">
-        <h2 data-cms="vendors.title">Featured Vendors</h2>
-        <div id="homepage-vendors"></div>
-        <a href="/vendors" class="btn" data-cms-btn="vendors.cta">Become A Vendor</a>
-      </div>
-    </section>
-    <section id="stats" class="section stats" aria-label="Event statistics">
-      <div class="container grid grid-stats">
-        <div class="stat"><h2 data-cms="stats.s1.num">75</h2><p data-cms="stats.s1.label">Vendor Spaces</p></div>
-        <div class="stat"><h2 data-cms="stats.s2.num">2500+</h2><p data-cms="stats.s2.label">Expected Attendees</p></div>
-        <div class="stat"><h2 data-cms="stats.s3.num">1</h2><p data-cms="stats.s3.label">Historic Event</p></div>
-        <div class="stat"><h2 data-cms="stats.s4.num">All Day</h2><p data-cms="stats.s4.label">Education</p></div>
-      </div>
-    </section>
-    <section id="join" class="section">
-      <div class="container">
-        <h2 data-cms="join.title">Join The Experience</h2>
-        <div class="buttons" role="group" aria-label="Join the event actions">
-          <a href="https://www.axs.com/events/1498004/bakd-on-the-bay-tickets" target="_blank" rel="noopener" class="btn" data-cms-btn="join.cta1">Get Tickets</a>
-          <a href="/vendors" class="btn" data-cms-btn="join.cta2">Vendor Registration</a>
-          <a href="/sponsors" class="btn" data-cms-btn="join.cta3">Sponsor Opportunities</a>
-          <a href="/speakers" class="btn" data-cms-btn="join.cta4">Apply To Speak</a>
-          <a href="/djs" class="btn" data-cms-btn="join.cta7">Perform / DJ</a>
-          <a href="/profile/new" class="btn" data-cms-btn="join.cta5">Create Your Profile</a>
-          <a href="/feed" class="btn" data-cms-btn="join.cta8">Community Feed</a>
-          <a href="/directory" class="btn btn-secondary" data-cms-btn="join.cta6">Browse The Directory</a>
-        </div>
-      </div>
-    </section>
-    <section id="venue" class="section section-muted">
-      <div class="container">
-        <h2 data-cms="venue.title">Bayfront Convention Center</h2>
-        <p data-cms="venue.body">A premier waterfront venue overlooking Presque Isle Bay.</p>
-      </div>
-    </section>
-    <section id="schedule" class="section section-muted-2">
-      <div class="container">
-        <h2 data-cms="schedule.title">Event Schedule Preview</h2>
-        <div class="grid">
-          <div class="card"><h3 data-cms="schedule.c1">Education Station</h3></div>
-          <div class="card"><h3 data-cms="schedule.c2">Exploration Station</h3></div>
-          <div class="card"><h3 data-cms="schedule.c3">Elevation Station</h3></div>
-        </div>
-      </div>
-    </section>
-    <section id="entertainment" class="section section-muted-2">
-      <div class="container">
-        <h2 data-cms="entertainment.title">DJs &amp; Live Entertainment</h2>
-        <p data-cms="entertainment.body">Music all day on the bay — DJs, live bands and performers keeping the energy high across the event.</p>
-        <div id="homepage-entertainment"></div>
-        <div class="buttons" role="group" aria-label="Entertainment actions">
-          <a href="/djs" class="btn" data-cms-btn="entertainment.cta">Apply to Perform</a>
-          <a href="/directory?role=dj" class="btn btn-secondary" data-cms-btn="entertainment.cta2">Meet the Lineup</a>
-        </div>
-      </div>
-    </section>
-    <section id="sponsor-banner" class="section" aria-label="Sponsored message">
-      <div class="container">
-        <div data-ad-slot="homepage_banner" hidden></div>
-      </div>
-    </section>
+    <section id="proof" class="proof"><div class="shell split"><div><p class="eyebrow">Proof before promises</p><h2>Bak’d On The Bay is the first ecosystem powered by Beslyfe.</h2><p>One event became a connected platform for participants, businesses, community, operations, and measurable opportunity.</p></div><a class="button secondary" href="https://cannadispo.com" rel="noopener">See the proof ecosystem</a></div></section>
+    <section id="principles" class="section shell"><p class="eyebrow">Built on trust</p><h2>Intelligence should serve people.</h2><div class="principles"><p>Explain every recommendation.</p><p>Ask before consequential action.</p><p>Give people control of their data.</p><p>Optimize for outcomes, not addiction.</p></div></section>
+    <section class="cta shell"><h2>Better systems create better chances.</h2><p>Beslyfe is building the infrastructure for communities where the right people can find one another and do something meaningful together.</p><a class="button" href="mailto:hello@beslyfe.com">Build with Beslyfe</a></section>
   </main>
-
-  <footer role="contentinfo">
-    <div class="container">
-      <h2 data-cms="footer.title">Bak'd On The Bay</h2>
-      <p data-cms="footer.line1">Hosted by Hemptations LLP</p>
-      <p data-cms="footer.line2">Bayfront Convention Center • Erie, Pennsylvania</p>
-      <p data-cms="footer.line3">© 2026 Bak'd On The Bay</p>
-    </div>
-  </footer>
-
-  <button id="menuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">Menu</button>
-
-  <script src="platform-theme.js"></script>
-  <script src="homepage-admin-state.js"></script>
-  <script src="bay-session.js"></script>
-  <script src="assets/js/main.js"></script>
-  <script src="homepage-showcase.js"></script>
-  <script src="homepage-education.js"></script>
-  <script src="assets/js/ads.js" defer></script>
-  <!-- The section order above already matches the admin's published order, so
-       the page renders correctly in one pass. homepage-admin-state.js only
-       re-applies the order at runtime if an admin later changes it. -->
+  <footer><div class="shell"><a class="brand" href="/">beslyfe<span>.</span></a><p>Software for human opportunity.</p><nav aria-label="Legal and company"><a href="/manifesto">Manifesto</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>© 2026 Beslyfe. All rights reserved.</small></div></footer>
 </body>
 </html>

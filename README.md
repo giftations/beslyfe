@@ -30,3 +30,8 @@ npm test
 - [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md)
 - [`docs/PRODUCT_IDENTITY_BOUNDARIES.md`](docs/PRODUCT_IDENTITY_BOUNDARIES.md)
 - [`docs/PULL_REQUEST_WORKFLOW.md`](docs/PULL_REQUEST_WORKFLOW.md)
+- [`platform/automation/execution-contract.mjs`](platform/automation/execution-contract.mjs) — internal, external, and hybrid automation authority.
+
+## Release boundary
+
+This repository is ready to publish the Beslyfe platform identity and reusable contracts, but it must not replace or deploy over the Bak'd On The Bay Netlify site. Connect `beslyfe.com` only to a separate platform site after DNS, apex/`www` HTTPS, canonical URLs, legal pages, and rollback are verified.

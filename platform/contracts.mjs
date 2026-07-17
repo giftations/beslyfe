@@ -38,8 +38,10 @@ import { dataPortabilityContractSummary } from './data/portability-contract.mjs'
 import { importContractSummary } from './lifecycle/import-contract.mjs'
 import { migrationContractSummary } from './lifecycle/migration-contract.mjs'
 import { releaseGateContractSummary } from './lifecycle/release-gate-contract.mjs'
+import { automationExecutionContract } from './automation/execution-contract.mjs'
 
 export const PLATFORM_CONTRACT_REGISTRY = {
+  automationExecution: automationExecutionContract,
   modules: MODULES,
   ecosystemConfiguration: ecosystemConfigChecklist(),
   accessApplications: accessApplicationContractSummary(),

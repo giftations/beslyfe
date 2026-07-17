@@ -41,6 +41,9 @@
 
 /education           /education-schedule.html            200
 /manifesto           /manifesto.html                     200
+/constitution        /CONSTITUTION.md                    200
+/privacy             /privacy.html                       200
+/terms               /terms.html                         200
 
 # Interactive, to-scale floor plan
 /floorplan           /floorplan.html                     200
