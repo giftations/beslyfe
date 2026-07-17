@@ -7,6 +7,7 @@ const home = read('index.html')
 test('public homepage presents Beslyfe rather than the proof event', () => {
   assert.match(home, /Beslyfe — The Community Operating System/)
   assert.match(home, /https:\/\/beslyfe\.com\//)
+  assert.match(home, /beslyfe-social-preview\.png/)
   assert.match(home, /Bak’d On The Bay is the first ecosystem powered by Beslyfe/)
   assert.doesNotMatch(home, /Get Tickets|Vendor Registration|Bayfront Convention Center/)
 })

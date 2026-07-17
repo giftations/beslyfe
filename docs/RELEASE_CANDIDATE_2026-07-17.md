@@ -17,7 +17,7 @@
 - Create or select a Netlify site dedicated to Beslyfe. Never attach this repo to the Bak'd/Cannadispo production site.
 - Point `beslyfe.com` and `www.beslyfe.com` to that dedicated site and verify HTTPS.
 - Confirm `www` redirects to the chosen canonical apex host.
-- Add a platform-specific social preview image before announcing broadly.
+- Confirm the platform-specific social preview image renders correctly on the deployed URL.
 - Visually verify desktop and mobile layouts in the deployed preview.
 - Verify every public route, canonical URL, privacy/terms page, and mail link.
 - Confirm rollback to the previous dedicated Beslyfe deploy.
