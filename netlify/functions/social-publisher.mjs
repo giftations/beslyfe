@@ -3,6 +3,7 @@ import { getDatabase } from '@netlify/database'
 import { json, readJsonBody, recordAudit, requireAdmin, requireSameOrigin } from './lib/session.mjs'
 import {
   bootstrapFacebookConnection,
+  SOCIAL_CAMPAIGNS,
   LAUNCH_CAMPAIGN,
   publishCampaign,
   readPublishingState,
@@ -61,6 +62,19 @@ export default async (req) => {
       details: { results: Object.fromEntries(Object.entries(results).map(([key, value]) => [key, { ok: value.ok, status: value.status, externalId: value.externalId || '' }])) },
     })
     return json({ ok: Object.values(results).some((result) => result.ok), results })
+  }
+
+  if (body.action === 'publish-campaign') {
+    const campaign = SOCIAL_CAMPAIGNS.find((item) => item.id === String(body.campaignId || ''))
+    if (!campaign) return json({ error: 'Unknown social campaign.' }, 404)
+    const results = await publishCampaign(db, campaign, env)
+    await recordAudit(db, req, admin, {
+      action: 'social.campaign.publish',
+      resourceType: 'social_campaign',
+      resourceId: campaign.id,
+      details: { results: Object.fromEntries(Object.entries(results).map(([key, value]) => [key, { ok: value.ok, status: value.status, externalId: value.externalId || '' }])) },
+    })
+    return json({ ok: Object.values(results).some((result) => result.ok), campaignId: campaign.id, results })
   }
 
   return json({ error: 'Unknown social publishing action.' }, 400)

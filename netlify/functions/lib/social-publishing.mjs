@@ -173,11 +173,19 @@ export async function publishFacebook(connection, content = {}, env = {}, fetchI
   const appSecret = String(env.META_APP_SECRET || '').trim()
   if (!connection?.pageId || !pageToken || !appSecret) throw new Error('Facebook Page publishing is not connected.')
   const body = new URLSearchParams()
-  body.set('message', String(content.text || '').slice(0, 10000))
-  if (content.linkUrl) body.set('link', String(content.linkUrl))
+  const text = String(content.text || '').slice(0, 10000)
+  const imageUrl = String(content.imageUrl || '').trim()
+  if (imageUrl) {
+    body.set('url', imageUrl)
+    body.set('caption', text)
+    body.set('published', 'true')
+  } else {
+    body.set('message', text)
+    if (content.linkUrl) body.set('link', String(content.linkUrl))
+  }
   body.set('access_token', pageToken)
   body.set('appsecret_proof', appSecretProof(pageToken, appSecret))
-  const result = await checkedFetch(metaUrl(`${connection.pageId}/feed`, env), {
+  const result = await checkedFetch(metaUrl(`${connection.pageId}/${imageUrl ? 'photos' : 'feed'}`, env), {
     method: 'POST',
     headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
@@ -191,8 +199,10 @@ export async function publishInstagram(content = {}, env = {}, fetchImpl = fetch
   if (!userId || !token) throw new Error('Instagram publishing is not connected.')
   if (!content.imageUrl) throw new Error('Instagram launch publishing requires a public image URL.')
   const create = new URLSearchParams()
+  const placement = String(content.instagramPlacement || 'feed').toLowerCase()
   create.set('image_url', String(content.imageUrl))
-  create.set('caption', String(content.text || '').slice(0, 2200))
+  if (placement === 'story') create.set('media_type', 'STORIES')
+  else create.set('caption', String(content.text || '').slice(0, 2200))
   create.set('access_token', token)
   const container = await checkedFetch(`https://graph.instagram.com/${metaVersion(env)}/${userId}/media`, {
     method: 'POST',
@@ -216,8 +226,13 @@ export async function publishThreads(content = {}, env = {}, fetchImpl = fetch) 
   const token = String(env.THREADS_ACCESS_TOKEN || '').trim()
   if (!userId || !token) throw new Error('Threads publishing is not connected.')
   const create = new URLSearchParams()
-  create.set('media_type', 'TEXT')
+  const imageUrl = String(content.imageUrl || '').trim()
+  create.set('media_type', imageUrl ? 'IMAGE' : 'TEXT')
   create.set('text', String(content.text || '').slice(0, 500))
+  if (imageUrl) {
+    create.set('image_url', imageUrl)
+    create.set('alt_text', String(content.altText || 'Beslyfe campaign image').slice(0, 1000))
+  }
   create.set('access_token', token)
   const container = await checkedFetch(`https://graph.threads.net/${threadsVersion(env)}/${userId}/threads`, {
     method: 'POST',
@@ -261,6 +276,13 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
   const state = await readPublishingState(db)
   const requested = Array.isArray(campaign.channels) ? campaign.channels : ['facebook', 'instagram', 'threads']
   const results = {}
+  const publishAt = Date.parse(String(campaign.publishAfter || ''))
+  if (Number.isFinite(publishAt) && publishAt > Date.now()) {
+    for (const channel of requested) {
+      results[channel] = { ok: true, skipped: true, status: 'scheduled', publishAfter: campaign.publishAfter }
+    }
+    return results
+  }
   for (const channel of requested) {
     const key = `${campaign.id}:${channel}`
     const previous = cleanObject(state.deliveries[key])
@@ -269,10 +291,12 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
       continue
     }
     try {
+      const override = cleanObject(cleanObject(campaign.channelContent)[channel])
+      const content = { ...campaign, ...override }
       let published
-      if (channel === 'facebook') published = await publishFacebook(state.connections.facebook, campaign, env, fetchImpl)
-      else if (channel === 'instagram') published = await publishInstagram(campaign, env, fetchImpl)
-      else if (channel === 'threads') published = await publishThreads(campaign, env, fetchImpl)
+      if (channel === 'facebook') published = await publishFacebook(state.connections.facebook, content, env, fetchImpl)
+      else if (channel === 'instagram') published = await publishInstagram(content, env, fetchImpl)
+      else if (channel === 'threads') published = await publishThreads(content, env, fetchImpl)
       else throw new Error('Unsupported social channel.')
       const record = { status: 'published', publishedAt: new Date().toISOString(), externalId: published.id, url: published.url }
       state.deliveries[key] = record
@@ -298,3 +322,45 @@ export const LAUNCH_CAMPAIGN = Object.freeze({
   linkUrl: 'https://beslyfe.com/?utm_source=facebook&utm_medium=organic&utm_campaign=beslyfe_launch',
   channels: ['facebook', 'instagram', 'threads'],
 })
+
+export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
+  Object.freeze({
+    id: 'beslyfe-free-opportunity-01-first-step-2026-07-18',
+    publishAfter: '2026-07-18T20:30:00Z',
+    text: 'What if the idea you keep thinking about had somewhere to begin?\n\nBeslyfe is 100% free. Bring the dream—a blog, creative career, online store, retail operation, property-management system, community, event, or something nobody has named yet. Beslyfe helps you shape it, connect it, and automate repetitive work so you can spend more time doing what you love.\n\nStart free at https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step\n\n#Beslyfe #BuildYourFuture #FreeOpportunity #GrowTogether',
+    imageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-first-step-v1.png',
+    linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step',
+    altText: 'A creator takes the first step on an idea while a warm, connected path opens toward future work and community.',
+    channels: ['facebook', 'instagram', 'threads'],
+    channelContent: {
+      threads: {
+        text: 'Your idea deserves somewhere to begin. Beslyfe is 100% free—bring the dream, shape the plan, connect with people, and automate repetitive work so you can spend more time doing what you love. Start at https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step #Beslyfe #GrowTogether',
+      },
+    },
+  }),
+  Object.freeze({
+    id: 'beslyfe-free-opportunity-02-story-2026-07-20',
+    publishAfter: '2026-07-20T14:00:00Z',
+    text: 'Your idea deserves a beginning. Beslyfe is 100% free to join.',
+    imageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-story-v1.png',
+    altText: 'A glowing path connects a first creative workspace to businesses, collaborators, and a hopeful future.',
+    instagramPlacement: 'story',
+    channels: ['instagram'],
+  }),
+  Object.freeze({
+    id: 'beslyfe-free-opportunity-03-community-2026-07-22',
+    publishAfter: '2026-07-22T14:00:00Z',
+    text: 'Big changes rarely begin with a perfect plan. They begin when somebody shares the idea, asks a useful question, and finds people willing to help.\n\nBeslyfe gives builders, creators, business owners, organizers, and dreamers a 100% free place to begin—and a growing community to move forward with.\n\nBring what you hope to build: https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together\n\n#Beslyfe #GrowTogether #BuildInPublic #Community',
+    imageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-community-v1.png',
+    linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together',
+    altText: 'A warm, diverse group helps one another turn creative and business ideas into practical next steps.',
+    channels: ['facebook', 'instagram', 'threads'],
+    channelContent: {
+      threads: {
+        text: 'Big changes rarely begin with a perfect plan. They begin when someone shares the idea, asks a useful question, and finds people willing to help. Beslyfe is a 100% free place to begin—and a growing community to move forward with. https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together #Beslyfe #GrowTogether',
+      },
+    },
+  }),
+])
+
+export const SOCIAL_CAMPAIGNS = Object.freeze([LAUNCH_CAMPAIGN, ...FREE_OPPORTUNITY_CAMPAIGNS])
