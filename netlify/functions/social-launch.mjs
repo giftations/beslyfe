@@ -2,6 +2,7 @@ import { getDatabase } from '@netlify/database'
 
 import {
   bootstrapFacebookConnection,
+  SOCIAL_CAMPAIGNS,
   LAUNCH_CAMPAIGN,
   publishCampaign,
   readPublishingState,
@@ -10,7 +11,18 @@ import {
 
 export const config = { schedule: '*/5 * * * *' }
 
-function publicRunSummary({ bootstrap, readiness, results }) {
+function safeResults(results = {}) {
+  return Object.fromEntries(Object.entries(results).map(([channel, result]) => [channel, {
+    ok: result.ok,
+    skipped: !!result.skipped,
+    status: result.status,
+    error: result.error || '',
+    externalId: result.externalId || '',
+    publishAfter: result.publishAfter || '',
+  }]))
+}
+
+function publicRunSummary({ bootstrap, readiness, campaigns }) {
   return {
     bootstrap: {
       attempted: bootstrap.attempted,
@@ -21,7 +33,7 @@ function publicRunSummary({ bootstrap, readiness, results }) {
       facebook: {
         ready: readiness.facebook.ready,
         bootstrapReady: readiness.facebook.bootstrapReady,
-        pageName: readiness.facebook.pageName,
+        pageName: readiness.facebook.account,
       },
       instagram: {
         ready: readiness.instagram.ready,
@@ -33,13 +45,8 @@ function publicRunSummary({ bootstrap, readiness, results }) {
         appReady: readiness.threads.appReady,
       },
     },
-    results: Object.fromEntries(Object.entries(results).map(([channel, result]) => [channel, {
-      ok: result.ok,
-      skipped: !!result.skipped,
-      status: result.status,
-      error: result.error || '',
-      externalId: result.externalId || '',
-    }])),
+    results: safeResults(campaigns[LAUNCH_CAMPAIGN.id]),
+    campaigns: Object.fromEntries(Object.entries(campaigns).map(([id, results]) => [id, safeResults(results)])),
   }
 }
 
@@ -62,9 +69,11 @@ export default async () => {
     }
   }
 
-  const results = await publishCampaign(db, LAUNCH_CAMPAIGN, env)
-  console.info('social-launch result', JSON.stringify(publicRunSummary({ bootstrap, readiness, results })))
-  return new Response(JSON.stringify({ ok: true, bootstrap, readiness, results }), {
+  const campaigns = {}
+  for (const campaign of SOCIAL_CAMPAIGNS) campaigns[campaign.id] = await publishCampaign(db, campaign, env)
+  const summary = publicRunSummary({ bootstrap, readiness, campaigns })
+  console.info('social-launch result', JSON.stringify(summary))
+  return new Response(JSON.stringify({ ok: true, bootstrap, readiness, ...summary }), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
   })
 }
