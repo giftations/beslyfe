@@ -141,7 +141,7 @@ export default async (req) => {
 
     if (type === 'network-stats') {
       const [members, posts, reels, ecosystems, wins] = await Promise.all([
-        db.sql`SELECT COUNT(*)::int AS n FROM profiles WHERE status = 'approved'`,
+        db.sql`SELECT COUNT(*)::int AS n FROM profiles WHERE status = 'approved' AND COALESCE(details->>'hidden', 'false') <> 'true'`,
         db.sql`SELECT COUNT(*)::int AS n FROM social_posts WHERE visibility = 'public' AND post_type IN ('post', 'reel')`,
         db.sql`SELECT COUNT(*)::int AS n FROM social_posts WHERE visibility = 'public' AND post_type = 'reel'`,
         db.sql`SELECT COUNT(*)::int AS n FROM ecosystems WHERE status = 'active' AND visibility = 'public'`,

@@ -6,6 +6,7 @@ import {
   timingSafeEqualHex, readJsonBody, ensureProfileForAccountId, ensureNetworkMembership,
 } from './lib/session.mjs'
 import { VERIFIED_SENDER, sendEmail } from './lib/email.mjs'
+import { welcomeVerifiedMember } from './lib/community-care.mjs'
 
 // Account authentication for Beslyfe. An account is a single login
 // credential (email + password) bound to exactly one community profile, so a
@@ -645,6 +646,9 @@ export default async (req) => {
     if (account.profile_id) {
       await db.sql`UPDATE profiles SET "status" = 'approved', "updated_at" = ${nowIso} WHERE "id" = ${account.profile_id}`
       await ensureNetworkMembership(db, account.profile_id, 'signup')
+      try {
+        await welcomeVerifiedMember(db, { profileId: account.profile_id, displayName: account.name, now: new Date(nowIso) })
+      } catch { /* A welcome-post problem must never block account verification. */ }
     }
     await db.sql`UPDATE email_verifications SET "used_at" = ${nowIso} WHERE "token_hash" = ${tokenHash}`
     await db.sql`DELETE FROM email_verifications WHERE "account_id" = ${account.id} AND "token_hash" <> ${tokenHash}`
