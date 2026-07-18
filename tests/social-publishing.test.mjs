@@ -4,11 +4,14 @@ import { existsSync } from 'node:fs'
 
 import {
   appSecretProof,
+  campaignDeliveryPlan,
   chooseManagedPage,
   decryptSocialToken,
   encryptSocialToken,
   FREE_OPPORTUNITY_CAMPAIGNS,
   LAUNCH_CAMPAIGN,
+  publishCampaign,
+  publishFacebookStory,
   publishInstagram,
   publishThreads,
   SOCIAL_CAMPAIGNS,
@@ -72,9 +75,87 @@ test('free-opportunity campaign is paced, count-free, and uses committed creativ
     assert.doesNotMatch(JSON.stringify(campaign), /\b\d+\s+(?:members|users|followers)\b/i)
     assert.match(campaign.imageUrl, /^https:\/\/beslyfe\.com\/assets\/images\/campaigns\//)
     assert.equal(existsSync(new URL(`..${new URL(campaign.imageUrl).pathname}`, import.meta.url)), true)
+    if (campaign.instagramPlacement !== 'story') {
+      assert.match(campaign.storyImageUrl, /^https:\/\/beslyfe\.com\/assets\/images\/campaigns\//)
+      assert.equal(existsSync(new URL(`..${new URL(campaign.storyImageUrl).pathname}`, import.meta.url)), true)
+    }
     assert.ok(campaign.publishAfter)
   }
   assert.equal(FREE_OPPORTUNITY_CAMPAIGNS[1].instagramPlacement, 'story')
+})
+
+test('feed campaigns automatically receive separate Facebook and Instagram Story deliveries', () => {
+  assert.deepEqual(campaignDeliveryPlan({ channels: ['facebook', 'instagram', 'threads'] }), [
+    { key: 'facebook', publisher: 'facebook', placement: 'feed' },
+    { key: 'facebook_story', publisher: 'facebook', placement: 'story' },
+    { key: 'instagram', publisher: 'instagram', placement: 'feed' },
+    { key: 'instagram_story', publisher: 'instagram', placement: 'story' },
+    { key: 'threads', publisher: 'threads', placement: 'feed' },
+  ])
+  assert.deepEqual(campaignDeliveryPlan({ channels: ['instagram'], instagramPlacement: 'story' }), [
+    { key: 'instagram', publisher: 'instagram', placement: 'story' },
+  ])
+})
+
+test('Facebook Story publishing creates an unpublished photo then a Page Story', async () => {
+  const calls = []
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), body: String(options.body || '') })
+    return { ok: true, status: 200, json: async () => calls.length === 1 ? ({ id: 'photo-1' }) : ({ post_id: 'story-1' }) }
+  }
+  const encrypted = encryptSocialToken('page-token', 'state-secret', 'facebook:page-1')
+  const result = await publishFacebookStory({ pageId: 'page-1', token: encrypted }, {
+    imageUrl: 'https://beslyfe.com/story.png',
+  }, { META_APP_SECRET: 'app-secret', SOCIAL_OAUTH_STATE_SECRET: 'state-secret' }, fetchImpl)
+  assert.equal(result.id, 'story-1')
+  assert.match(calls[0].url, /page-1\/photos$/)
+  assert.match(calls[0].body, /published=false/)
+  assert.match(calls[1].url, /page-1\/photo_stories$/)
+  assert.match(calls[1].body, /photo_id=photo-1/)
+})
+
+test('Instagram feed and Story companions publish once under separate idempotency keys', async () => {
+  let storedState = null
+  const db = {
+    sql: async (strings, ...values) => {
+      const query = strings.join('?')
+      if (query.includes('SELECT "data" FROM site_settings')) return storedState ? [{ data: storedState }] : []
+      if (query.includes('INSERT INTO site_settings')) {
+        storedState = JSON.parse(values[1])
+        return []
+      }
+      throw new Error(`Unexpected query: ${query}`)
+    },
+  }
+  const calls = []
+  const fetchImpl = async (url, options) => {
+    const href = String(url)
+    const body = String(options.body || '')
+    calls.push({ href, body })
+    if (href.includes('fields=status_code')) return { ok: true, status: 200, json: async () => ({ status_code: 'FINISHED' }) }
+    if (href.includes('/media_publish')) return { ok: true, status: 200, json: async () => ({ id: `published-${calls.length}` }) }
+    return { ok: true, status: 200, json: async () => ({ id: `container-${calls.length}` }) }
+  }
+  const campaign = {
+    id: 'campaign-with-story',
+    channels: ['instagram'],
+    text: 'Feed caption',
+    imageUrl: 'https://beslyfe.com/feed.png',
+    storyImageUrl: 'https://beslyfe.com/story.png',
+  }
+  const env = { INSTAGRAM_USER_ID: 'ig', INSTAGRAM_ACCESS_TOKEN: 'token' }
+  const first = await publishCampaign(db, campaign, env, fetchImpl)
+  assert.equal(first.instagram.status, 'published')
+  assert.equal(first.instagram_story.status, 'published')
+  assert.match(calls[0].body, /image_url=https%3A%2F%2Fbeslyfe.com%2Ffeed.png/)
+  assert.doesNotMatch(calls[0].body, /media_type=STORIES/)
+  assert.match(calls[3].body, /image_url=https%3A%2F%2Fbeslyfe.com%2Fstory.png/)
+  assert.match(calls[3].body, /media_type=STORIES/)
+  const callCount = calls.length
+  const second = await publishCampaign(db, campaign, env, fetchImpl)
+  assert.equal(second.instagram.skipped, true)
+  assert.equal(second.instagram_story.skipped, true)
+  assert.equal(calls.length, callCount)
 })
 
 test('Instagram story and Threads image publishing use their media containers', async () => {

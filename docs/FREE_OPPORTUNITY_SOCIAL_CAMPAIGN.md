@@ -19,11 +19,11 @@ Beslyfe is a 100% free place to turn a hope, skill, business idea, creative prac
 
 | Date (UTC) | Placement | Theme | Creative |
 | --- | --- | --- | --- |
-| July 18, 20:30 | Instagram feed; Facebook and Threads when connected | Your idea has somewhere to begin | `beslyfe-free-opportunity-first-step-v1.png` |
+| July 18, 20:30 | Instagram feed + Story; Facebook feed + Story and Threads when connected | Your idea has somewhere to begin | `beslyfe-free-opportunity-first-step-v1.png` + `beslyfe-free-opportunity-story-v1.png` |
 | July 20, 14:00 | Instagram Story | Your idea deserves a beginning | `beslyfe-free-opportunity-story-v1.png` |
-| July 22, 14:00 | Instagram feed; Facebook and Threads when connected | Big changes grow through people | `beslyfe-free-opportunity-community-v1.png` |
+| July 22, 14:00 | Instagram feed + Story; Facebook feed + Story and Threads when connected | Big changes grow through people | `beslyfe-free-opportunity-community-v1.png` + `beslyfe-free-opportunity-journey-vertical-v1.png` |
 
-Delivery keys are campaign ID plus channel. A published delivery is never posted twice, even though the scheduler checks every five minutes.
+Feed campaigns automatically create separate Story deliveries on Instagram and Facebook. Delivery keys are campaign ID plus placement (`instagram`, `instagram_story`, `facebook`, or `facebook_story`), so a published feed or Story is never posted twice even though the scheduler checks every five minutes. Threads has no Story placement in this publisher.
 
 ## Channel readiness audited July 18, 2026
 
