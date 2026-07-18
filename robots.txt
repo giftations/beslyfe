@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /.netlify/functions/
+
+Sitemap: https://beslyfe.com/sitemap.xml
+
