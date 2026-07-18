@@ -1,18 +1,18 @@
 # Beslyfe
 
-Beslyfe is the parent platform and long-term vision repository.
+Beslyfe is the parent platform, company, and dedicated public platform
+repository.
 
 The production Bak'd On The Bay implementation lives in
 [`giftations/bakd-on-the-bay`](https://github.com/giftations/bakd-on-the-bay).
-Do not connect Netlify production to this repository.
+`beslyfe.com` is hosted from this repository on its own dedicated Netlify site.
+Do not connect this repository to the Bak'd On The Bay/Cannadispo Netlify site.
 
-This repo should stay focused on the Beslyfe Constitution, Manifesto, AI
-principles, platform architecture, ecosystem contracts, roadmap, governance, and
-other reusable platform decisions.
-
-Completed implementation work that belongs in production should be moved into
-`giftations/bakd-on-the-bay` through a focused pull request, then validated
-against the live Netlify assumptions for `cannadispo.com`.
+This repository owns the Beslyfe public product surface, reusable platform
+contracts and runtime, roadmap, governance, trust and AI standards, and shared
+ecosystem architecture. Bak'd-specific content and operating workflows belong
+in `giftations/bakd-on-the-bay`; reusable Beslyfe capability belongs here and
+must be consumed through configuration rather than copied between products.
 
 ## Development
 
@@ -27,11 +27,16 @@ npm test
 ## Platform References
 
 - [`docs/PLATFORM_ARCHITECTURE.md`](docs/PLATFORM_ARCHITECTURE.md)
-- [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md)
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — authoritative product and platform roadmap.
+- [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md) — compatibility pointer for the original incomplete plan.
 - [`docs/PRODUCT_IDENTITY_BOUNDARIES.md`](docs/PRODUCT_IDENTITY_BOUNDARIES.md)
 - [`docs/PULL_REQUEST_WORKFLOW.md`](docs/PULL_REQUEST_WORKFLOW.md)
 - [`platform/automation/execution-contract.mjs`](platform/automation/execution-contract.mjs) — internal, external, and hybrid automation authority.
 
 ## Release boundary
 
-This repository is ready to publish the Beslyfe platform identity and reusable contracts, but it must not replace or deploy over the Bak'd On The Bay Netlify site. Connect `beslyfe.com` only to a separate platform site after DNS, apex/`www` HTTPS, canonical URLs, legal pages, and rollback are verified.
+This repository publishes the Beslyfe platform identity and reusable contracts
+to the dedicated Beslyfe Netlify site. It must never replace or deploy over the
+Bak'd On The Bay/Cannadispo site. Future releases must preserve dedicated
+hosting, apex/`www` HTTPS, canonical URLs, legal pages, observability, and a
+verified rollback path.

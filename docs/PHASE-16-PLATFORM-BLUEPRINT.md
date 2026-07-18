@@ -1,4 +1,10 @@
-# Phase 16 Platform Blueprint
+# Historical Event OS Blueprint
+
+> Historical input, not an active numbered phase. The reusable ideas in this
+> brief are incorporated into the authoritative
+> [`Beslyfe Product and Platform Roadmap`](ROADMAP.md), principally Phases 1, 4,
+> 8, and 10. The roadmap is the source of truth for status, dependencies, owners,
+> metrics, and release gates.
 
 ## Purpose
 Transform the current Bak'd On The Bay codebase into a reusable Event Operating System.
