@@ -26,6 +26,7 @@
     dataExport: '/.netlify/functions/data-export',
     traffic: '/.netlify/functions/traffic',
     ecosystems: '/.netlify/functions/ecosystems',
+    socialPublisher: '/.netlify/functions/social-publisher',
   };
 
   // ── Session gate ──────────────────────────────────────────────────────────
@@ -185,6 +186,7 @@
     { id: 'crm', label: 'CRM' },
     { id: 'optional-event', label: 'Optional Event Tools' },
     { id: 'advertising', label: 'Advertising' },
+    { id: 'growth', label: 'Growth & Publishing' },
     { id: 'overview', label: 'Overview' },
     { id: 'website', label: 'Website' },
     { id: 'people', label: 'People & Applications' },
@@ -201,6 +203,7 @@
     { id: 'ads-campaigns', label: 'Campaigns', icon: '📣', group: 'advertising', render: renderAdCampaigns },
     { id: 'ads-reports', label: 'Ad Reports', icon: '📊', group: 'advertising', render: renderAdReports },
     { id: 'ads-invoices', label: 'Invoices', icon: '🧾', group: 'advertising', render: renderAdInvoices },
+    { id: 'social-publishing', label: 'Social Publisher', icon: '↗', group: 'growth', render: renderSocialPublishing },
     { id: 'dashboard', label: 'Dashboard', icon: '📊', group: 'overview', render: renderDashboard },
     { id: 'executive', label: 'Executive', icon: '🧭', group: 'overview', render: renderExecutive },
     { id: 'analytics', label: 'Analytics', icon: '📈', group: 'overview', render: renderAnalytics },
@@ -1471,6 +1474,50 @@
   }
 
   // ── Settings ───────────────────────────────────────────────────────────────
+  function renderSocialPublishing(host) {
+    host.innerHTML = pageHead('Social Publisher', 'Connect Beslyfe once, then deliver each approved campaign across Facebook, Instagram, Threads, TikTok and X without duplicates.') +
+      '<div class="card mb-4"><div class="flex between"><div><div class="card-title">Five-network connection</div><p class="muted small">Access tokens are encrypted at rest. Facebook and Instagram feed posts also receive separate Story delivery.</p></div><button class="btn brand" id="spPublish">Publish due campaigns</button></div></div>' +
+      '<div class="grid cols-2" id="spNetworks">' + loadingList() + '</div>' +
+      '<div class="card mt-4"><div class="card-title">Delivery log <button class="btn ghost sm" id="spRefresh">↻ Refresh</button></div><div id="spDeliveries">' + loadingList() + '</div></div>';
+
+    var labels = { facebook: 'Facebook Page', instagram: 'Instagram', threads: 'Threads', tiktok: 'TikTok', x: 'X / Twitter' };
+    var oauth = { facebook: true, threads: true, tiktok: true, x: true };
+    function load() {
+      api(API.socialPublisher).then(function (data) {
+        var readiness = data.readiness || {};
+        $('#spNetworks', host).innerHTML = ['facebook', 'instagram', 'threads', 'tiktok', 'x'].map(function (key) {
+          var status = readiness[key] || {}, connected = !!status.ready;
+          var account = status.account ? '@' + String(status.account).replace(/^@/, '') : 'No account connected';
+          var note = key === 'tiktok' && connected && !status.publicPostingApproved
+            ? 'Connected, but public Direct Post remains locked until TikTok approves the app audit.'
+            : key === 'instagram' ? 'Connected through the production Meta publishing token.'
+            : connected ? 'Ready for automatic campaign delivery.'
+            : status.appReady === false ? 'Provider app credentials still need to be added.' : 'Authorize the Beslyfe account.';
+          return '<div class="card"><div class="flex between"><div><div class="card-title">' + esc(labels[key]) + '</div><div class="meta">' + esc(account) + '</div></div><span class="badge ' + (connected ? 'approved' : 'neutral') + '">' + (connected ? 'Connected' : 'Not connected') + '</span></div>' +
+            '<p class="muted small mt-4">' + esc(note) + '</p>' +
+            (oauth[key] ? '<a class="btn ' + (connected ? 'ghost' : 'brand') + ' sm" href="/.netlify/functions/social-oauth?provider=' + key + '">' + (connected ? 'Reconnect' : 'Connect') + ' ' + esc(labels[key]) + '</a>' : '') + '</div>';
+        }).join('');
+        var rows = Object.keys(data.deliveries || {}).sort().reverse().slice(0, 80).map(function (key) {
+          var item = data.deliveries[key] || {}, badge = item.status === 'published' ? 'approved' : (item.status === 'failed' ? 'rejected' : 'neutral');
+          return '<div class="row"><div class="grow"><div class="name">' + esc(key) + '</div><div class="meta">' + esc(item.publishedAt || item.attemptedAt || '') + (item.error ? ' · ' + esc(item.error) : '') + '</div></div>' +
+            (item.url ? '<a class="btn ghost sm" href="' + esc(item.url) + '" target="_blank" rel="noopener">Open</a>' : '') + '<span class="badge ' + badge + '">' + esc(item.status || 'pending') + '</span></div>';
+        });
+        $('#spDeliveries', host).innerHTML = rows.length ? '<div class="list">' + rows.join('') + '</div>' : emptyState('↗', 'No deliveries yet', 'Due campaigns will appear here after the publisher runs.');
+      }).catch(function (error) {
+        $('#spNetworks', host).innerHTML = errorBox(error.message); $('#spDeliveries', host).innerHTML = errorBox(error.message);
+      });
+    }
+    $('#spRefresh', host).onclick = load;
+    $('#spPublish', host).onclick = function () {
+      var button = this; button.disabled = true; button.textContent = 'Publishing…';
+      api(API.socialPublisher, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'publish-launch' }) })
+        .then(function () { toast('Publisher finished safely', { type: 'ok' }); load(); })
+        .catch(function (error) { toast(error.message, { type: 'err' }); })
+        .finally(function () { button.disabled = false; button.textContent = 'Publish due campaigns'; });
+    };
+    load();
+  }
+
   function renderSettings(host) {
     host.innerHTML = pageHead('Settings', 'Core event configuration that publishes to the live site. Changes autosave.') +
       '<div class="grid cols-2">' +

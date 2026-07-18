@@ -13,11 +13,15 @@ import {
   publishCampaign,
   publishFacebookStory,
   publishInstagram,
+  publishTikTok,
   publishThreads,
+  publishX,
   SOCIAL_CAMPAIGNS,
   socialReadiness,
   waitForInstagramContainer,
 } from '../netlify/functions/lib/social-publishing.mjs'
+import { openOauthState, sealOauthState } from '../netlify/functions/social-oauth.mjs'
+import tiktokOauthHandler from '../netlify/functions/social-oauth-tiktok.mjs'
 import { normalizeTrafficEvent, resolveTrafficWindow } from '../netlify/functions/traffic.mjs'
 
 test('social tokens are encrypted at rest with connection-bound authenticated encryption', () => {
@@ -54,7 +58,7 @@ test('readiness exposes no token material and launch delivery is multi-channel',
   assert.equal(ready.facebook.ready, true)
   assert.equal(ready.instagram.ready, true)
   assert.equal(ready.threads.ready, true)
-  assert.deepEqual(LAUNCH_CAMPAIGN.channels, ['facebook', 'instagram', 'threads'])
+  assert.deepEqual(LAUNCH_CAMPAIGN.channels, ['facebook', 'instagram', 'threads', 'tiktok', 'x'])
   assert.match(LAUNCH_CAMPAIGN.linkUrl, /utm_campaign=beslyfe_launch/)
   assert.doesNotMatch(JSON.stringify(ready), /ig-token|threads-token|ciphertext/)
 })
@@ -185,6 +189,50 @@ test('Instagram story and Threads image publishing use their media containers', 
   assert.match(threadBodies[0], /media_type=IMAGE/)
   assert.match(threadBodies[0], /image_url=/)
   assert.match(threadBodies[0], /alt_text=/)
+})
+
+test('OAuth connection state is encrypted, authenticated, provider-bound, and expiring', () => {
+  const sealed = sealOauthState({ provider: 'x', verifier: 'pkce-secret', expiresAt: Date.now() + 60_000 }, 'state-secret')
+  assert.doesNotMatch(sealed, /pkce-secret|\"provider\"/)
+  assert.equal(openOauthState(sealed, 'state-secret').provider, 'x')
+  assert.throws(() => openOauthState(sealed, 'wrong-secret'), /Invalid/)
+  assert.throws(() => openOauthState(sealed, 'state-secret', Date.now() + 120_000), /Expired/)
+  assert.equal(typeof tiktokOauthHandler, 'function')
+})
+
+test('X publishes through user-context OAuth and returns a canonical post URL', async () => {
+  const calls = []
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), options })
+    return { ok: true, status: 201, json: async () => ({ data: { id: '123', text: 'hello' } }) }
+  }
+  const result = await publishX({ text: 'hello' }, { X_ACCESS_TOKEN: 'token' }, fetchImpl)
+  assert.equal(result.url, 'https://x.com/i/web/status/123')
+  assert.equal(calls[0].url, 'https://api.x.com/2/tweets')
+  assert.equal(JSON.parse(calls[0].options.body).text, 'hello')
+  assert.match(calls[0].options.headers.Authorization, /^Bearer /)
+})
+
+test('TikTok refuses private-only automation and uses the audited photo Direct Post contract', async () => {
+  await assert.rejects(() => publishTikTok({ imageUrl: 'https://beslyfe.com/post.png' }, { TIKTOK_ACCESS_TOKEN: 'token' }, async () => {
+    throw new Error('network should not be called')
+  }), /audit approval/)
+
+  const calls = []
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), options })
+    if (calls.length === 1) return { ok: true, status: 200, json: async () => ({ data: { privacy_level_options: ['PUBLIC_TO_EVERYONE'] }, error: { code: 'ok' } }) }
+    return { ok: true, status: 200, json: async () => ({ data: { publish_id: 'pub-1' }, error: { code: 'ok' } }) }
+  }
+  const result = await publishTikTok({ text: 'Build your future', imageUrl: 'https://beslyfe.com/post.png' }, {
+    TIKTOK_ACCESS_TOKEN: 'token', TIKTOK_PUBLIC_POST_APPROVED: 'true',
+  }, fetchImpl)
+  assert.equal(result.id, 'pub-1')
+  const request = JSON.parse(calls[1].options.body)
+  assert.equal(request.post_mode, 'DIRECT_POST')
+  assert.equal(request.media_type, 'PHOTO')
+  assert.equal(request.post_info.privacy_level, 'PUBLIC_TO_EVERYONE')
+  assert.equal(request.post_info.brand_organic_toggle, true)
 })
 
 test('Instagram waits through processing without publishing early', async () => {
