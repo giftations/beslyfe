@@ -12,6 +12,7 @@ test('public homepage presents Beslyfe rather than the proof event', () => {
   assert.match(home, /Beslyfe - Build, grow, and belong/)
   assert.match(home, /https:\/\/beslyfe\.com\//)
   assert.match(home, /beslyfe-social-preview-v2\.png/)
+  assert.match(home, /https:\/\/www\.tiktok\.com\/@bes_lyfe/)
   assert.match(home, /remains an isolated proof ecosystem/)
   assert.match(home, /Nothing grows alone/)
   assert.match(home, /Ticketing<\/strong><small>Added only when you choose ticket sales/)
