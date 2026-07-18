@@ -36,6 +36,8 @@ test('public launch exposes sign in, admin, and 100% free membership', () => {
 test('Admin OS exposes privacy-safe Beslyfe traffic analytics', () => {
   const admin = read('assets/js/admin-os.js')
   const shell = read('admin/index.html')
+  assert.match(admin, /<b>Beslyfe Admin OS<\/b><small>Platform Control<\/small>/)
+  assert.doesNotMatch(admin, /<b>Bak\\'d Admin OS<\/b>/)
   assert.match(admin, /traffic:\s*'\/\.netlify\/functions\/traffic'/)
   assert.match(admin, /location\.replace\('\/admin\/login'\)/)
   assert.match(shell, /location\.replace\('\/admin\/login'\)/)

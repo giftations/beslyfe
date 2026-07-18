@@ -233,7 +233,7 @@
         '<aside class="side">' +
           '<div class="side-brand">' +
             '<div class="logo">B</div>' +
-            '<div class="txt"><b>Bak\'d Admin OS</b><small>Event Control</small></div>' +
+            '<div class="txt"><b>Beslyfe Admin OS</b><small>Platform Control</small></div>' +
           '</div>' +
           '<nav class="side-nav" id="sideNav"></nav>' +
           '<div class="side-foot">' +
