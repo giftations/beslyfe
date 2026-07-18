@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import {
   COMMUNITY_FEDERATION_PROTOCOL,
   FEDERATION_GUARDRAILS,
@@ -31,4 +32,11 @@ test('Beslyfe public profiles redact private details too', () => {
   const view = publicProfileView({ email: 'private@example.com', details: { phone: '555', products: 'Design' } })
   assert.equal(view.email, '')
   assert.deepEqual(view.details, { products: 'Design' })
+})
+
+test('community copy distinguishes public federation from explicit account linking', () => {
+  const community = readFileSync(new URL('../community.html', import.meta.url), 'utf8')
+  assert.match(community, /One network identity/)
+  assert.match(community, /Account linking is explicit, never assumed\./)
+  assert.doesNotMatch(community, /One account and profile/)
 })
