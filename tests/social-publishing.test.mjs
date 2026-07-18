@@ -9,7 +9,7 @@ import {
   LAUNCH_CAMPAIGN,
   socialReadiness,
 } from '../netlify/functions/lib/social-publishing.mjs'
-import { normalizeTrafficEvent } from '../netlify/functions/traffic.mjs'
+import { normalizeTrafficEvent, resolveTrafficWindow } from '../netlify/functions/traffic.mjs'
 
 test('social tokens are encrypted at rest with connection-bound authenticated encryption', () => {
   const encrypted = encryptSocialToken('page-token', 'state-secret', 'facebook:123')
@@ -56,5 +56,12 @@ test('traffic measurement stores attribution without personal data', () => {
   }), {
     path: '/welcome', source: 'facebook', medium: 'organic', campaign: 'launch', referrerHost: 'example.com',
   })
+})
+
+test('traffic reporting supports bounded operator windows', () => {
+  assert.equal(resolveTrafficWindow('24h'), '24h')
+  assert.equal(resolveTrafficWindow('7d'), '7d')
+  assert.equal(resolveTrafficWindow('30d'), '30d')
+  assert.equal(resolveTrafficWindow('365d'), '7d')
 })
 

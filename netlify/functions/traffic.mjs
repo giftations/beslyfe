@@ -19,6 +19,13 @@ function cleanReferrer(value) {
   } catch { return '' }
 }
 
+const TRAFFIC_WINDOWS = Object.freeze({ '24h': 1, '7d': 7, '30d': 30 })
+
+export function resolveTrafficWindow(value) {
+  const key = String(value || '').toLowerCase()
+  return Object.hasOwn(TRAFFIC_WINDOWS, key) ? key : '7d'
+}
+
 export function normalizeTrafficEvent(body = {}) {
   return {
     path: cleanPath(body.path),
@@ -51,18 +58,26 @@ export default async (req) => {
   if (req.method === 'GET') {
     const admin = await requireAdmin(req, db)
     if (admin instanceof Response) return admin
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    const [totals, sources, campaigns, recent] = await Promise.all([
+    const windowKey = resolveTrafficWindow(new URL(req.url).searchParams.get('window'))
+    const since = new Date(Date.now() - TRAFFIC_WINDOWS[windowKey] * 24 * 60 * 60 * 1000).toISOString()
+    const [totals, paths, sources, campaigns, referrers, daily, recent] = await Promise.all([
       db.sql`SELECT COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since}`,
+      db.sql`SELECT "path", COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since} GROUP BY "path" ORDER BY views DESC LIMIT 25`,
       db.sql`SELECT "source", COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since} GROUP BY "source" ORDER BY views DESC LIMIT 12`,
       db.sql`SELECT "campaign", COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since} AND "campaign" <> '' GROUP BY "campaign" ORDER BY views DESC LIMIT 12`,
-      db.sql`SELECT "path", "source", "medium", "campaign", "referrer_host", "created_at" FROM traffic_events ORDER BY "created_at" DESC LIMIT 50`,
+      db.sql`SELECT "referrer_host", COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since} AND "referrer_host" <> '' GROUP BY "referrer_host" ORDER BY views DESC LIMIT 12`,
+      db.sql`SELECT DATE_TRUNC('day', "created_at") AS day, COUNT(*)::int AS views FROM traffic_events WHERE "created_at" >= ${since} GROUP BY day ORDER BY day ASC`,
+      db.sql`SELECT "path", "source", "medium", "campaign", "referrer_host", "created_at" FROM traffic_events WHERE "created_at" >= ${since} ORDER BY "created_at" DESC LIMIT 100`,
     ])
     return json({
-      window: '24h',
+      window: windowKey,
+      since,
       views: totals[0]?.views || 0,
+      paths,
       sources,
       campaigns,
+      referrers,
+      daily,
       recent,
       generatedAt: new Date().toISOString(),
     })

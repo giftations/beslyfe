@@ -22,6 +22,16 @@
 (function () {
   'use strict';
 
+  // Every public page that uses the shared CMS loader also participates in the
+  // same privacy-safe traffic measurement. The tracker has its own once guard,
+  // so pages may include it directly without creating duplicate views.
+  if (!window.__beslyfeTrafficSent && !document.querySelector('script[src="/assets/js/traffic.js"]')) {
+    var trafficScript = document.createElement('script');
+    trafficScript.src = '/assets/js/traffic.js';
+    trafficScript.defer = true;
+    document.head.appendChild(trafficScript);
+  }
+
   /**
    * Derives a stable page key from the current path so each page stores its own
    * settings. "/" and "/index.html" map to "homepage"; "/about.html" -> "about";

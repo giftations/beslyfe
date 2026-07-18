@@ -1,5 +1,5 @@
 /* ============================================================================
-   Bak'd Admin OS — Shell runtime
+   Beslyfe Admin OS — Shell runtime
    A single-page "mission control" that unifies every admin workspace behind one
    persistent sidebar, one command palette, and one design language. Modules are
    self-contained render functions; rich existing editors (Website CMS, Floor
@@ -24,6 +24,7 @@
     dashboards: '/.netlify/functions/dashboards',
     tickets: '/.netlify/functions/tickets',
     dataExport: '/.netlify/functions/data-export',
+    traffic: '/.netlify/functions/traffic',
   };
 
   // ── Session gate ──────────────────────────────────────────────────────────
@@ -224,7 +225,7 @@
   // ── Shell construction ────────────────────────────────────────────────────
   var app, sideNav, crumbEl, content;
   function buildShell() {
-    document.title = "Admin OS · Bak'd On The Bay";
+    document.title = 'Beslyfe Admin OS';
     var root = document.getElementById('app-root');
     root.innerHTML =
       '<div class="app" id="app">' +
@@ -875,9 +876,14 @@
       '<div class="card"><div class="card-title">📥 Applications by type</div><div id="anType" class="muted">Loading…</div></div>' +
       '<div class="card"><div class="card-title">📇 Profiles by role</div><div id="anRole" class="muted">Loading…</div></div>' +
       '</div>' +
-      '<div class="card mt-4"><div class="card-title">🌐 Website traffic</div>' +
-      '<p class="muted">Page views, popular pages and referrers are available in <b>Netlify Analytics</b> for this site. Enable it in the Netlify dashboard to see server-side traffic without adding any tracking scripts.</p>' +
-      '<a class="btn ghost mt-2" href="https://app.netlify.com/projects/bakdonthebay/analytics" target="_blank">Open Netlify Analytics ↗</a></div>';
+      '<div class="card mt-4"><div class="card-title">🌐 Beslyfe website traffic <button class="btn ghost sm" id="anTrafficRefresh">↻ Refresh</button></div>' +
+      '<p class="muted small">Privacy-safe page views, paths, sources, campaigns, and referring hosts from the last seven days. Visitors with Do Not Track enabled are respected.</p>' +
+      '<div class="stats mt-4" id="anTrafficStats">' + statSkeletons(4) + '</div>' +
+      '<div class="grid cols-3 mt-4"><div><h3 class="section-subtitle">Top pages</h3><div id="anTrafficPaths" class="muted">Loading…</div></div>' +
+      '<div><h3 class="section-subtitle">Sources</h3><div id="anTrafficSources" class="muted">Loading…</div></div>' +
+      '<div><h3 class="section-subtitle">Campaigns</h3><div id="anTrafficCampaigns" class="muted">Loading…</div></div></div>' +
+      '<div class="mt-4"><h3 class="section-subtitle">Recent visits</h3><div id="anTrafficRecent">' + loadingList() + '</div></div></div>';
+    $('#anTrafficRefresh', host).onclick = loadTraffic;
     Promise.all([
       api(API.apps).catch(function () { return { items: [], counts: {} }; }),
       api(API.profiles + '?status=all').catch(function () { return { items: [] }; }),
@@ -896,6 +902,39 @@
       $('#anType', host).innerHTML = bars(tally(apps, 'type'));
       $('#anRole', host).innerHTML = bars(tally(profs, 'role'));
     });
+    loadTraffic();
+
+    function loadTraffic() {
+      api(API.traffic + '?window=7d').then(function (d) {
+        var sourceRows = d.sources || [], campaignRows = d.campaigns || [], pathRows = d.paths || [];
+        $('#anTrafficStats', host).innerHTML =
+          stat((d.views || 0).toLocaleString(), 'Page views · 7 days', '↗', 'accent') +
+          stat(pathRows.length, 'Tracked pages', '▤', '') +
+          stat(sourceRows.length, 'Traffic sources', '◎', '') +
+          stat(campaignRows.length, 'Campaigns', '◆', '');
+        $('#anTrafficPaths', host).innerHTML = trafficBars(pathRows, 'path');
+        $('#anTrafficSources', host).innerHTML = trafficBars(sourceRows, 'source');
+        $('#anTrafficCampaigns', host).innerHTML = trafficBars(campaignRows, 'campaign', 'No campaign-tagged visits yet.');
+        var recent = d.recent || [];
+        $('#anTrafficRecent', host).innerHTML = recent.length ?
+          '<div class="table-wrap"><table class="data"><thead><tr><th>Page</th><th>Source</th><th>Campaign</th><th>Referrer</th><th>Time</th></tr></thead><tbody>' +
+          recent.slice(0, 30).map(function (visit) {
+            return '<tr><td><b>' + esc(visit.path || '/') + '</b></td><td>' + esc(visit.source || 'direct') + '</td><td class="muted">' + esc(visit.campaign || '—') + '</td><td class="muted">' + esc(visit.referrer_host || '—') + '</td><td class="muted">' + esc(fmtDateTime(visit.created_at)) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : emptyState('↗', 'No measured visits yet', 'The collector begins recording privacy-safe page views as people visit public routes.');
+      }).catch(function (e) {
+        $('#anTrafficStats', host).innerHTML = errorBox(e.message);
+        $('#anTrafficPaths', host).innerHTML = '<span class="muted">Traffic data unavailable.</span>';
+        $('#anTrafficSources', host).innerHTML = '';
+        $('#anTrafficCampaigns', host).innerHTML = '';
+        $('#anTrafficRecent', host).innerHTML = '';
+      });
+    }
+
+    function trafficBars(rows, key, emptyMessage) {
+      var counts = {};
+      (rows || []).forEach(function (row) { counts[row[key] || 'unknown'] = Number(row.views || 0); });
+      return Object.keys(counts).length ? bars(counts) : '<span class="muted">' + esc(emptyMessage || 'No data yet.') + '</span>';
+    }
     function pct(a, b) { return b ? Math.round((a / b) * 100) + '%' : '0%'; }
     function tally(arr, key) { var m = {}; arr.forEach(function (x) { var k = x[key] || 'other'; m[k] = (m[k] || 0) + 1; }); return m; }
     function bars(m) {
@@ -1468,8 +1507,8 @@
       '<div class="grid cols-2">' +
       '<div class="card"><div class="card-title">🗄️ Data model</div><p class="muted small">All site data — including image & video bytes — lives in one Netlify Postgres database.</p>' +
         '<dl class="kv"><dt>events</dt><dd>editions — the multi-event tenant root</dd><dt>applications</dt><dd>submissions + workflow, notes & timeline</dd><dt>profiles</dt><dd>directory listings</dd><dt>accounts</dt><dd>member logins</dd><dt>site_settings</dt><dd>published site config</dd><dt>site_media</dt><dd>shared media bytes</dd><dt>floorplan</dt><dd>draft & published layout</dd><dt>social_*</dt><dd>feed, messages, groups</dd><dt>crm_people / crm_companies</dt><dd>deduplicated CRM: one person, one company</dd><dt>crm_person_roles / crm_company_events</dt><dd>a person\'s roles · a company\'s events</dd><dt>ad_campaigns / ad_creatives</dt><dd>advertising: buys & their placement creatives</dd><dt>ad_events / ad_invoices</dt><dd>impression/click delivery log · advertiser billing</dd><dt>audit_log</dt><dd>append-only trail of admin actions</dd></dl></div>' +
-      '<div class="card"><div class="card-title">ℹ️ Environment</div><dl class="kv"><dt>Signed in</dt><dd>' + esc(session.name || '') + '</dd><dt>Role</dt><dd>' + esc(session.role) + '</dd><dt>Site</dt><dd>bakdonthebay</dd><dt>Runtime</dt><dd>Netlify Functions</dd></dl>' +
-        '<a class="btn ghost mt-4" href="https://app.netlify.com/projects/bakdonthebay" target="_blank">Open Netlify dashboard ↗</a></div>' +
+      '<div class="card"><div class="card-title">ℹ️ Environment</div><dl class="kv"><dt>Signed in</dt><dd>' + esc(session.name || '') + '</dd><dt>Role</dt><dd>' + esc(session.role) + '</dd><dt>Site</dt><dd>beslyfe.com</dd><dt>Runtime</dt><dd>Netlify Functions</dd></dl>' +
+        '<a class="btn ghost mt-4" href="https://app.netlify.com/projects/beslyfe" target="_blank" rel="noopener">Open Netlify dashboard ↗</a></div>' +
       '</div>';
     host.insertAdjacentHTML('beforeend', '<div class="card mt-4"><div class="card-title">Platform contracts</div><div id="platformContracts">' + loadingList() + '</div></div>');
     api(API.events + '?platform')

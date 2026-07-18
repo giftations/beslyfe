@@ -1,4 +1,6 @@
 (() => {
+  if (window.__beslyfeTrafficSent) return
+  window.__beslyfeTrafficSent = true
   if (navigator.doNotTrack === '1') return
   const params = new URLSearchParams(location.search)
   const payload = JSON.stringify({
