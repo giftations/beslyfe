@@ -45,6 +45,7 @@ export function openOauthState(value, secret, now = Date.now()) {
 }
 
 function callbackUrl(provider) {
+  if (provider === 'tiktok') return 'https://beslyfe.com/.netlify/functions/social-oauth-tiktok'
   return `${BASE_URL}?provider=${encodeURIComponent(provider)}`
 }
 
@@ -160,7 +161,8 @@ function successHtml(provider, account) {
 export default async (req) => {
   const env = globalThis.process?.env || {}
   const url = new URL(req.url)
-  const provider = String(url.searchParams.get('provider') || '').toLowerCase()
+  const inferredProvider = url.pathname.endsWith('/social-oauth-tiktok') ? 'tiktok' : ''
+  const provider = String(url.searchParams.get('provider') || inferredProvider).toLowerCase()
   if (!PROVIDERS.has(provider)) return json({ error: 'Unknown social provider.' }, 400)
   const db = getDatabase()
   const stateSecret = String(env.SOCIAL_OAUTH_STATE_SECRET || '')

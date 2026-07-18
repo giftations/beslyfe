@@ -21,6 +21,7 @@ import {
   waitForInstagramContainer,
 } from '../netlify/functions/lib/social-publishing.mjs'
 import { openOauthState, sealOauthState } from '../netlify/functions/social-oauth.mjs'
+import tiktokOauthHandler from '../netlify/functions/social-oauth-tiktok.mjs'
 import { normalizeTrafficEvent, resolveTrafficWindow } from '../netlify/functions/traffic.mjs'
 
 test('social tokens are encrypted at rest with connection-bound authenticated encryption', () => {
@@ -196,6 +197,7 @@ test('OAuth connection state is encrypted, authenticated, provider-bound, and ex
   assert.equal(openOauthState(sealed, 'state-secret').provider, 'x')
   assert.throws(() => openOauthState(sealed, 'wrong-secret'), /Invalid/)
   assert.throws(() => openOauthState(sealed, 'state-secret', Date.now() + 120_000), /Expired/)
+  assert.equal(typeof tiktokOauthHandler, 'function')
 })
 
 test('X publishes through user-context OAuth and returns a canonical post URL', async () => {
