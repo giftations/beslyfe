@@ -5,7 +5,7 @@
   # UI-configured command (e.g. a leftover `bundle exec jekyll build`, which
   # fails because the site is not a Ruby/Jekyll project and has no Gemfile).
   # Note: _config.yml is only used for GitHub Pages, not for the Netlify deploy.
-  command = "echo 'Static site — no build step required.'"
+  command = "npm test"
   publish = "."
 
 [functions]
@@ -28,4 +28,4 @@
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
