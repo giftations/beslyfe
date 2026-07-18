@@ -1,6 +1,7 @@
 import { getDatabase } from '@netlify/database'
 import { readSession, requireSession, requireSameOrigin, newId, isLiveAdmin, ensureProfileForAccount, json } from './lib/session.mjs'
 import { createNotification, notifyFollowers } from './lib/notify.mjs'
+import { ensureCommunityWelcomeLetter } from './lib/community-care.mjs'
 
 // Shared Beslyfe social network. Profiles are durable identities across every
 // business, website, event, creator, nonprofit, and community ecosystem. Public
@@ -94,6 +95,9 @@ export default async (req) => {
   // ── Reads ──
   if (req.method === 'GET') {
     const type = url.searchParams.get('type') || 'feed'
+    if (type === 'feed') {
+      try { await ensureCommunityWelcomeLetter(db) } catch { /* Feed reads remain available during a care-system hiccup. */ }
+    }
     // "Viewer" — whose like/follow state to reflect — is always the signed-in
     // profile, never a client-supplied id, so nobody can probe another member's
     // followers-only posts by passing their id.
