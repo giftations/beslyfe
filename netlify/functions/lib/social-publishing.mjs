@@ -210,6 +210,7 @@ export async function publishInstagram(content = {}, env = {}, fetchImpl = fetch
     body: create,
   }, fetchImpl, 'Instagram')
   if (!container.id) throw new Error('Instagram did not create a media container.')
+  await waitForInstagramContainer(String(container.id), token, env, fetchImpl)
   const publish = new URLSearchParams()
   publish.set('creation_id', String(container.id))
   publish.set('access_token', token)
@@ -219,6 +220,24 @@ export async function publishInstagram(content = {}, env = {}, fetchImpl = fetch
     body: publish,
   }, fetchImpl, 'Instagram')
   return { id: String(result.id || ''), url: 'https://www.instagram.com/beslyfe_/' }
+}
+
+export async function waitForInstagramContainer(containerId, token, env = {}, fetchImpl = fetch, options = {}) {
+  const attempts = Math.max(1, Math.min(20, Number(options.attempts || 10)))
+  const delayMs = Math.max(0, Math.min(5000, Number(options.delayMs ?? 750)))
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const statusUrl = new URL(`https://graph.instagram.com/${metaVersion(env)}/${encodeURIComponent(containerId)}`)
+    statusUrl.searchParams.set('fields', 'status_code,status')
+    statusUrl.searchParams.set('access_token', token)
+    const status = await checkedFetch(statusUrl, { headers: { Accept: 'application/json' } }, fetchImpl, 'Instagram')
+    const code = String(status.status_code || '').toUpperCase()
+    if (code === 'FINISHED' || code === 'PUBLISHED') return status
+    if (code === 'ERROR' || code === 'EXPIRED') {
+      throw new Error(`Instagram media container ${code.toLowerCase()}: ${String(status.status || 'processing failed').slice(0, 300)}`)
+    }
+    if (attempt < attempts && delayMs) await new Promise((resolve) => setTimeout(resolve, delayMs))
+  }
+  throw new Error('Instagram media container is still processing; the scheduled publisher will retry safely.')
 }
 
 export async function publishThreads(content = {}, env = {}, fetchImpl = fetch) {
