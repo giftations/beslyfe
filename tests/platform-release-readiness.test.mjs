@@ -28,6 +28,8 @@ test('public launch exposes sign in, admin, and 100% free membership', () => {
   assert.match(home, /href="\/admin"/)
   assert.match(login, /Welcome to Beslyfe/)
   assert.match(login, /100% free/i)
+  assert.match(login, /href="\/auth\.css"/)
+  assert.match(login, /src="\/auth\.js"/)
   assert.match(redirects, /^\/login\s+\/admin-login\.html\s+200/m)
   assert.match(redirects, /^\/signup\s+\/admin-login\.html\?mode=create\s+200/m)
 })
