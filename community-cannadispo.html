@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cannadispo community space — Beslyfe</title>
+  <meta name="description" content="The age-protected Cannadispo community space inside the shared Beslyfe network.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://beslyfe.com/community/cannadispo">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/beslyfe.css">
+  <link rel="stylesheet" href="/assets/css/community-space.css">
+  <script src="/assets/js/traffic.js" defer></script>
+  <script src="/beslyfe-session.js" defer></script>
+  <script src="/assets/js/community-space.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header"><nav class="shell primary-nav" aria-label="Primary"><a class="brand" href="/">beslyfe<span>.</span></a><div class="nav-links"><a href="/community">Community</a><a href="/feed">Feed</a><a href="/directory">People</a><a href="/create">Build</a></div><div class="nav-actions"><a class="nav-signin" id="login-btn" href="/login">Sign in</a><a class="button small" href="/signup" data-guest-only>Join free</a></div></nav></header>
+
+  <main id="main">
+    <section class="space-hero shell">
+      <div>
+        <p class="eyebrow"><span class="pulse"></span> Beslyfe community space · 18+</p>
+        <h1>Cannadispo lives inside the network.</h1>
+        <p class="lead">Cannadispo members, public profiles, and public contributions are part of Beslyfe without turning cannabis content into a general-audience feed.</p>
+        <div class="space-pills"><span>One shared network</span><span>Origin always shown</span><span>Private data stays private</span></div>
+      </div>
+      <aside class="space-rule"><strong>Protected, not isolated.</strong><p>Age protection controls access to this space. It does not create another disconnected community.</p></aside>
+    </section>
+
+    <section class="age-panel shell" id="ageGate" aria-labelledby="ageTitle">
+      <p class="eyebrow">Age-protected community</p>
+      <h2 id="ageTitle">Are you 18 or older?</h2>
+      <p>Cannadispo contains cannabis and hemp community content. Confirm your age to view its public Beslyfe profiles and feed.</p>
+      <div class="actions"><button class="button" id="confirmAge" type="button">I am 18 or older</button><button class="button secondary" id="declineAge" type="button">I am under 18</button></div>
+      <small>Your decision is saved on this device. It does not reveal your birth date.</small>
+    </section>
+
+    <div id="spaceContent" hidden>
+      <section class="space-stats"><div class="shell stat-row"><div><strong id="spaceMembers">-</strong><span>Cannadispo members</span></div><div><strong id="spacePosts">-</strong><span>public contributions</span></div><div><strong id="spaceReels">-</strong><span>reels shared</span></div><div><strong>1</strong><span>shared Beslyfe network</span></div></div></section>
+
+      <section class="section shell">
+        <div class="space-heading"><div><p class="eyebrow">People in this space</p><h2>Cannadispo members on Beslyfe.</h2></div><a href="https://cannadispo.com/community" rel="noopener">Open Cannadispo →</a></div>
+        <p class="space-explainer">These are public-safe federated profiles. Application details, email addresses, phone numbers, private messages, and limited-audience activity never cross the boundary.</p>
+        <div class="space-profile-grid" id="spaceProfiles" aria-live="polite"><p>Loading member profiles…</p></div>
+      </section>
+
+      <section class="section space-feed"><div class="shell"><div class="space-heading"><div><p class="eyebrow">Public contributions</p><h2>From Cannadispo.</h2></div><span class="origin-chip">Origin protected · 18+</span></div><div class="space-post-grid" id="spacePostsGrid" aria-live="polite"><p>Loading the space feed…</p></div></div></section>
+
+      <section class="section shell boundary-grid"><div><p class="eyebrow">How one community works</p><h2>One identity direction. Separate controls.</h2></div><ol><li><b>1</b><span><strong>Discover here</strong>Public Cannadispo members appear inside Beslyfe with their origin.</span></li><li><b>2</b><span><strong>Participate there today</strong>Writes stay in Cannadispo until the member explicitly links a canonical Beslyfe account.</span></li><li><b>3</b><span><strong>Repeat for every build</strong>Every Beslyfe build receives the same community-bridge contract and audience controls.</span></li></ol></section>
+
+      <section class="space-footer-action shell"><button type="button" id="resetAge">Change age decision</button><a class="button secondary" href="/community">Back to all communities</a></section>
+    </div>
+  </main>
+
+  <footer><div class="shell footer-grid"><div><a class="brand" href="/">beslyfe<span>.</span></a><p>One network. The right boundary for every space.</p></div><nav><strong>Community</strong><a href="/community">Community home</a><a href="/feed">General feed</a><a href="/directory">People</a></nav><nav><strong>Beslyfe</strong><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>© 2026 Beslyfe.</small></div></footer>
+</body>
+</html>

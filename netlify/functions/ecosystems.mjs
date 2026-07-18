@@ -19,12 +19,15 @@ import {
   salesEngineContractSummary,
 } from '../../platform/growth/sales-engine-contract.mjs'
 import { communityNetworkContractSummary } from '../../platform/communities/network-contract.mjs'
+import { communityBridgeDefaults } from '../../platform/communities/federation-contract.mjs'
 
 const PRODUCT_KEYS = new Set(PRODUCT_BLUEPRINTS.map((item) => item.key))
 const OUTCOME_KEYS = new Set(PRODUCT_OUTCOMES.map((item) => item.key))
 const SALES_MODE_KEYS = new Set(SALES_MODES.map((item) => item.key))
 const SALES_PROVIDER_KEYS = new Set(SALES_PROVIDERS.map((item) => item.key))
 const STATUS_KEYS = new Set(['draft', 'active', 'paused', 'archived'])
+const MINIMUM_AGES = new Set([0, 13, 18, 21])
+const CONTENT_RATINGS = new Set(['general', 'regulated-adult'])
 const MAX_NAME = 160
 const MAX_DESCRIPTION = 1200
 const MAX_URL = 1000
@@ -224,6 +227,15 @@ export default async (req) => {
     const now = new Date().toISOString()
     const description = str(body.description, MAX_DESCRIPTION)
     const answers = body.answers && typeof body.answers === 'object' ? body.answers : {}
+    const minimumAge = MINIMUM_AGES.has(Number(body.minimumAge)) ? Number(body.minimumAge) : 0
+    const contentRating = CONTENT_RATINGS.has(body.contentRating) ? body.contentRating : (minimumAge >= 18 ? 'regulated-adult' : 'general')
+    const settings = {
+      communityBridge: communityBridgeDefaults({
+        ecosystemId: id,
+        minimumAge,
+        contentRating,
+      }),
+    }
     await db.sql`
       INSERT INTO ecosystems (
         id, slug, name, description, product_type, primary_outcome,
@@ -233,7 +245,7 @@ export default async (req) => {
         ${id}, ${slug}, ${name}, ${description}, ${productType}, ${primaryOutcome},
         ${profileId}, 'beslyfe-network', 'draft', 'public',
         ${JSON.stringify(capabilities)}::jsonb, ${JSON.stringify(answers)}::jsonb,
-        '{}'::jsonb, ${now}, ${now}
+        ${JSON.stringify(settings)}::jsonb, ${now}, ${now}
       )
     `
     await db.sql`

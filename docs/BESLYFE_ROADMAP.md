@@ -44,7 +44,7 @@ Exit gate: a new visitor cannot mistake Beslyfe for the proof event and can find
 
 ## Phase 2 — The shared community network
 
-Status: first release implemented; depth work continues.
+Status: local network and protected cross-site federation implemented; account-link depth continues.
 
 - Make `/community` the public doorway to feed, reels, stories, groups, messaging, and people.
 - Give every verified member one shared-network membership.
@@ -52,10 +52,16 @@ Status: first release implemented; depth work continues.
 - Let public posts flow to the global feed while ecosystem-only, follower-only, and private content stays bounded.
 - Show connected ecosystems and live network totals.
 - Carry existing approved proof members into the global network without duplicating identities.
+- Federate separately hosted community spaces through an allowlisted, versioned bridge.
+- Require age confirmation before retrieving protected profiles or contributions.
+- Render federated profiles on Beslyfe as public-safe, read-only identities with visible origin.
+- Link a federated identity to a canonical Beslyfe account only through an explicit, revocable ownership flow.
 - Add success-story prompts and structured outcome tags.
 - Add community moderation queues, reporting, appeals, and response-time targets.
 
 Exit gate: members can discover, publish, converse, organize, and report content; every visibility choice is enforced on the server.
+
+Current boundary: Cannadispo discovery and public content are federated read-only. Follows, messages, edits, and writes remain in the originating space until the explicit account-link milestone is complete.
 
 ## Phase 3 — Guided creation
 

@@ -17,6 +17,7 @@ test('ecosystem configuration contract includes the platform core sections', () 
     'modules',
     'roles',
     'profiles',
+    'communityBridge',
     'intake',
     'marketplace',
     'privacy',
