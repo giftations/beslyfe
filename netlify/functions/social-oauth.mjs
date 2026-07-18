@@ -129,11 +129,12 @@ async function connectTikTok(db, code, env) {
     client_key: env.TIKTOK_CLIENT_KEY, client_secret: env.TIKTOK_CLIENT_SECRET, code, grant_type: 'authorization_code', redirect_uri: callbackUrl('tiktok'),
   }, {}, 'TikTok')
   const meUrl = new URL('https://open.tiktokapis.com/v2/user/info/')
-  meUrl.searchParams.set('fields', 'open_id,display_name,username')
+  meUrl.searchParams.set('fields', 'open_id,display_name')
   const me = await readJson(await fetch(meUrl, { headers: { Authorization: `Bearer ${token.access_token}` } }), 'TikTok')
   const user = me?.data?.user || {}
+  const username = String(env.TIKTOK_USERNAME || '').replace(/^@/, '')
   return saveSocialConnection(db, 'tiktok', {
-    accountId: String(token.open_id || user.open_id), username: String(user.username || ''), account: String(user.username || user.display_name || ''),
+    accountId: String(token.open_id || user.open_id), username, account: String(username || user.display_name || ''),
     refreshToken: String(token.refresh_token || ''), expiresAt: new Date(Date.now() + Number(token.expires_in || 86400) * 1000).toISOString(),
   }, String(token.access_token), env)
 }
