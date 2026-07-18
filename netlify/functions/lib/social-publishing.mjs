@@ -101,7 +101,8 @@ async function responseJson(response) {
 async function checkedFetch(url, options, fetchImpl, provider) {
   const response = await fetchImpl(url, options)
   const body = await responseJson(response)
-  if (!response.ok || body.error) {
+  const providerError = body.error && body.error.code !== 'ok'
+  if (!response.ok || providerError) {
     const providerCode = body?.error?.code || body?.error?.error_subcode || body?.error?.code || ''
     const message = body?.error?.message || body?.error?.message || `${provider} returned HTTP ${response.status}.`
     const error = new Error(`${provider} rejected the request${providerCode ? ` (${providerCode})` : ''}: ${message}`)
@@ -193,6 +194,71 @@ export async function publishFacebook(connection, content = {}, env = {}, fetchI
   return { id: String(result.id || ''), url: result.id ? `https://www.facebook.com/${result.id}` : '' }
 }
 
+function connectionToken(connection, provider, env = {}, kind = 'access') {
+  const stateSecret = String(env.SOCIAL_OAUTH_STATE_SECRET || '').trim()
+  const record = kind === 'refresh' ? connection?.refreshToken : connection?.token
+  if (!record || !stateSecret) return ''
+  const suffix = kind === 'refresh' ? ':refresh' : ''
+  return decryptSocialToken(record, stateSecret, `${provider}:${connection.accountId || connection.pageId || ''}${suffix}`)
+}
+
+function envOrConnectionToken(connection, provider, envKey, env = {}) {
+  return connectionToken(connection, provider, env) || String(env[envKey] || '').trim()
+}
+
+async function currentProviderToken(db, provider, connection, env = {}, fetchImpl = fetch) {
+  const envKey = provider === 'x' ? 'X_ACCESS_TOKEN' : 'TIKTOK_ACCESS_TOKEN'
+  const current = envOrConnectionToken(connection, provider, envKey, env)
+  const expiresAt = Date.parse(String(connection?.expiresAt || ''))
+  if (!connection?.token || !Number.isFinite(expiresAt) || expiresAt > Date.now() + 5 * 60 * 1000) return current
+  const refreshToken = connectionToken(connection, provider, env, 'refresh')
+  if (!db || !refreshToken) return current
+  let response
+  if (provider === 'tiktok') {
+    response = await fetchImpl('https://open.tiktokapis.com/v2/oauth/token/', {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ client_key: String(env.TIKTOK_CLIENT_KEY || ''), client_secret: String(env.TIKTOK_CLIENT_SECRET || ''), grant_type: 'refresh_token', refresh_token: refreshToken }),
+    })
+  } else {
+    const headers = { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' }
+    const params = { grant_type: 'refresh_token', refresh_token: refreshToken }
+    if (env.X_CLIENT_SECRET) headers.Authorization = `Basic ${Buffer.from(`${env.X_CLIENT_ID}:${env.X_CLIENT_SECRET}`).toString('base64')}`
+    else params.client_id = String(env.X_CLIENT_ID || '')
+    response = await fetchImpl('https://api.x.com/2/oauth2/token', { method: 'POST', headers, body: new URLSearchParams(params) })
+  }
+  const body = await responseJson(response)
+  if (!response.ok || !body.access_token) throw new Error(`${provider === 'x' ? 'X' : 'TikTok'} token refresh failed: ${String(body.error_description || body.message || `HTTP ${response.status}`).slice(0, 300)}`)
+  await saveSocialConnection(db, provider, {
+    ...connection,
+    refreshToken: String(body.refresh_token || refreshToken),
+    expiresAt: new Date(Date.now() + Number(body.expires_in || (provider === 'x' ? 7200 : 86400)) * 1000).toISOString(),
+  }, String(body.access_token), env)
+  return String(body.access_token)
+}
+
+export async function saveSocialConnection(db, provider, connection = {}, accessToken = '', env = {}) {
+  const stateSecret = String(env.SOCIAL_OAUTH_STATE_SECRET || '').trim()
+  const accountId = String(connection.accountId || connection.pageId || '').trim()
+  if (!provider || !accountId || !accessToken || !stateSecret) throw new Error('The social connection could not be saved securely.')
+  const state = await readPublishingState(db)
+  const rawConnection = cleanObject(connection)
+  const refreshToken = String(rawConnection.refreshToken || '')
+  const publicConnection = { ...rawConnection }
+  delete publicConnection.refreshToken
+  state.connections[provider] = {
+    ...publicConnection,
+    status: 'connected',
+    accountId,
+    token: encryptSocialToken(accessToken, stateSecret, `${provider}:${accountId}`),
+    ...(refreshToken ? { refreshToken: encryptSocialToken(refreshToken, stateSecret, `${provider}:${accountId}:refresh`) } : {}),
+    connectedAt: new Date().toISOString(),
+    checkedAt: new Date().toISOString(),
+  }
+  await writePublishingState(db, state)
+  return { provider, accountId, account: String(connection.account || connection.pageName || connection.username || '') }
+}
+
 export async function publishFacebookStory(connection, content = {}, env = {}, fetchImpl = fetch) {
   const pageToken = facebookConnectionToken(connection, env)
   const appSecret = String(env.META_APP_SECRET || '').trim()
@@ -274,8 +340,9 @@ export async function waitForInstagramContainer(containerId, token, env = {}, fe
 }
 
 export async function publishThreads(content = {}, env = {}, fetchImpl = fetch) {
-  const userId = String(env.THREADS_USER_ID || '').trim()
-  const token = String(env.THREADS_ACCESS_TOKEN || '').trim()
+  const connection = cleanObject(content.connection)
+  const userId = String(connection.accountId || env.THREADS_USER_ID || '').trim()
+  const token = envOrConnectionToken(connection, 'threads', 'THREADS_ACCESS_TOKEN', env)
   if (!userId || !token) throw new Error('Threads publishing is not connected.')
   const create = new URLSearchParams()
   const imageUrl = String(content.imageUrl || '').trim()
@@ -304,6 +371,57 @@ export async function publishThreads(content = {}, env = {}, fetchImpl = fetch) 
   return { id: String(result.id || ''), url: `https://www.threads.net/@${encodeURIComponent(username)}` }
 }
 
+export async function publishX(content = {}, env = {}, fetchImpl = fetch) {
+  const connection = cleanObject(content.connection)
+  const token = await currentProviderToken(content.db, 'x', connection, env, fetchImpl)
+  if (!token) throw new Error('X publishing is not connected.')
+  const result = await checkedFetch('https://api.x.com/2/tweets', {
+    method: 'POST',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: String(content.text || '').slice(0, 280) }),
+  }, fetchImpl, 'X')
+  const id = String(result?.data?.id || '')
+  return { id, url: id ? `https://x.com/i/web/status/${id}` : 'https://x.com/' }
+}
+
+export async function publishTikTok(content = {}, env = {}, fetchImpl = fetch) {
+  const connection = cleanObject(content.connection)
+  const token = await currentProviderToken(content.db, 'tiktok', connection, env, fetchImpl)
+  if (!token) throw new Error('TikTok publishing is not connected.')
+  if (String(env.TIKTOK_PUBLIC_POST_APPROVED || '').toLowerCase() !== 'true') {
+    throw new Error('TikTok public posting needs Content Posting API audit approval; private-only automation is intentionally disabled.')
+  }
+  const imageUrl = String(content.imageUrl || '').trim()
+  if (!imageUrl) throw new Error('TikTok photo publishing requires a public image URL.')
+  const creator = await checkedFetch('https://open.tiktokapis.com/v2/post/publish/creator_info/query/', {
+    method: 'POST',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+    body: '{}',
+  }, fetchImpl, 'TikTok')
+  const options = creator?.data?.privacy_level_options || []
+  if (!options.includes('PUBLIC_TO_EVERYONE')) throw new Error('TikTok does not currently allow public posting for this account and app.')
+  const result = await checkedFetch('https://open.tiktokapis.com/v2/post/publish/content/init/', {
+    method: 'POST',
+    headers: { Accept: 'application/json', Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+    body: JSON.stringify({
+      post_info: {
+        title: String(content.tiktokTitle || 'Build what you imagine with Beslyfe').slice(0, 90),
+        description: String(content.text || '').slice(0, 4000),
+        privacy_level: 'PUBLIC_TO_EVERYONE',
+        disable_comment: false,
+        auto_add_music: true,
+        brand_content_toggle: false,
+        brand_organic_toggle: true,
+      },
+      source_info: { source: 'PULL_FROM_URL', photo_images: [imageUrl], photo_cover_index: 0 },
+      post_mode: 'DIRECT_POST',
+      media_type: 'PHOTO',
+    }),
+  }, fetchImpl, 'TikTok')
+  const id = String(result?.data?.publish_id || '')
+  return { id, url: 'https://www.tiktok.com/@bes_lyfe' }
+}
+
 export function socialReadiness(state = {}, env = {}) {
   const connections = cleanObject(state.connections)
   return {
@@ -317,15 +435,26 @@ export function socialReadiness(state = {}, env = {}) {
       account: env.INSTAGRAM_USERNAME || 'beslyfe_',
     },
     threads: {
-      ready: !!(env.THREADS_USER_ID && env.THREADS_ACCESS_TOKEN),
-      account: env.THREADS_USERNAME || '',
+      ready: !!((connections.threads?.accountId && connections.threads?.token && env.SOCIAL_OAUTH_STATE_SECRET) || (env.THREADS_USER_ID && env.THREADS_ACCESS_TOKEN)),
+      account: connections.threads?.account || env.THREADS_USERNAME || '',
       appReady: !!(env.THREADS_APP_ID && env.THREADS_APP_SECRET),
+    },
+    tiktok: {
+      ready: !!((connections.tiktok?.accountId && connections.tiktok?.token && env.SOCIAL_OAUTH_STATE_SECRET) || env.TIKTOK_ACCESS_TOKEN),
+      account: connections.tiktok?.account || env.TIKTOK_USERNAME || '',
+      appReady: !!(env.TIKTOK_CLIENT_KEY && env.TIKTOK_CLIENT_SECRET),
+      publicPostingApproved: String(env.TIKTOK_PUBLIC_POST_APPROVED || '').toLowerCase() === 'true',
+    },
+    x: {
+      ready: !!((connections.x?.accountId && connections.x?.token && env.SOCIAL_OAUTH_STATE_SECRET) || env.X_ACCESS_TOKEN),
+      account: connections.x?.account || env.X_USERNAME || '',
+      appReady: !!env.X_CLIENT_ID,
     },
   }
 }
 
 export function campaignDeliveryPlan(campaign = {}) {
-  const requested = Array.isArray(campaign.channels) ? campaign.channels : ['facebook', 'instagram', 'threads']
+  const requested = Array.isArray(campaign.channels) ? campaign.channels : ['facebook', 'instagram', 'threads', 'tiktok', 'x']
   const plan = []
   for (const channel of requested) {
     plan.push({ key: channel, publisher: channel, placement: String(campaign[`${channel}Placement`] || 'feed').toLowerCase() })
@@ -372,7 +501,9 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
       if (delivery.key === 'facebook_story') published = await publishFacebookStory(state.connections.facebook, content, env, fetchImpl)
       else if (delivery.publisher === 'facebook') published = await publishFacebook(state.connections.facebook, content, env, fetchImpl)
       else if (delivery.publisher === 'instagram') published = await publishInstagram(content, env, fetchImpl)
-      else if (delivery.publisher === 'threads') published = await publishThreads(content, env, fetchImpl)
+      else if (delivery.publisher === 'threads') published = await publishThreads({ ...content, connection: state.connections.threads }, env, fetchImpl)
+      else if (delivery.publisher === 'tiktok') published = await publishTikTok({ ...content, db, connection: state.connections.tiktok }, env, fetchImpl)
+      else if (delivery.publisher === 'x') published = await publishX({ ...content, db, connection: state.connections.x }, env, fetchImpl)
       else throw new Error('Unsupported social channel.')
       const record = { status: 'published', publishedAt: new Date().toISOString(), externalId: published.id, url: published.url }
       state.deliveries[key] = record
@@ -397,7 +528,7 @@ export const LAUNCH_CAMPAIGN = Object.freeze({
   imageUrl: 'https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png',
   storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
   linkUrl: 'https://beslyfe.com/?utm_source=facebook&utm_medium=organic&utm_campaign=beslyfe_launch',
-  channels: ['facebook', 'instagram', 'threads'],
+  channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
 })
 
 export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
@@ -409,7 +540,7 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-story-v1.png',
     linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step',
     altText: 'A creator takes the first step on an idea while a warm, connected path opens toward future work and community.',
-    channels: ['facebook', 'instagram', 'threads'],
+    channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
     channelContent: {
       threads: {
         text: 'Your idea deserves somewhere to begin. Beslyfe is 100% free—bring the dream, shape the plan, connect with people, and automate repetitive work so you can spend more time doing what you love. Start at https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step #Beslyfe #GrowTogether',
@@ -433,7 +564,7 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
     linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together',
     altText: 'A warm, diverse group helps one another turn creative and business ideas into practical next steps.',
-    channels: ['facebook', 'instagram', 'threads'],
+    channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
     channelContent: {
       threads: {
         text: 'Big changes rarely begin with a perfect plan. They begin when someone shares the idea, asks a useful question, and finds people willing to help. Beslyfe is a 100% free place to begin—and a growing community to move forward with. https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together #Beslyfe #GrowTogether',

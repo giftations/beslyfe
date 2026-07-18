@@ -44,6 +44,17 @@ function publicRunSummary({ bootstrap, readiness, campaigns }) {
         account: readiness.threads.account,
         appReady: readiness.threads.appReady,
       },
+      tiktok: {
+        ready: readiness.tiktok.ready,
+        account: readiness.tiktok.account,
+        appReady: readiness.tiktok.appReady,
+        publicPostingApproved: readiness.tiktok.publicPostingApproved,
+      },
+      x: {
+        ready: readiness.x.ready,
+        account: readiness.x.account,
+        appReady: readiness.x.appReady,
+      },
     },
     results: safeResults(campaigns[LAUNCH_CAMPAIGN.id]),
     campaigns: Object.fromEntries(Object.entries(campaigns).map(([id, results]) => [id, safeResults(results)])),
