@@ -193,6 +193,39 @@ export async function publishFacebook(connection, content = {}, env = {}, fetchI
   return { id: String(result.id || ''), url: result.id ? `https://www.facebook.com/${result.id}` : '' }
 }
 
+export async function publishFacebookStory(connection, content = {}, env = {}, fetchImpl = fetch) {
+  const pageToken = facebookConnectionToken(connection, env)
+  const appSecret = String(env.META_APP_SECRET || '').trim()
+  const imageUrl = String(content.imageUrl || '').trim()
+  if (!connection?.pageId || !pageToken || !appSecret) throw new Error('Facebook Page publishing is not connected.')
+  if (!imageUrl) throw new Error('Facebook Story publishing requires a public image URL.')
+
+  const proof = appSecretProof(pageToken, appSecret)
+  const photoBody = new URLSearchParams()
+  photoBody.set('url', imageUrl)
+  photoBody.set('published', 'false')
+  photoBody.set('access_token', pageToken)
+  photoBody.set('appsecret_proof', proof)
+  const photo = await checkedFetch(metaUrl(`${connection.pageId}/photos`, env), {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: photoBody,
+  }, fetchImpl, 'Facebook')
+  if (!photo.id) throw new Error('Facebook did not create a Story photo container.')
+
+  const storyBody = new URLSearchParams()
+  storyBody.set('photo_id', String(photo.id))
+  storyBody.set('access_token', pageToken)
+  storyBody.set('appsecret_proof', proof)
+  const story = await checkedFetch(metaUrl(`${connection.pageId}/photo_stories`, env), {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: storyBody,
+  }, fetchImpl, 'Facebook')
+  const id = String(story.post_id || story.id || photo.id)
+  return { id, url: `https://www.facebook.com/${connection.pageId}` }
+}
+
 export async function publishInstagram(content = {}, env = {}, fetchImpl = fetch) {
   const userId = String(env.INSTAGRAM_USER_ID || '').trim()
   const token = String(env.INSTAGRAM_ACCESS_TOKEN || '').trim()
@@ -291,35 +324,59 @@ export function socialReadiness(state = {}, env = {}) {
   }
 }
 
+export function campaignDeliveryPlan(campaign = {}) {
+  const requested = Array.isArray(campaign.channels) ? campaign.channels : ['facebook', 'instagram', 'threads']
+  const plan = []
+  for (const channel of requested) {
+    plan.push({ key: channel, publisher: channel, placement: String(campaign[`${channel}Placement`] || 'feed').toLowerCase() })
+    if (campaign.storyCompanion === false) continue
+    if (channel === 'facebook' && String(campaign.facebookPlacement || 'feed').toLowerCase() !== 'story') {
+      plan.push({ key: 'facebook_story', publisher: 'facebook', placement: 'story' })
+    }
+    if (channel === 'instagram' && String(campaign.instagramPlacement || 'feed').toLowerCase() !== 'story') {
+      plan.push({ key: 'instagram_story', publisher: 'instagram', placement: 'story' })
+    }
+  }
+  return plan
+}
+
 export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch) {
   const state = await readPublishingState(db)
-  const requested = Array.isArray(campaign.channels) ? campaign.channels : ['facebook', 'instagram', 'threads']
+  const deliveries = campaignDeliveryPlan(campaign)
   const results = {}
   const publishAt = Date.parse(String(campaign.publishAfter || ''))
   if (Number.isFinite(publishAt) && publishAt > Date.now()) {
-    for (const channel of requested) {
-      results[channel] = { ok: true, skipped: true, status: 'scheduled', publishAfter: campaign.publishAfter }
+    for (const delivery of deliveries) {
+      results[delivery.key] = { ok: true, skipped: true, status: 'scheduled', publishAfter: campaign.publishAfter }
     }
     return results
   }
-  for (const channel of requested) {
-    const key = `${campaign.id}:${channel}`
+  for (const delivery of deliveries) {
+    const key = `${campaign.id}:${delivery.key}`
     const previous = cleanObject(state.deliveries[key])
     if (previous.status === 'published') {
-      results[channel] = { ok: true, skipped: true, ...previous }
+      results[delivery.key] = { ok: true, skipped: true, ...previous }
       continue
     }
     try {
-      const override = cleanObject(cleanObject(campaign.channelContent)[channel])
-      const content = { ...campaign, ...override }
+      const channelContent = cleanObject(campaign.channelContent)
+      const publisherOverride = cleanObject(channelContent[delivery.publisher])
+      const deliveryOverride = cleanObject(channelContent[delivery.key])
+      const content = { ...campaign, ...publisherOverride, ...deliveryOverride }
+      if (delivery.placement === 'story') {
+        content.imageUrl = String(deliveryOverride.imageUrl || campaign.storyImageUrl || content.imageUrl || '')
+        content.facebookPlacement = 'story'
+        content.instagramPlacement = 'story'
+      }
       let published
-      if (channel === 'facebook') published = await publishFacebook(state.connections.facebook, content, env, fetchImpl)
-      else if (channel === 'instagram') published = await publishInstagram(content, env, fetchImpl)
-      else if (channel === 'threads') published = await publishThreads(content, env, fetchImpl)
+      if (delivery.key === 'facebook_story') published = await publishFacebookStory(state.connections.facebook, content, env, fetchImpl)
+      else if (delivery.publisher === 'facebook') published = await publishFacebook(state.connections.facebook, content, env, fetchImpl)
+      else if (delivery.publisher === 'instagram') published = await publishInstagram(content, env, fetchImpl)
+      else if (delivery.publisher === 'threads') published = await publishThreads(content, env, fetchImpl)
       else throw new Error('Unsupported social channel.')
       const record = { status: 'published', publishedAt: new Date().toISOString(), externalId: published.id, url: published.url }
       state.deliveries[key] = record
-      results[channel] = { ok: true, ...record }
+      results[delivery.key] = { ok: true, ...record }
     } catch (error) {
       const record = {
         status: /not connected|needs/i.test(error?.message || '') ? 'blocked' : 'failed',
@@ -327,7 +384,7 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
         error: String(error?.message || 'Publishing failed.').slice(0, 500),
       }
       state.deliveries[key] = record
-      results[channel] = { ok: false, ...record }
+      results[delivery.key] = { ok: false, ...record }
     }
     await writePublishingState(db, state)
   }
@@ -338,6 +395,7 @@ export const LAUNCH_CAMPAIGN = Object.freeze({
   id: 'beslyfe-launch-2026-07-18',
   text: 'Beslyfe is live. Build communities, coordinate work, and turn ideas into meaningful action from one living platform. Join the founding community at https://beslyfe.com/?utm_source=social&utm_medium=organic&utm_campaign=beslyfe_launch #Beslyfe #CommunityBuilding #Automation',
   imageUrl: 'https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png',
+  storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
   linkUrl: 'https://beslyfe.com/?utm_source=facebook&utm_medium=organic&utm_campaign=beslyfe_launch',
   channels: ['facebook', 'instagram', 'threads'],
 })
@@ -348,6 +406,7 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     publishAfter: '2026-07-18T20:30:00Z',
     text: 'What if the idea you keep thinking about had somewhere to begin?\n\nBeslyfe is 100% free. Bring the dream—a blog, creative career, online store, retail operation, property-management system, community, event, or something nobody has named yet. Beslyfe helps you shape it, connect it, and automate repetitive work so you can spend more time doing what you love.\n\nStart free at https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step\n\n#Beslyfe #BuildYourFuture #FreeOpportunity #GrowTogether',
     imageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-first-step-v1.png',
+    storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-story-v1.png',
     linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step',
     altText: 'A creator takes the first step on an idea while a warm, connected path opens toward future work and community.',
     channels: ['facebook', 'instagram', 'threads'],
@@ -371,6 +430,7 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     publishAfter: '2026-07-22T14:00:00Z',
     text: 'Big changes rarely begin with a perfect plan. They begin when somebody shares the idea, asks a useful question, and finds people willing to help.\n\nBeslyfe gives builders, creators, business owners, organizers, and dreamers a 100% free place to begin—and a growing community to move forward with.\n\nBring what you hope to build: https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together\n\n#Beslyfe #GrowTogether #BuildInPublic #Community',
     imageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-community-v1.png',
+    storyImageUrl: 'https://beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
     linkUrl: 'https://beslyfe.com/signup?utm_source=facebook&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together',
     altText: 'A warm, diverse group helps one another turn creative and business ideas into practical next steps.',
     channels: ['facebook', 'instagram', 'threads'],
