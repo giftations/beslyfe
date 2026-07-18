@@ -15,6 +15,7 @@ test('platform contract registry exposes every core contract group', () => {
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communities.communityTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communityNetwork.recordTypes))
+  assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.communityFederation.recordTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes))
   assert.ok(Array.isArray(PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes))

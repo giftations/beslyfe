@@ -38,6 +38,10 @@ export const ECOSYSTEM_CONFIG_CONTRACT = {
     required: ['fields', 'visibilityDefaults', 'approvalPolicy'],
     purpose: 'Configures directory/profile data without hardcoding product-specific fields.',
   },
+  communityBridge: {
+    required: ['networkId', 'ecosystemId', 'identityMode', 'contributionMode', 'originAttribution', 'audience', 'accountLinkRequiredForWrites'],
+    purpose: 'Connects every build to the shared Beslyfe network while preserving age, visibility, origin, and write boundaries.',
+  },
   intake: {
     required: ['enabled', 'workflows', 'questions', 'statusFlow', 'contracts'],
     purpose: 'Configures application and approval workflows only when the selected product needs gated participation.',

@@ -172,13 +172,31 @@ async function sendProfileApprovalEmail(profile, req) {
   return sendEmail({ to: profile.email, subject, text, html })
 }
 
-// Public responses must never leak member email addresses (mass-harvesting
-// risk). Only an admin, or the owner viewing their own profile, sees the email.
-function publicView(item, canSeeEmail) {
+// Public profile metadata is an explicit allowlist. Application and onboarding
+// forms also use `details`, so returning that object wholesale can expose phone
+// numbers, contact names, internal package choices, or moderation state.
+export const PUBLIC_PROFILE_DETAIL_KEYS = new Set([
+  'products', 'booth', 'boothNumber', 'location', 'tier', 'talkTitle',
+  'talkTopic', 'interests', 'actType', 'genre', 'mixLink', 'goals',
+  'category', 'vendorCategory', 'industry', 'featured',
+])
+
+export function publicProfileDetails(details) {
+  const out = {}
+  if (!details || typeof details !== 'object') return out
+  for (const key of PUBLIC_PROFILE_DETAIL_KEYS) {
+    if (details[key] !== undefined && details[key] !== null) out[key] = details[key]
+  }
+  return out
+}
+
+// Public responses must never leak member email addresses or private detail
+// fields. Only an admin, or the owner viewing their own profile, sees them.
+export function publicProfileView(item, canSeePrivate = false) {
   if (!item) return item
-  if (canSeeEmail) return item
+  if (canSeePrivate) return item
   const { email, ...rest } = item
-  return { ...rest, email: '' }
+  return { ...rest, email: '', details: publicProfileDetails(item.details) }
 }
 
 // The edition a new profile belongs to: the active event. Best-effort so a
@@ -211,7 +229,7 @@ export default async (req) => {
       // Hidden system/admin profiles are invisible to everyone but an admin or
       // the owner — behave as if they don't exist for anyone else.
       if (isHidden(item) && !isAdmin && !owner) return json({ error: 'Not found' }, 404)
-      return json({ item: publicView(item, isAdmin || owner) }, 200, { 'Cache-Control': 'no-store' })
+      return json({ item: publicProfileView(item, isAdmin || owner) }, 200, { 'Cache-Control': 'no-store' })
     }
 
     const roleFilter = url.searchParams.get('role')
@@ -242,7 +260,7 @@ export default async (req) => {
     // sees them so a system profile is never silently unaccounted for.
     let listed = rows.map(normalizeRow).filter(Boolean)
     if (!isAdmin) listed = listed.filter((it) => !isHidden(it))
-    const items = listed.map((it) => publicView(it, isAdmin))
+    const items = listed.map((it) => publicProfileView(it, isAdmin))
     return json({ items }, 200, { 'Cache-Control': 'no-store' })
   }
 

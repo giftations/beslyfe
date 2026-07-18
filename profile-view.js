@@ -64,6 +64,7 @@
     var html = '<div class="bubble profile-detail">'
       + avatar
       + '<span class="role-pill">' + escHtml(p.role) + '</span>'
+      + (p.federated ? '<span class="role-pill" style="margin-left:8px">From ' + escHtml((p.origin || {}).name || 'connected community') + ' · 18+</span>' : '')
       + '<h1>' + escHtml(p.displayName || '(no name)') + '</h1>';
     if (p.company) html += '<p class="detail-company">' + escHtml(p.company) + '</p>';
     if (p.tagline) html += '<p class="detail-company" style="color:var(--muted)">' + escHtml(p.tagline) + '</p>';
@@ -96,6 +97,7 @@
   // True when the visitor may edit this profile: it is their own active identity,
   // it is the profile linked to their account, or they are signed in as an admin.
   function canEdit(p) {
+    if (p.federated) return false;
     try {
       var session = JSON.parse(localStorage.getItem('beslyfe_session') || 'null');
       if (session && session.role === 'admin') return true;
@@ -105,9 +107,36 @@
     return !!(me && me.id === p.id);
   }
 
+  async function loadFederated(id) {
+    var confirmed = false;
+    try { confirmed = localStorage.getItem('beslyfe_age_cannadispo') === '18'; } catch (e) {}
+    if (!confirmed) {
+      container.innerHTML = '<div class="bubble profile-detail"><span class="role-pill">Cannadispo · 18+</span><h1>Age confirmation required</h1><p class="detail-bio">Confirm that you are 18 or older before viewing this age-protected community profile.</p><button class="detail-link" id="confirmFederatedAge" type="button">I am 18 or older</button><a class="detail-link" href="/community">I am under 18</a></div>';
+      document.getElementById('confirmFederatedAge').addEventListener('click', function () { try { localStorage.setItem('beslyfe_age_cannadispo', '18'); } catch (e) {} loadFederated(id); });
+      return;
+    }
+    try {
+      var url = '/.netlify/functions/community-network?type=profile&ecosystem=cannadispo&ageConfirmed=1&id=' + encodeURIComponent(id);
+      var res = await fetch(url);
+      var data = await res.json();
+      if (res.status === 404) { container.innerHTML = '<p class="empty">This profile could not be found.</p>'; return; }
+      if (!res.ok) throw new Error(data.error || 'Failed to load');
+      render(data.item);
+      applyProfileMeta(data.item);
+      initSocial(data.item);
+    } catch (err) {
+      container.innerHTML = '<p class="empty">Could not load this profile: ' + escHtml(err.message) + '</p>';
+    }
+  }
+
   async function load() {
-    var id = new URLSearchParams(window.location.search).get('id');
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get('id');
     if (!id) { container.innerHTML = '<p class="empty">No profile specified.</p>'; return; }
+    if (params.get('ecosystem') === 'cannadispo' || String(id).indexOf('cannadispo:') === 0) {
+      await loadFederated(id);
+      return;
+    }
     try {
       var res = await fetch(ENDPOINT + '?id=' + encodeURIComponent(id));
       var data = await res.json();
@@ -124,6 +153,15 @@
 
   // ── Social layer: follower stats, a follow button, and this profile's posts ──
   function initSocial(profile) {
+    if (profile.federated) {
+      var origin = profile.origin || {};
+      var federated = document.createElement('div');
+      federated.className = 'profile-social';
+      federated.innerHTML = '<p class="so-muted">This is a public-safe federated profile. Follow, message, and editing actions stay in the member\'s protected Cannadispo space until they explicitly link a canonical Beslyfe account.</p><div id="pFollowWrap"><a class="so-btn" href="/community/cannadispo">Cannadispo on Beslyfe</a>' + (origin.profileUrl ? '<a class="so-btn ghost" href="' + escHtml(origin.profileUrl) + '" rel="noopener">Open original profile</a>' : '') + '</div>';
+      var federatedDetail = container.querySelector('.profile-detail');
+      (federatedDetail || container).appendChild(federated);
+      return;
+    }
     var S = window.BeslyfeSocial;
     if (!S) return;
     var me = S.getIdentity();
