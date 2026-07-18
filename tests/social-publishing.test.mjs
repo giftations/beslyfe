@@ -13,6 +13,7 @@ import {
   publishThreads,
   SOCIAL_CAMPAIGNS,
   socialReadiness,
+  waitForInstagramContainer,
 } from '../netlify/functions/lib/social-publishing.mjs'
 import { normalizeTrafficEvent, resolveTrafficWindow } from '../netlify/functions/traffic.mjs'
 
@@ -77,16 +78,20 @@ test('free-opportunity campaign is paced, count-free, and uses committed creativ
 })
 
 test('Instagram story and Threads image publishing use their media containers', async () => {
-  const instagramBodies = []
-  const instagramFetch = async (_url, options) => {
-    instagramBodies.push(String(options.body || ''))
-    return { ok: true, status: 200, json: async () => ({ id: instagramBodies.length === 1 ? 'container' : 'published' }) }
+  const instagramCalls = []
+  const instagramFetch = async (url, options) => {
+    const href = String(url)
+    instagramCalls.push({ href, body: String(options.body || '') })
+    if (href.includes('/media_publish')) return { ok: true, status: 200, json: async () => ({ id: 'published' }) }
+    if (href.includes('/container?')) return { ok: true, status: 200, json: async () => ({ id: 'container', status_code: 'FINISHED' }) }
+    return { ok: true, status: 200, json: async () => ({ id: 'container' }) }
   }
   await publishInstagram({ text: 'Count-free story', imageUrl: 'https://beslyfe.com/story.png', instagramPlacement: 'story' }, {
     INSTAGRAM_USER_ID: 'ig', INSTAGRAM_ACCESS_TOKEN: 'token',
   }, instagramFetch)
-  assert.match(instagramBodies[0], /media_type=STORIES/)
-  assert.doesNotMatch(instagramBodies[0], /caption=/)
+  assert.match(instagramCalls[0].body, /media_type=STORIES/)
+  assert.doesNotMatch(instagramCalls[0].body, /caption=/)
+  assert.match(instagramCalls[1].href, /fields=status_code/)
 
   const threadBodies = []
   const threadsFetch = async (_url, options) => {
@@ -99,6 +104,18 @@ test('Instagram story and Threads image publishing use their media containers', 
   assert.match(threadBodies[0], /media_type=IMAGE/)
   assert.match(threadBodies[0], /image_url=/)
   assert.match(threadBodies[0], /alt_text=/)
+})
+
+test('Instagram waits through processing without publishing early', async () => {
+  let checks = 0
+  const fetchImpl = async () => ({
+    ok: true,
+    status: 200,
+    json: async () => ({ id: 'container', status_code: ++checks === 1 ? 'IN_PROGRESS' : 'FINISHED' }),
+  })
+  const result = await waitForInstagramContainer('container', 'token', {}, fetchImpl, { attempts: 3, delayMs: 0 })
+  assert.equal(result.status_code, 'FINISHED')
+  assert.equal(checks, 2)
 })
 
 test('traffic reporting supports bounded operator windows', () => {
