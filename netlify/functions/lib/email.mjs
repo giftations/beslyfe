@@ -23,7 +23,7 @@ function warnOnce(code, message) {
 // admin@cannadispo.com is the current operational fallback sender. Keep it until
 // EMAIL_FROM_ADDRESS / APPROVAL_EMAIL_FROM are verified and configured in Netlify.
 export const VERIFIED_SENDER = env('EMAIL_FROM_ADDRESS') || 'admin@cannadispo.com'
-export const DEFAULT_FROM = `Bak'd On The Bay <${VERIFIED_SENDER}>`
+export const DEFAULT_FROM = `Beslyfe <${VERIFIED_SENDER}>`
 
 // Parse a `Display Name <addr@example.com>` or bare `addr@example.com` string
 // into the { name, email } shape SendGrid wants (Resend accepts the raw string).

@@ -1,4 +1,4 @@
-/* Email verification for Bak'd On The Bay.
+/* Email verification for Beslyfe.
    Talks to the /auth function:
      • On load, exchanges the ?token=… from the verification email for an active,
        signed-in session (action: 'verify-email') and forwards to the hub.

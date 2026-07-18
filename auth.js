@@ -1,4 +1,4 @@
-/* Account auth for Bak'd On The Bay.
+/* Account auth for Beslyfe.
    Talks to the /auth function: one account = one password = one community
    profile. Signing in stores the account session (`bakd_session`) and also sets
    the active social identity (`bay_active_profile`) to the account's linked
@@ -6,6 +6,8 @@
    themselves — no separate "choose a profile" step. */
 (function () {
   var AUTH_ENDPOINT = '/.netlify/functions/auth';
+  // Legacy storage keys stay stable so existing members are not signed out
+  // during the Beslyfe identity migration.
   var SESSION_KEY = 'bakd_session';
   var IDENTITY_KEY = 'bay_active_profile';
 
@@ -96,6 +98,35 @@
     if (createForm) createForm.classList.toggle('hidden', isSignin);
   }
 
+  // Clean public routes use /signup?mode=create while /login defaults to sign
+  // in. Keeping one form avoids two authentication implementations drifting.
+  var authPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  var requestedMode = new URLSearchParams(window.location.search).get('mode');
+  if (authPath === '/signup' || authPath === '/join' || requestedMode === 'create' || requestedMode === 'signup' || requestedMode === 'join') {
+    showTab('create');
+  }
+
+  // Readiness contains booleans only—never secret values. It prevents a visitor
+  // from creating an account that cannot receive its required verification.
+  fetch(AUTH_ENDPOINT + '?action=readiness', { headers: { Accept: 'application/json' } })
+    .then(function (res) { return res.ok ? res.json() : {}; })
+    .then(function (ready) {
+      var notice = document.getElementById('setupNotice');
+      if (!notice) return;
+      var messages = [];
+      if (ready.memberSignupReady === false) messages.push('New-account email verification is temporarily unavailable. Existing members can still sign in.');
+      var adminIntent = authPath === '/admin/login' || new URLSearchParams(window.location.search).get('admin') === '1';
+      if (adminIntent && ready.adminAccessReady === false) messages.push('Administrator access still needs its secure production password configured.');
+      if (!messages.length) return;
+      notice.textContent = messages.join(' ');
+      notice.hidden = false;
+      if (ready.memberSignupReady === false) {
+        var createButton = createForm && createForm.querySelector('button[type="submit"]');
+        if (createButton) { createButton.disabled = true; createButton.textContent = 'Free signup temporarily unavailable'; }
+      }
+    })
+    .catch(function () { /* The forms still report server errors normally. */ });
+
   // ── Sign In ──
   var signinForm = document.getElementById('signinForm');
   if (signinForm) {
@@ -160,13 +191,13 @@
           createForm.reset();
           successEl.textContent = (data && data.message) || 'Almost there — check your email for a link to verify your account, then sign in.';
           if (data && data.emailSent === false) {
-            successEl.textContent += ' (If it doesn’t arrive, use “Resend verification email” after trying to sign in.)';
+            successEl.textContent = 'Your account was created, but verification email delivery is not connected yet. Contact hello@beslyfe.com before trying again.';
           }
-          if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+          if (btn) { btn.disabled = false; btn.textContent = 'Join Beslyfe Free'; }
         })
         .catch(function (err) {
           errorEl.textContent = err.message;
-          if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+          if (btn) { btn.disabled = false; btn.textContent = 'Join Beslyfe Free'; }
         });
     });
   }

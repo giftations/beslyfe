@@ -39,6 +39,13 @@
 # Direct messages
 /messages            /messages.html                      200
 
+# One authentication implementation behind clear public entry points.
+/login               /admin-login.html                  200
+/sign-in             /admin-login.html                  200
+/signup              /admin-login.html?mode=create      200
+/join                /admin-login.html?mode=create      200
+/admin/login         /admin-login.html?admin=1           200
+
 /education           /education-schedule.html            200
 /manifesto           /manifesto.html                     200
 /constitution        /CONSTITUTION.md                    200

@@ -7,7 +7,7 @@ import {
 } from './lib/session.mjs'
 import { VERIFIED_SENDER, sendEmail } from './lib/email.mjs'
 
-// Account authentication for Bak'd On The Bay. An account is a single login
+// Account authentication for Beslyfe. An account is a single login
 // credential (email + password) bound to exactly one community profile, so a
 // member signs up once and that profile becomes their identity everywhere —
 // the directory, the feed and direct messages. One account, one password, one
@@ -95,7 +95,7 @@ const VERIFY_TTL_MS = 24 * 60 * 60 * 1000 // email-verification links are valid 
 // provider is configured the send is a no-op, so the caller still cannot
 // distinguish "no such account" from "email not sent".
 async function sendResetEmail(toEmail, name, link) {
-  const subject = 'Reset your Bak’d On The Bay password'
+  const subject = 'Reset your Beslyfe password'
   const text = [
     `Hi ${name || 'there'},`,
     '',
@@ -104,10 +104,10 @@ async function sendResetEmail(toEmail, name, link) {
     '',
     'If you did not request this, you can safely ignore this email — your password will not change.',
     '',
-    "Bak'd On The Bay",
+    'Beslyfe',
   ].join('\n')
   const safeLink = escHtml(link)
-  const html = `<p>Hi ${escHtml(name || 'there')},</p><p>We received a request to reset your password. Use the link below within the next hour to choose a new one:</p><p><a href="${safeLink}">${safeLink}</a></p><p>If you did not request this, you can safely ignore this email — your password will not change.</p><p>Bak'd On The Bay</p>`
+  const html = `<p>Hi ${escHtml(name || 'there')},</p><p>We received a request to reset your Beslyfe password. Use the link below within the next hour to choose a new one:</p><p><a href="${safeLink}">${safeLink}</a></p><p>If you did not request this, you can safely ignore this email — your password will not change.</p><p>Beslyfe</p>`
   const result = await sendEmail({ to: toEmail, subject, text, html })
   return !!(result && result.sent)
 }
@@ -116,19 +116,19 @@ async function sendResetEmail(toEmail, name, link) {
 // approval and reset flows use. The link carries a random token whose only stored
 // form is a hash, so possession of the link is the proof of address ownership.
 async function sendVerificationEmail(toEmail, name, link) {
-  const subject = "Verify your Bak’d On The Bay account"
+  const subject = 'Verify your free Beslyfe account'
   const text = [
     `Hi ${name || 'there'},`,
     '',
-    "Thanks for signing up for Bak'd On The Bay. Confirm this email address to activate your account — the link is valid for 24 hours:",
+    'Thanks for joining Beslyfe. Your membership is 100% free. Confirm this email address to activate your account—the link is valid for 24 hours:',
     link,
     '',
     "If you didn't create an account, you can safely ignore this email.",
     '',
-    "Bak'd On The Bay",
+    'Beslyfe',
   ].join('\n')
   const safeLink = escHtml(link)
-  const html = `<p>Hi ${escHtml(name || 'there')},</p><p>Thanks for signing up for Bak'd On The Bay. Confirm this email address to activate your account — the link is valid for 24 hours:</p><p><a href="${safeLink}">${safeLink}</a></p><p>If you didn't create an account, you can safely ignore this email.</p><p>Bak'd On The Bay</p>`
+  const html = `<p>Hi ${escHtml(name || 'there')},</p><p>Thanks for joining Beslyfe. Your membership is <strong>100% free</strong>. Confirm this email address to activate your account—the link is valid for 24 hours:</p><p><a href="${safeLink}">${safeLink}</a></p><p>If you didn't create an account, you can safely ignore this email.</p><p>Beslyfe</p>`
   const result = await sendEmail({ to: toEmail, subject, text, html })
   return !!(result && result.sent)
 }
@@ -429,6 +429,15 @@ export default async (req) => {
   const url = new URL(req.url)
 
   if (req.method === 'GET') {
+    // Public booleans let the sign-in screen prevent stranded registrations
+    // without exposing any secret value or provider detail.
+    if (url.searchParams.get('action') === 'readiness') {
+      return json({
+        memberSignupReady: Boolean(envStr('RESEND_API_KEY') || envStr('SENDGRID_API_KEY')),
+        adminAccessReady: Boolean(envStr('ADMIN_PASSWORD')),
+      })
+    }
+
     // ── Who am I? — resolve identity from the session cookie ──
     if (url.searchParams.get('action') === 'session') {
       const session = await readSession(req, db)

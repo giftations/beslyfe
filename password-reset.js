@@ -1,4 +1,4 @@
-/* Password reset for Bak'd On The Bay.
+/* Password reset for Beslyfe.
    Talks to the /auth function:
      • forgot-password.html requests a reset link (action: 'request-reset').
      • reset-password.html confirms a new password with the emailed token

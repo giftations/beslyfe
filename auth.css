@@ -22,6 +22,22 @@ width:min(100%,420px);
 box-shadow:0 24px 70px rgba(0,0,0,.38);
 }
 
+.auth-brand{
+display:inline-block;
+font-size:1.45rem;
+font-weight:900;
+letter-spacing:-.04em;
+text-decoration:none;
+color:#071008;
+}
+
+.auth-brand span{color:#4f7f08}
+.login-box h1{margin:10px 0 4px}
+.login-help{margin:0 0 18px;color:#52604f;line-height:1.5}
+.setup-notice{padding:11px 13px;margin:0 0 16px;border-radius:10px;background:#fff4ce;color:#5e4300;border:1px solid #e2c45f;font-size:14px}
+.login-footer{display:flex;justify-content:center;gap:8px;margin-top:6px;color:#52604f;font-size:14px}
+.login-footer a{color:#2d6a2d;font-weight:700}
+
 .tab-bar{
 display:flex;
 margin-bottom:20px;

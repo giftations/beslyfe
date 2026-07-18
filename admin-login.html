@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sign In | Bak'd On The Bay</title>
+<title>Sign In or Join Free | Beslyfe</title>
 <link rel="stylesheet" href="auth.css">
 <script>
   /* Already signed in? Skip the login form and go straight to the right
@@ -24,11 +24,14 @@
 <body>
 
 <div class="login-box">
-<h1>Bak'd On The Bay</h1>
+<a class="auth-brand" href="/">beslyfe<span>.</span></a>
+<h1>Welcome to Beslyfe</h1>
+<p class="login-help">Sign in to your community or create a free account. Members are 100% free—no credit card or subscription.</p>
+<p id="setupNotice" class="setup-notice" role="status" aria-live="polite" hidden></p>
 
 <div class="tab-bar">
   <button class="tab-btn active" id="signinTab">Sign In</button>
-  <button class="tab-btn" id="createTab">Create Account</button>
+  <button class="tab-btn" id="createTab">Join Free</button>
 </div>
 
 <!-- Sign In Form -->
@@ -55,19 +58,21 @@
   <label for="createRole">I am a...</label>
   <select id="createRole" required>
     <option value="" selected disabled>Select your role</option>
-    <option value="attendee">General Attendee</option>
-    <option value="vendor">Vendor</option>
-    <option value="speaker">Speaker</option>
-    <option value="sponsor">Sponsor</option>
-    <option value="dj">DJ / Performer</option>
+    <option value="attendee">Community member</option>
+    <option value="vendor">Business or organization</option>
+    <option value="speaker">Mentor, educator, or creator</option>
+    <option value="sponsor">Partner or supporter</option>
+    <option value="dj">Performer or artist</option>
   </select>
   <p id="createError" class="error-message" role="alert" aria-live="polite"></p>
   <p id="createSuccess" class="success-message" role="status" aria-live="polite"></p>
-  <button type="submit">Create Account</button>
+  <button type="submit">Join Beslyfe Free</button>
 </form>
 
+<div class="login-footer"><a href="/">Back to Beslyfe</a><span aria-hidden="true">·</span><a href="/admin">Admin</a></div>
 </div>
 
 <script src="auth.js"></script>
+<script src="/assets/js/traffic.js"></script>
 </body>
 </html>
