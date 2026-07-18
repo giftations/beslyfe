@@ -15,8 +15,8 @@
       try {
         var t = localStorage.getItem('admin_theme'); if (t) document.documentElement.setAttribute('data-theme', t);
         var s = JSON.parse(localStorage.getItem('bakd_session') || 'null');
-        if (!s || s.role !== 'admin') location.replace('/admin-login.html');
-      } catch (e) { location.replace('/admin-login.html'); }
+        if (!s || s.role !== 'admin') location.replace('/admin/login');
+      } catch (e) { location.replace('/admin/login'); }
     })();
   </script>
 </head>

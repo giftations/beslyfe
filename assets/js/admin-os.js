@@ -30,7 +30,7 @@
   // ── Session gate ──────────────────────────────────────────────────────────
   var session = null;
   try { session = JSON.parse(localStorage.getItem('bakd_session') || 'null'); } catch (e) {}
-  if (!session || session.role !== 'admin') { location.replace('/admin-login.html'); return; }
+  if (!session || session.role !== 'admin') { location.replace('/admin/login'); return; }
 
   // Authoritative server check. The localStorage gate above is only a fast,
   // spoofable fast-fail — a forged `bakd_session` would pass it. Confirm with the
@@ -45,7 +45,7 @@
       var acct = d && d.account;
       if (!acct || acct.role !== 'admin') {
         try { localStorage.removeItem('bakd_session'); localStorage.removeItem('bay_active_profile'); } catch (e) {}
-        location.replace('/admin-login.html');
+        location.replace('/admin/login');
       }
     })
     .catch(function () { /* transient network error — keep the local gate */ });
@@ -282,7 +282,7 @@
 
     document.getElementById('logoutBtn').onclick = function () {
       try { localStorage.removeItem('bakd_session'); localStorage.removeItem('bay_active_profile'); } catch (e) {}
-      location.replace('/admin-login.html');
+      location.replace('/admin/login');
     };
     document.getElementById('sideToggle').onclick = toggleSidebar;
     document.getElementById('sideScrim').onclick = function () { app.classList.remove('mobile-open'); };
