@@ -1,0 +1,118 @@
+.build-signal .possibility-line {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-soft);
+  font-size: .62rem;
+  line-height: 1.35;
+}
+
+.build-signal .mini-bars {
+  height: 28px;
+  margin-top: 6px;
+}
+
+.possibility-section {
+  padding-bottom: 40px;
+}
+
+.possibility-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.possibility-card {
+  min-height: 290px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 27px;
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.possibility-card:nth-child(2),
+.possibility-card:nth-child(5) {
+  background: #f1eeff;
+}
+
+.possibility-card:nth-child(3),
+.possibility-card:nth-child(4) {
+  background: #eefbf8;
+}
+
+.possibility-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(105, 86, 232, .42);
+  box-shadow: var(--shadow);
+}
+
+.possibility-card > span {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font: 800 .68rem/1 "Manrope", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.possibility-card h3 {
+  margin: 24px 0 10px;
+  font-size: 1.55rem;
+  line-height: 1.05;
+}
+
+.possibility-card p {
+  margin: 0 0 24px;
+  color: var(--ink-soft);
+}
+
+.possibility-card b {
+  margin-top: auto;
+  color: var(--violet);
+  font-size: .82rem;
+}
+
+.custom-possibility {
+  background: var(--ink) !important;
+  color: #fff;
+}
+
+.custom-possibility > span {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.custom-possibility p {
+  color: #c8c6da;
+}
+
+.custom-possibility b {
+  color: var(--mint);
+}
+
+@media (max-width: 980px) {
+  .possibility-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .build-signal .possibility-line {
+    font-size: .56rem;
+  }
+
+  .possibility-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .possibility-card {
+    min-height: 250px;
+  }
+}
