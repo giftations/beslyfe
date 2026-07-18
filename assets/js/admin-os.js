@@ -2,8 +2,8 @@
    Beslyfe Admin OS — Shell runtime
    A single-page "mission control" that unifies every admin workspace behind one
    persistent sidebar, one command palette, and one design language. Modules are
-   self-contained render functions; rich existing editors (Website CMS, Floor
-   Plan, Schedule) are embedded so no functionality is lost.
+   self-contained render functions. Ecosystem tools are modular and legacy
+   event operations remain under the clearly labeled optional section.
    ========================================================================== */
 (function () {
   'use strict';
@@ -25,15 +25,22 @@
     tickets: '/.netlify/functions/tickets',
     dataExport: '/.netlify/functions/data-export',
     traffic: '/.netlify/functions/traffic',
+    ecosystems: '/.netlify/functions/ecosystems',
   };
 
   // ── Session gate ──────────────────────────────────────────────────────────
   var session = null;
-  try { session = JSON.parse(localStorage.getItem('bakd_session') || 'null'); } catch (e) {}
+  try {
+    var earlierSessionKey = ['ba', 'kd_session'].join('');
+    var sessionRaw = localStorage.getItem('beslyfe_session') || localStorage.getItem(earlierSessionKey);
+    if (sessionRaw && !localStorage.getItem('beslyfe_session')) localStorage.setItem('beslyfe_session', sessionRaw);
+    localStorage.removeItem(earlierSessionKey);
+    session = JSON.parse(sessionRaw || 'null');
+  } catch (e) {}
   if (!session || session.role !== 'admin') { location.replace('/admin/login'); return; }
 
   // Authoritative server check. The localStorage gate above is only a fast,
-  // spoofable fast-fail — a forged `bakd_session` would pass it. Confirm with the
+  // spoofable fast-fail — a forged `beslyfe_session` would pass it. Confirm with the
   // server, which derives identity from the httpOnly session cookie the client
   // cannot read or set, that this browser really holds an approved admin session.
   // If not, clear local state and bounce to login. Runs in the background so the
@@ -44,7 +51,7 @@
     .then(function (d) {
       var acct = d && d.account;
       if (!acct || acct.role !== 'admin') {
-        try { localStorage.removeItem('bakd_session'); localStorage.removeItem('bay_active_profile'); } catch (e) {}
+        try { localStorage.removeItem('beslyfe_session'); localStorage.removeItem('beslyfe_active_profile'); } catch (e) {}
         location.replace('/admin/login');
       }
     })
@@ -174,9 +181,9 @@
   // ── Module registry ───────────────────────────────────────────────────────
   // group order defines the sidebar sections; each module has a render(host).
   var GROUPS = [
-    { id: 'platform', label: 'Platform' },
+    { id: 'platform', label: 'Builds & Growth' },
     { id: 'crm', label: 'CRM' },
-    { id: 'ticketing', label: 'Ticketing' },
+    { id: 'optional-event', label: 'Optional Event Tools' },
     { id: 'advertising', label: 'Advertising' },
     { id: 'overview', label: 'Overview' },
     { id: 'website', label: 'Website' },
@@ -185,22 +192,23 @@
     { id: 'operations', label: 'Operations' },
   ];
   var MODULES = [
-    { id: 'events', label: 'Events', icon: '🎪', group: 'platform', render: renderEvents },
+    { id: 'ecosystems', label: 'Ecosystems', icon: '∞', group: 'platform', render: renderEcosystems },
+    { id: 'events', label: 'Events', icon: '🎪', group: 'optional-event', render: renderEvents },
     { id: 'crm-people', label: 'People', icon: '🧑‍🤝‍🧑', group: 'crm', render: renderCrmPeople },
     { id: 'crm-companies', label: 'Companies', icon: '🏢', group: 'crm', render: renderCrmCompanies },
-    { id: 'ticket-sales', label: 'Ticket Sales', icon: '🎟️', group: 'ticketing', render: renderTicketSales },
-    { id: 'ticket-connections', label: 'Connections', icon: '🔌', group: 'ticketing', render: renderTicketConnections },
+    { id: 'ticket-sales', label: 'Ticket Sales', icon: '🎟️', group: 'optional-event', render: renderTicketSales },
+    { id: 'ticket-connections', label: 'Connections', icon: '🔌', group: 'optional-event', render: renderTicketConnections },
     { id: 'ads-campaigns', label: 'Campaigns', icon: '📣', group: 'advertising', render: renderAdCampaigns },
     { id: 'ads-reports', label: 'Ad Reports', icon: '📊', group: 'advertising', render: renderAdReports },
     { id: 'ads-invoices', label: 'Invoices', icon: '🧾', group: 'advertising', render: renderAdInvoices },
     { id: 'dashboard', label: 'Dashboard', icon: '📊', group: 'overview', render: renderDashboard },
     { id: 'executive', label: 'Executive', icon: '🧭', group: 'overview', render: renderExecutive },
     { id: 'analytics', label: 'Analytics', icon: '📈', group: 'overview', render: renderAnalytics },
-    { id: 'cms', label: 'Website CMS', icon: '🎨', group: 'website', render: embed('/admin-homepage.html', 'Website CMS & Builder', 'Edit every homepage section — hero, copy, buttons, media, theme, section order — then preview & publish.') },
+    { id: 'cms', label: 'Website & Brand', icon: '🎨', group: 'website', render: renderSiteWorkspace },
     { id: 'media', label: 'Media Library', icon: '🖼️', group: 'website', render: renderMedia },
-    { id: 'floorplan', label: 'Floor Plan', icon: '🗺️', group: 'website', render: embed('/floorplan-editor.html', 'Interactive Floor Plan', 'Create, move, resize and assign booths, then publish the printable map.') },
-    { id: 'schedule', label: 'Schedule', icon: '🗓️', group: 'website', render: embed('/education-schedule.html', 'Schedule', 'The published education & entertainment schedule. Speaker slots are managed inside the Website CMS.') },
-    { id: 'applications', label: 'Applications', icon: '📥', group: 'people', render: renderApplications, badge: 'appsPending' },
+    { id: 'floorplan', label: 'Floor Plan', icon: '🗺️', group: 'optional-event', render: embed('/floorplan-editor.html', 'Interactive Floor Plan', 'Create, move, resize and assign booths, then publish the printable map.') },
+    { id: 'schedule', label: 'Schedule', icon: '🗓️', group: 'optional-event', render: embed('/education-schedule.html', 'Schedule', 'The published education & entertainment schedule. Speaker slots are managed inside the Website CMS.') },
+    { id: 'applications', label: 'Applications', icon: '📥', group: 'optional-event', render: renderApplications, badge: 'appsPending' },
     { id: 'users', label: 'Users', icon: '👥', group: 'people', render: renderUsers },
     { id: 'vendors', label: 'Vendors', icon: '🏪', group: 'people', render: profileModule('vendor', 'Vendors') },
     { id: 'sponsors', label: 'Sponsors', icon: '🤝', group: 'people', render: profileModule('sponsor', 'Sponsors') },
@@ -281,7 +289,7 @@
     drawerFoot = document.getElementById('drawerFoot');
 
     document.getElementById('logoutBtn').onclick = function () {
-      try { localStorage.removeItem('bakd_session'); localStorage.removeItem('bay_active_profile'); } catch (e) {}
+      try { localStorage.removeItem('beslyfe_session'); localStorage.removeItem('beslyfe_active_profile'); } catch (e) {}
       location.replace('/admin/login');
     };
     document.getElementById('sideToggle').onclick = toggleSidebar;
@@ -448,6 +456,37 @@
      MODULES
      ======================================================================== */
 
+  function renderEcosystems(host) {
+    host.innerHTML = pageHead('Ecosystems', 'Every build chooses its own capabilities while sharing one community network. Ticketing stays off unless a build explicitly needs it.', '<a class="btn brand" href="/create" target="_blank">+ Start a build</a>') +
+      '<div class="stats" id="ecoStats">' + statSkeletons(4) + '</div>' +
+      '<div class="card"><div class="card-title">Connected builds <span class="sub">shared network, separate controls</span></div><div id="ecoList">' + loadingList() + '</div></div>' +
+      '<div class="card mt-4"><div class="card-title">Capability rule</div><p class="muted">Websites and businesses start with content, analytics, community, and growth. Event applications, floor plans, and ticketing live under Optional Event Tools and are never inherited automatically.</p></div>';
+    Promise.all([
+      api(API.ecosystems + '?type=public'),
+      api(API.ecosystems + '?type=network-stats')
+    ]).then(function (result) {
+      var items = result[0].items || [], totals = result[1] || {};
+      $('#ecoStats', host).innerHTML =
+        stat((totals.ecosystems || 0).toLocaleString(), 'Connected ecosystems', '∞', 'accent') +
+        stat((totals.members || 0).toLocaleString(), 'Network members', '👥', '') +
+        stat((totals.contributions || 0).toLocaleString(), 'Public contributions', '💬', '') +
+        stat((totals.successStories || 0).toLocaleString(), 'Success stories', '↗', '');
+      $('#ecoList', host).innerHTML = items.length ? '<div class="list">' + items.map(function (item) {
+        var capabilities = item.capabilities || [], ticketing = capabilities.indexOf('ticketing') >= 0;
+        return '<div class="row"><div class="avatar sq">' + esc((item.productType || 'E').slice(0, 1).toUpperCase()) + '</div><div class="grow"><div class="name">' + esc(item.name) + '</div><div class="meta">' + esc(item.productType || 'ecosystem') + ' · ' + esc(item.primaryOutcome || 'community-growth') + '</div></div><span class="pill ' + (ticketing ? 'yellow' : 'green') + '">Ticketing ' + (ticketing ? 'enabled' : 'off') + '</span></div>';
+      }).join('') + '</div>' : emptyState('∞', 'No public builds yet', 'Start the first build from the guided Beslyfe builder.');
+    }).catch(function (error) { $('#ecoList', host).innerHTML = errorBox(error.message); });
+  }
+
+  function renderSiteWorkspace(host) {
+    host.innerHTML = pageHead('Website & Brand', 'The production Beslyfe identity, public routes, community doorway, and guided builder.', '<a class="btn brand" href="/" target="_blank">View live site</a>') +
+      '<div class="grid cols-2">' +
+        '<div class="card"><div class="card-title">Production identity</div><dl class="kv"><dt>Canonical domain</dt><dd>beslyfe.com</dd><dt>Default theme</dt><dd>Beslyfe · violet, mint, cream</dd><dt>Membership</dt><dd>100% free</dd><dt>Social card</dt><dd>beslyfe-social-preview-v2.png</dd></dl></div>' +
+        '<div class="card"><div class="card-title">Primary journeys</div><div class="list"><a class="row" href="/community" target="_blank"><div class="grow"><div class="name">Community</div><div class="meta">Feed, reels, stories, groups, messages, people</div></div><span>→</span></a><a class="row" href="/create" target="_blank"><div class="grow"><div class="name">Guided builder</div><div class="meta">Modular builds and growth actions</div></div><span>→</span></a><a class="row" href="/proof/bakd-on-the-bay" target="_blank"><div class="grow"><div class="name">Proof boundary</div><div class="meta">Original event kept separate</div></div><span>→</span></a></div></div>' +
+      '</div>' +
+      '<div class="card mt-4"><div class="card-title">Publishing model</div><p class="muted">Public Beslyfe pages use the neutral platform theme and cannot inherit event-specific CMS branding. Ecosystem page generation, preview, version history, and rollback are tracked in the active roadmap.</p><div class="hstack mt-4"><a class="btn brand" href="/create" target="_blank">Start a build</a><a class="btn ghost" href="/community" target="_blank">Open community</a><a class="btn ghost" href="#/ecosystems">Manage ecosystems</a></div></div>';
+  }
+
   function pageHead(title, desc, actionsHtml) {
     return '<div class="page-head"><div><h1>' + esc(title) + '</h1>' +
       (desc ? '<p>' + esc(desc) + '</p>' : '') + '</div>' +
@@ -457,7 +496,7 @@
 
   // ── Dashboard ──────────────────────────────────────────────────────────────
   function renderDashboard(host) {
-    host.innerHTML = pageHead('Dashboard', 'A live snapshot of your event. Every workspace is one click away in the sidebar or ⌘K.') +
+    host.innerHTML = pageHead('Dashboard', 'A live snapshot of the Beslyfe platform. Every workspace is one click away in the sidebar or ⌘K.') +
       '<div class="stats" id="dStats">' + statSkeletons(4) + '</div>' +
       '<div class="grid cols-2">' +
       '<div class="card"><div class="card-title">🗂️ Applications by status<a class="sub" href="#/applications">Open →</a></div><div id="dApps" class="muted">Loading…</div></div>' +

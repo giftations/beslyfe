@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Tools | Bak'd On The Bay</title>
+    <title>Admin Tools | Beslyfe</title>
     <style>
       :root {
         --bg: #0f172a;
@@ -196,7 +196,7 @@
     <script>
       (function () {
         try {
-          var sessionRaw = localStorage.getItem('bakd_session');
+          var sessionRaw = localStorage.getItem('beslyfe_session');
           var session = sessionRaw ? JSON.parse(sessionRaw) : null;
           if (!session || session.role !== 'admin') {
             window.location.replace('/admin-login.html');
@@ -295,7 +295,7 @@
         <p class="helper">Control the brand area in the navigation. Use text, an uploaded image URL from the Media Library, or both.</p>
         <div class="field">
           <label for="brandText">Brand text</label>
-          <input id="brandText" type="text" placeholder="BAK'D ON THE BAY" />
+          <input id="brandText" type="text" placeholder="BESLYFE" />
         </div>
         <div class="field">
           <label for="brandImage">Brand image URL</label>
@@ -586,7 +586,7 @@
         const resetOrderBtn = document.getElementById("resetOrderBtn");
         const DEFAULT_SECTIONS = [
           { id: "featured-event", label: "Featured Event (hidden by default)" },
-          { id: "about", label: "Why Bak'd On The Bay?" },
+          { id: "about", label: "Why Beslyfe?" },
           { id: "stats", label: "Event Statistics" },
           { id: "education-station", label: "Education Station" },
           { id: "sponsors", label: "Featured Sponsors" },
@@ -1113,7 +1113,7 @@
         });
 
         logoutBtn.addEventListener("click", function () {
-          try { localStorage.removeItem("bakd_session"); } catch (e) {}
+          try { localStorage.removeItem("beslyfe_session"); } catch (e) {}
           window.location.replace("/admin-login.html");
         });
 

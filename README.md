@@ -1,42 +1,33 @@
 # Beslyfe
 
-Beslyfe is the parent platform, company, and dedicated public platform
-repository.
+Beslyfe is a free community and modular growth platform for people building
+businesses, websites, events, creator projects, nonprofits, and communities.
 
-The production Bak'd On The Bay implementation lives in
-[`giftations/bakd-on-the-bay`](https://github.com/giftations/bakd-on-the-bay).
-`beslyfe.com` is hosted from this repository on its own dedicated Netlify site.
-Do not connect this repository to the Bak'd On The Bay/Cannadispo Netlify site.
+The repository owns the Beslyfe public experience, shared community network,
+guided builder, growth connections, reusable platform contracts, administration
+tools, roadmap, and release infrastructure. Product capabilities are selected by
+outcome: ticketing is optional, not a platform-wide assumption.
 
-This repository owns the Beslyfe public product surface, reusable platform
-contracts and runtime, roadmap, governance, trust and AI standards, and shared
-ecosystem architecture. Bak'd-specific content and operating workflows belong
-in `giftations/bakd-on-the-bay`; reusable Beslyfe capability belongs here and
-must be consumed through configuration rather than copied between products.
+The original event implementation is retained only as an isolated proof under
+[`proof/`](proof/). Historical documentation and event-specific assets stay
+inside that boundary and do not supply Beslyfe defaults.
 
 ## Development
-
-Install dependencies and run tests when changing contracts or docs with runnable
-checks:
 
 ```sh
 npm install
 npm test
 ```
 
-## Platform References
+## Platform references
 
-- [`docs/PLATFORM_ARCHITECTURE.md`](docs/PLATFORM_ARCHITECTURE.md)
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — authoritative product and platform roadmap.
-- [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md) — compatibility pointer for the original incomplete plan.
-- [`docs/PRODUCT_IDENTITY_BOUNDARIES.md`](docs/PRODUCT_IDENTITY_BOUNDARIES.md)
-- [`docs/PULL_REQUEST_WORKFLOW.md`](docs/PULL_REQUEST_WORKFLOW.md)
-- [`platform/automation/execution-contract.mjs`](platform/automation/execution-contract.mjs) — internal, external, and hybrid automation authority.
+- [`docs/BESLYFE_ROADMAP.md`](docs/BESLYFE_ROADMAP.md) — authoritative roadmap
+- [`docs/PHASED_EXECUTION_PLAN.md`](docs/PHASED_EXECUTION_PLAN.md) — compatibility pointer
+- [`platform/README.md`](platform/README.md) — platform architecture overview
+- [`platform/automation/execution-contract.mjs`](platform/automation/execution-contract.mjs) — automation authority model
 
 ## Release boundary
 
-This repository publishes the Beslyfe platform identity and reusable contracts
-to the dedicated Beslyfe Netlify site. It must never replace or deploy over the
-Bak'd On The Bay/Cannadispo site. Future releases must preserve dedicated
-hosting, apex/`www` HTTPS, canonical URLs, legal pages, observability, and a
-verified rollback path.
+This repository publishes to the dedicated Beslyfe Netlify project and the
+`beslyfe.com` domain. Releases must preserve HTTPS, canonical URLs, legal pages,
+observability, data migrations, and a verified rollback path.

@@ -1,6 +1,6 @@
-# Frontend Architecture
+# Proof Frontend Architecture Appendix
 
-This document defines the Phase 1 frontend system for `bakd-on-the-bay`.
+This document records the Phase 1 frontend system for the isolated proof implementation. New Beslyfe public surfaces use the neutral Beslyfe design system and must not inherit this event theme.
 
 ## Goals
 

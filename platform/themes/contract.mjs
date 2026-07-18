@@ -2,8 +2,8 @@
 //
 // Themes let ecosystems differ without forking code. A theme is presentation
 // and default module intent, not a second product, permission system, or data
-// store. Bak'd On The Bay is the flagship theme; future events, venues,
-// communities, and industries should use the same contract.
+// store. Beslyfe is the neutral default; proof ecosystems and future
+// communities or industries use the same contract without inheriting modules.
 
 export const THEME_RECORD_TYPES = [
   {

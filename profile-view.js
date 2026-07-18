@@ -31,11 +31,11 @@
   // instead of the generic "Community Profile" defaults baked into the HTML.
   function applyProfileMeta(p) {
     var name = p.displayName || 'Community Member';
-    var title = name + ' — Bak\'d On The Bay';
+    var title = name + ' — Beslyfe';
     var descBits = [p.role, p.tagline].filter(Boolean);
     var desc = descBits.length
-      ? name + ' — ' + descBits.join(' · ') + ' at Bak\'d On The Bay.'
-      : name + ' is part of the Bak\'d On The Bay community.';
+      ? name + ' — ' + descBits.join(' · ') + ' in the Beslyfe community.'
+      : name + ' is part of the Beslyfe community.';
     document.title = title;
     setMeta('description', false, desc);
     setMeta('og:title', true, title);
@@ -51,7 +51,7 @@
 
   // Friendly labels for the free-form detail keys.
   var DETAIL_LABELS = {
-    products: 'Products', booth: 'Booth', tier: 'Sponsorship Tier',
+    products: 'Products / services', booth: 'Where to find me', tier: 'Organization focus',
     talkTitle: 'Talk', talkTopic: 'Topic', interests: 'Interests',
     actType: 'Act Type', genre: 'Genre', mixLink: 'Listen'
   };
@@ -97,11 +97,11 @@
   // it is the profile linked to their account, or they are signed in as an admin.
   function canEdit(p) {
     try {
-      var session = JSON.parse(localStorage.getItem('bakd_session') || 'null');
+      var session = JSON.parse(localStorage.getItem('beslyfe_session') || 'null');
       if (session && session.role === 'admin') return true;
       if (session && session.profileId === p.id) return true;
     } catch (e) {}
-    var me = window.BaySocial && window.BaySocial.getIdentity && window.BaySocial.getIdentity();
+    var me = window.BeslyfeSocial && window.BeslyfeSocial.getIdentity && window.BeslyfeSocial.getIdentity();
     return !!(me && me.id === p.id);
   }
 
@@ -114,7 +114,7 @@
       if (res.status === 404) { container.innerHTML = '<p class="empty">This profile could not be found.</p>'; return; }
       if (!res.ok) throw new Error(data.error || 'Failed to load');
       render(data.item);
-      document.title = (data.item.displayName || 'Profile') + ' — Bak\'d On The Bay';
+      document.title = (data.item.displayName || 'Profile') + ' — Beslyfe';
       applyProfileMeta(data.item);
       initSocial(data.item);
     } catch (err) {
@@ -124,7 +124,7 @@
 
   // ── Social layer: follower stats, a follow button, and this profile's posts ──
   function initSocial(profile) {
-    var S = window.BaySocial;
+    var S = window.BeslyfeSocial;
     if (!S) return;
     var me = S.getIdentity();
 
@@ -218,7 +218,7 @@
 
     refreshStats();
     loadPosts();
-    document.addEventListener('bay-identity-change', function () { refreshStats(); loadPosts(); });
+    document.addEventListener('beslyfe-identity-change', function () { refreshStats(); loadPosts(); });
   }
 
   load();

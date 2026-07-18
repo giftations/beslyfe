@@ -37,6 +37,7 @@ test('registered themes satisfy the reusable theme contract shape', () => {
 })
 
 test('theme resolution falls back to the default theme safely', () => {
+  assert.equal(DEFAULT_THEME_KEY, 'beslyfe')
   const resolved = resolveThemeSettings('does-not-exist')
   assert.equal(resolved.theme, DEFAULT_THEME_KEY)
   assert.ok(resolved.branding)

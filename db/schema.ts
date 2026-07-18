@@ -9,17 +9,69 @@ const bytea = customType<{ data: Buffer }>({
   },
 });
 
+// ── Ecosystems ──
+// The platform tenant is deliberately broader than an event. A business,
+// website, creator, nonprofit, community, or event is an ecosystem with a
+// capability plan. Every ecosystem participates in the shared Beslyfe network.
+export const ecosystems = pgTable("ecosystems", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().default(""),
+  name: text("name").notNull().default(""),
+  description: text("description").notNull().default(""),
+  productType: text("product_type").notNull().default("website"),
+  primaryOutcome: text("primary_outcome").notNull().default("community-growth"),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  parentEcosystemId: text("parent_ecosystem_id").notNull().default("beslyfe-network"),
+  status: text("status").notNull().default("draft"),
+  visibility: text("visibility").notNull().default("public"),
+  capabilities: jsonb("capabilities").notNull().default([]),
+  answers: jsonb("answers").notNull().default({}),
+  settings: jsonb("settings").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("ecosystems_slug_idx").on(t.slug),
+  index("ecosystems_owner_idx").on(t.ownerProfileId),
+  index("ecosystems_product_idx").on(t.productType, t.status),
+]);
+
+export const ecosystemMemberships = pgTable("ecosystem_memberships", {
+  ecosystemId: text("ecosystem_id").notNull(),
+  profileId: text("profile_id").notNull(),
+  role: text("role").notNull().default("member"),
+  source: text("source").notNull().default("direct"),
+  status: text("status").notNull().default("active"),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ columns: [t.ecosystemId, t.profileId] }),
+  index("ecosystem_memberships_profile_idx").on(t.profileId, t.status),
+]);
+
+export const growthChannels = pgTable("growth_channels", {
+  id: text("id").primaryKey(),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  mode: text("mode").notNull().default("lead"),
+  provider: text("provider").notNull().default("contact-form"),
+  offerName: text("offer_name").notNull().default(""),
+  actionLabel: text("action_label").notNull().default("Get started"),
+  destinationUrl: text("destination_url").notNull().default(""),
+  status: text("status").notNull().default("draft"),
+  attribution: jsonb("attribution").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("growth_channels_ecosystem_idx").on(t.ecosystemId, t.status),
+  index("growth_channels_owner_idx").on(t.ownerProfileId),
+]);
+
 // ── Events ──
-// The top-level tenant of the whole platform. Bak'd On The Bay is an Event OS:
-// every year, expo, venue or partner production is a row here, and every
-// event-scoped entity (applications, profiles, and — as the model grows —
-// companies, sponsorships, ads, …) carries an `event_id` pointing back to one.
-// Exactly one event is flagged `is_active`; it is the edition that new public
-// submissions attach to and that the admin is currently operating. Nothing about
-// an event is hardcoded — name, venue, dates and per-event settings all live in
-// this row so the platform can run unlimited future editions with no code change.
+// Optional event records for ecosystems that explicitly enable event tools.
+// Websites, businesses, creators, communities, and causes do not need one.
+// Event-scoped applications, schedules, and ticketing can point back here.
 export const events = pgTable("events", {
   id: text("id").primaryKey(),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
   slug: text("slug").notNull().default(""),
   name: text("name").notNull().default(""),
   tagline: text("tagline").notNull().default(""),
@@ -68,6 +120,7 @@ export const applications = pgTable("applications", {
 // in the jsonb `details` map so the schema stays stable as forms evolve.
 export const profiles = pgTable("profiles", {
   id: text("id").primaryKey(),
+  homeEcosystemId: text("home_ecosystem_id").notNull().default("beslyfe-network"),
   // The edition this profile belongs to (see events). Backfilled to the flagship
   // event for existing rows; new profiles stamp the active event automatically.
   eventId: text("event_id").notNull().default(""),
@@ -103,6 +156,7 @@ export const profiles = pgTable("profiles", {
 // { lat, lng, label, visibility } map for places shared on the community map.
 export const socialPosts = pgTable("social_posts", {
   id: text("id").primaryKey(),
+  ecosystemId: text("ecosystem_id").notNull().default("beslyfe-network"),
   authorId: text("author_id").notNull().default(""),
   body: text("body").notNull().default(""),
   imageUrl: text("image_url").notNull().default(""),
@@ -118,6 +172,7 @@ export const socialPosts = pgTable("social_posts", {
   index("social_posts_author_idx").on(t.authorId),
   index("social_posts_created_idx").on(t.createdAt),
   index("social_posts_type_idx").on(t.postType),
+  index("social_posts_ecosystem_idx").on(t.ecosystemId, t.createdAt),
 ]);
 
 export const socialComments = pgTable("social_comments", {

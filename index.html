@@ -3,50 +3,167 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Beslyfe — The Community Operating System</title>
-  <meta name="description" content="Beslyfe helps communities turn relationships, knowledge, and intelligent automation into real human opportunity.">
+  <title>Beslyfe - Build, grow, and belong</title>
+  <meta name="description" content="Build a website, business, community, event, or cause - then grow it through the shared Beslyfe community.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://beslyfe.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Beslyfe">
-  <meta property="og:title" content="Beslyfe — The Community Operating System">
-  <meta property="og:description" content="Software for communities that creates opportunity instead of maximizing attention.">
+  <meta property="og:title" content="Beslyfe - Build, grow, and belong">
+  <meta property="og:description" content="One free community. Every project you build makes the whole network stronger.">
   <meta property="og:url" content="https://beslyfe.com/">
-  <meta property="og:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview.jpg">
+  <meta property="og:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Beslyfe — The Community Operating System">
-  <meta name="twitter:description" content="Build communities that help people move forward.">
-  <meta name="twitter:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview.jpg">
+  <meta name="twitter:title" content="Beslyfe - Build, grow, and belong">
+  <meta name="twitter:description" content="Create something useful, connect it to community, and turn attention into real opportunity.">
+  <meta name="twitter:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png">
   <link rel="icon" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/beslyfe.css">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Beslyfe","url":"https://beslyfe.com/","logo":"https://beslyfe.com/assets/favicon.svg","description":"The community operating system for meaningful human opportunity.","sameAs":["https://www.instagram.com/beslyfe_/"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Beslyfe","url":"https://beslyfe.com/","logo":"https://beslyfe.com/assets/favicon.svg","description":"The shared community and growth platform for people building useful things.","sameAs":["https://www.instagram.com/beslyfe_/"]}</script>
   <script src="/assets/js/traffic.js" defer></script>
+  <script src="/beslyfe-session.js" defer></script>
+  <script src="/assets/js/home-community.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <header><nav class="shell" aria-label="Primary"><a class="brand" href="/">beslyfe<span>.</span></a><div><a class="nav-section" href="#platform">Platform</a><a class="nav-section" href="#proof">Proof</a><a class="nav-section" href="/manifesto">Manifesto</a><a href="/login">Sign in</a><a class="nav-join" href="/signup">Join free</a></div></nav></header>
+  <header class="site-header">
+    <nav class="shell primary-nav" aria-label="Primary">
+      <a class="brand" href="/" aria-label="Beslyfe home">beslyfe<span>.</span></a>
+      <div class="nav-links">
+        <a href="/community">Community</a>
+        <a href="/create">Build</a>
+        <a href="#growth">Grow</a>
+        <a href="/proof/bakd-on-the-bay">Proof</a>
+      </div>
+      <div class="nav-actions">
+        <a class="nav-signin" id="login-btn" href="/login">Sign in</a>
+        <a class="button small" href="/signup" data-guest-only>Join free</a>
+      </div>
+    </nav>
+  </header>
+
   <main id="main">
     <section class="hero shell">
-      <p class="eyebrow">The Community Operating System</p>
-      <h1>Build a community that helps people <em>move forward.</em></h1>
-      <p class="lead">Beslyfe connects people, businesses, knowledge, and opportunities—then uses transparent automation to make the next useful action effortless.</p>
-      <p class="free-callout"><strong>100% free.</strong> No credit card, subscription, or paywall to join.</p>
-      <div class="actions"><a class="button" href="/signup">Join Beslyfe free</a><a class="button secondary" href="/login">Sign in</a><a class="text-link" href="#platform">Explore the platform</a></div>
-      <div class="promise"><strong>Our measure of success:</strong> more meaningful opportunity, not more time spent scrolling.</div>
-    </section>
-    <section id="platform" class="section shell">
-      <p class="eyebrow">One connected system</p><h2>Everything a living ecosystem needs.</h2>
-      <div class="grid">
-        <article><span>01</span><h3>People & relationships</h3><p>Identity, profiles, organizations, CRM, introductions, and a durable relationship graph.</p></article>
-        <article><span>02</span><h3>Community & knowledge</h3><p>Directories, groups, messaging, schedules, places, and knowledge that remains useful.</p></article>
-        <article><span>03</span><h3>Opportunity engine</h3><p>Applications, events, marketplaces, sponsorships, and recommendations tied to outcomes.</p></article>
-        <article><span>04</span><h3>Action automation</h3><p>Internal, external, and hybrid workflows with approvals, audit history, and duplicate protection.</p></article>
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse"></span> One community. Infinite useful things.</p>
+        <h1>Build it.<br><em>Grow it together.</em></h1>
+        <p class="lead">Create a website, business, community, event, portfolio, or cause. Beslyfe connects every build to real people, useful conversations, and simple ways to generate sales.</p>
+        <p class="free-callout"><strong>100% free to join.</strong> No card, subscription, or paywall.</p>
+        <div class="actions">
+          <a class="button" href="/create">Start building</a>
+          <a class="button secondary" href="/community">Enter the community</a>
+        </div>
+        <div class="hero-trust">
+          <span>Posts, reels, and stories</span>
+          <span>Groups and direct messages</span>
+          <span>Sales and growth actions</span>
+        </div>
+      </div>
+
+      <div class="network-board" aria-label="A preview of the living Beslyfe network">
+        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <article class="signal-card community-signal">
+          <span class="signal-label">Community pulse</span>
+          <strong id="networkMemberCount">Growing now</strong>
+          <small>People connected across every ecosystem</small>
+        </article>
+        <article class="signal-card win-signal">
+          <span class="avatar-pair"><b>AM</b><b>JT</b></span>
+          <p><strong>A member helped another member</strong><br><span>Advice became a customer.</span></p>
+        </article>
+        <article class="signal-card sales-signal">
+          <span class="signal-icon">+</span>
+          <p><small>Growth action</small><strong>Sell online</strong><span>Checkout connected</span></p>
+        </article>
+        <article class="signal-card build-signal">
+          <small>Built with Beslyfe</small>
+          <strong>Business + community</strong>
+          <div class="mini-bars"><i></i><i></i><i></i><i></i></div>
+        </article>
+        <div class="board-core"><span>b</span><small>shared network</small></div>
       </div>
     </section>
-    <section id="proof" class="proof"><div class="shell split"><div><p class="eyebrow">Proof before promises</p><h2>Bak’d On The Bay is the first ecosystem powered by Beslyfe.</h2><p>One event became a connected platform for participants, businesses, community, operations, and measurable opportunity.</p></div><a class="button secondary" href="https://cannadispo.com" rel="noopener">See the proof ecosystem</a></div></section>
-    <section id="principles" class="section shell"><p class="eyebrow">Built on trust</p><h2>Intelligence should serve people.</h2><div class="principles"><p>Explain every recommendation.</p><p>Ask before consequential action.</p><p>Give people control of their data.</p><p>Optimize for outcomes, not addiction.</p></div></section>
-    <section class="cta shell"><p class="eyebrow">Free means free</p><h2>Better systems create better chances.</h2><p>Create your account and join the founding community for free. There is no credit card, trial countdown, or member subscription.</p><div class="actions centered"><a class="button" href="/signup">Create your free account</a><a class="button secondary" href="mailto:hello@beslyfe.com">Talk to the team</a></div></section>
+
+    <section class="network-strip" aria-label="Live Beslyfe network totals">
+      <div class="shell stat-row">
+        <div><strong id="statMembers">-</strong><span>community members</span></div>
+        <div><strong id="statContributions">-</strong><span>posts and reels</span></div>
+        <div><strong id="statEcosystems">-</strong><span>connected ecosystems</span></div>
+        <div><strong id="statWins">-</strong><span>shared success stories</span></div>
+      </div>
+    </section>
+
+    <section class="section shell community-first" id="community">
+      <div class="section-intro split-heading">
+        <div><p class="eyebrow">The center of Beslyfe</p><h2>Nothing grows alone.</h2></div>
+        <p>Every person who joins through a business, website, event, or community becomes part of the larger Beslyfe network. One identity. More useful connections. No disconnected user silos.</p>
+      </div>
+
+      <div class="community-grid">
+        <a class="community-card feed-card" href="/feed"><span class="card-number">01</span><div><h3>Community feed</h3><p>Ask for help, share progress, celebrate wins, and discover people worth knowing.</p></div><b>Open feed -></b></a>
+        <a class="community-card" href="/reels"><span class="feature-glyph">Play</span><div><h3>Reels & stories</h3><p>Show the process, not just the polished result.</p></div><b>Watch -></b></a>
+        <a class="community-card" href="/messages"><span class="feature-glyph">DM</span><div><h3>Direct messages</h3><p>Turn discovery into a real conversation.</p></div><b>Connect -></b></a>
+        <a class="community-card" href="/groups"><span class="feature-glyph">3+</span><div><h3>Groups</h3><p>Create focused spaces for teams, interests, customers, and causes.</p></div><b>Find groups -></b></a>
+        <a class="community-card" href="/directory"><span class="feature-glyph">Find</span><div><h3>People directory</h3><p>Find builders, businesses, mentors, collaborators, and supporters.</p></div><b>Explore -></b></a>
+      </div>
+
+      <div class="live-feed-block">
+        <div class="live-feed-head"><div><p class="eyebrow">Live from the network</p><h3>People building in public</h3></div><a href="/feed">See the full feed -></a></div>
+        <div class="home-feed" id="homeFeed"><article class="feed-skeleton"></article><article class="feed-skeleton"></article><article class="feed-skeleton"></article></div>
+      </div>
+    </section>
+
+    <section class="section build-section" id="build">
+      <div class="shell">
+        <div class="section-intro centered-copy"><p class="eyebrow">Start with what you need</p><h2>One platform, many kinds of build.</h2><p>Beslyfe asks the questions, recommends the capabilities, and leaves out everything that does not serve your goal.</p></div>
+        <div class="product-tabs" role="list" aria-label="Things you can build">
+          <a href="/create?type=business">Business</a><a href="/create?type=website">Website</a><a href="/create?type=community">Community</a><a href="/create?type=event">Event</a><a href="/create?type=creator">Creator</a><a href="/create?type=nonprofit">Nonprofit</a>
+        </div>
+        <div class="capability-demo">
+          <div class="capability-copy"><span class="status-pill">Recommended for a business</span><h3>Website + sales + customer growth</h3><p>Launch the pages, call to action, lead capture, community presence, and measurement a business needs.</p><a class="button" href="/create?type=business&goal=online-sales">Build a sales-ready business</a></div>
+          <div class="capability-stack">
+            <div class="capability on"><span>On</span><strong>Website & content</strong><small>Pages, offers, proof, contact</small></div>
+            <div class="capability on"><span>On</span><strong>Online sales</strong><small>Stripe, Shopify, Square, PayPal, or another checkout</small></div>
+            <div class="capability on"><span>On</span><strong>Community bridge</strong><small>Members and public wins strengthen the shared network</small></div>
+            <div class="capability off"><span>Off</span><strong>Ticketing</strong><small>Added only when you choose ticket sales</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section shell growth-section" id="growth">
+      <div class="growth-panel">
+        <div class="growth-copy"><p class="eyebrow">From idea to income</p><h2>Put one clear sales action everywhere.</h2><p>Connect a secure payment, booking, donation, or lead link once. Beslyfe turns it into the primary action for your site and attributable campaigns.</p><div class="actions"><a class="button" href="/create?goal=online-sales">Activate online sales</a><a class="text-link" href="/community">Ask the community for help</a></div></div>
+        <ol class="growth-steps"><li><span>1</span><div><strong>Choose the outcome</strong><small>Product, service, booking, lead, donation, or ticket.</small></div></li><li><span>2</span><div><strong>Connect checkout</strong><small>Use the provider you trust. Beslyfe never stores card details.</small></div></li><li><span>3</span><div><strong>Publish and share</strong><small>One action across your website, posts, messages, and campaigns.</small></div></li><li><span>4</span><div><strong>Learn what works</strong><small>Track visits, sources, campaigns, and outcomes.</small></div></li></ol>
+      </div>
+    </section>
+
+    <section class="proof-section" id="proof">
+      <div class="shell proof-grid">
+        <div><p class="eyebrow">Proof, kept in its place</p><h2>The first ecosystem proved the community pipeline.</h2><p>Bak'd On The Bay remains an isolated proof ecosystem. Its public members and contributions now strengthen the shared Beslyfe community while its event-specific ticketing and operations stay inside the proof.</p></div>
+        <a class="proof-card" href="/proof/bakd-on-the-bay"><span>Proof ecosystem 001</span><strong>See what was learned</strong><small>Identity, community, operations, and growth -></small></a>
+      </div>
+    </section>
+
+    <section class="cta shell">
+      <p class="eyebrow">Free means free</p>
+      <h2>Bring the idea.<br>Find the people. Build the next step.</h2>
+      <p>Join the founding Beslyfe community without a credit card, trial clock, or member subscription.</p>
+      <div class="actions centered"><a class="button" href="/signup">Create a free account</a><a class="button secondary" href="/community">Explore first</a></div>
+    </section>
   </main>
-  <footer><div class="shell"><a class="brand" href="/">beslyfe<span>.</span></a><p>Software for human opportunity. Free to join.</p><nav aria-label="Social"><a href="https://www.instagram.com/beslyfe_/" rel="me noopener">Instagram</a></nav><nav aria-label="Account, legal, and company"><a href="/login">Sign in</a><a href="/admin">Admin</a><a href="/manifesto">Manifesto</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></nav><small>© 2026 Beslyfe. All rights reserved.</small></div></footer>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div><a class="brand" href="/">beslyfe<span>.</span></a><p>Build useful things. Grow through community.</p></div>
+      <nav aria-label="Community"><strong>Community</strong><a href="/feed">Feed</a><a href="/reels">Reels</a><a href="/groups">Groups</a><a href="/directory">People</a></nav>
+      <nav aria-label="Build"><strong>Build</strong><a href="/create">Start a project</a><a href="/login">Sign in</a><a href="/admin">Admin</a></nav>
+      <nav aria-label="Company and legal"><strong>Beslyfe</strong><a href="/manifesto">Manifesto</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="https://www.instagram.com/beslyfe_/" rel="me noopener">Instagram</a></nav>
+      <small>© 2026 Beslyfe. Community first. Opportunity measured.</small>
+    </div>
+  </footer>
 </body>
 </html>

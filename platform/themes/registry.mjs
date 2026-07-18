@@ -12,17 +12,18 @@
 // via `GET /.netlify/functions/events?themes` — the browser never imports it
 // directly, so there is no cross-directory static-import coupling to maintain.
 
-import bakdOnTheBay from './bakd-on-the-bay/theme.mjs'
+import beslyfe from './beslyfe/theme.mjs'
+import proofTheme from '../../proof/bakd-on-the-bay/theme.mjs'
 import foodFestival from './food-festival/theme.mjs'
 import comicCon from './comic-con/theme.mjs'
 import businessExpo from './business-expo/theme.mjs'
 
 // Order here is the order themes are presented in the picker.
-export const THEMES = [bakdOnTheBay, foodFestival, comicCon, businessExpo]
+export const THEMES = [beslyfe, proofTheme, foodFestival, comicCon, businessExpo]
 
 // The theme the flagship edition seeds with and the fallback for any event
 // whose stored theme key is unknown (e.g. a theme later renamed).
-export const DEFAULT_THEME_KEY = 'bakd-on-the-bay'
+export const DEFAULT_THEME_KEY = 'beslyfe'
 
 const BY_KEY = new Map(THEMES.map((t) => [t.key, t]))
 

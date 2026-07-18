@@ -2,7 +2,7 @@
    the member's groups (with a discover toggle for public groups) and an open
    conversation that polls for new messages while it is on screen. */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var idAvatar = document.getElementById('idAvatar');
   var idText = document.getElementById('idText');
   var idChangeBtn = document.getElementById('idChangeBtn');
@@ -282,7 +282,7 @@
   });
 
   idChangeBtn.addEventListener('click', function () { S.openProfilePicker(function () { renderIdentity(); loadList(); }); });
-  document.addEventListener('bay-identity-change', function () { renderIdentity(); loadList(); });
+  document.addEventListener('beslyfe-identity-change', function () { renderIdentity(); loadList(); });
   renderIdentity();
   loadList();
 })();

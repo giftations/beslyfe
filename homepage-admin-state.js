@@ -65,14 +65,14 @@
 
   /**
    * Banner Reset (per-browser) — runs synchronously so main.js reads the
-   * correct bakd_entered value on DOMContentLoaded. Clears the flag after
+   * correct beslyfe_entered value on DOMContentLoaded. Clears the flag after
    * processing so it only fires once.
    */
   (function applyBannerReset() {
     try {
       var state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
       if (!state.homepageBannerReset) return;
-      localStorage.removeItem('bakd_entered');
+      localStorage.removeItem('beslyfe_entered');
       localStorage.setItem(
         STATE_KEY,
         JSON.stringify(Object.assign({}, state, { homepageBannerReset: false }))

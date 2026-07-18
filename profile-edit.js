@@ -3,40 +3,40 @@
    Reuses the same role-specific extras as the create-profile page, uploads a new
    photo to the shared site-media library, and saves via PUT to the profiles
    function. The headshot upload is resized/compressed first (shared helper in
-   social-common.js) so large photos and PNGs upload reliably. */
+   beslyfe-social.js) so large photos and PNGs upload reliably. */
 (function () {
   var MEDIA_ENDPOINT = '/.netlify/functions/site-media';
   var PROFILES_ENDPOINT = '/.netlify/functions/profiles';
-  var SESSION_KEY = 'bakd_session';
-  var IDENTITY_KEY = 'bay_active_profile';
+  var SESSION_KEY = 'beslyfe_session';
+  var IDENTITY_KEY = 'beslyfe_active_profile';
 
   // Extra fields offered per role — mirrors profile-new.js so the editor exposes
   // the same details an account can set when first creating its profile.
   var ROLE_EXTRAS = {
     vendor: [
-      { name: 'products', label: 'Products / What you sell', type: 'text', placeholder: 'e.g. edibles, glassware, apparel' },
-      { name: 'booth', label: 'Booth number', type: 'text', placeholder: 'If you already have one' }
+      { name: 'products', label: 'Products / services', type: 'text', placeholder: 'What can people buy or book?' },
+      { name: 'booth', label: 'Where to find you', type: 'text', placeholder: 'Website, city, or online storefront' }
     ],
     sponsor: [
-      { name: 'tier', type: 'note', text: 'Your sponsorship tier is assigned by the Bak\'d On The Bay team based on your package for the event — it can\'t be changed here.' }
+      { name: 'tier', label: 'Organization focus', type: 'text', placeholder: 'Mission, members, or community served' }
     ],
     speaker: [
-      { name: 'talkTitle', label: 'Talk / Session title', type: 'text', placeholder: 'What are you presenting?' },
-      { name: 'talkTopic', label: 'Topic area', type: 'text', placeholder: 'e.g. cultivation, law, wellness' }
+      { name: 'talkTitle', label: 'How you can help', type: 'text', placeholder: 'Mentoring, teaching, advising, or coaching' },
+      { name: 'talkTopic', label: 'Areas of expertise', type: 'text', placeholder: 'What do you know well?' }
     ],
     dj: [
-      { name: 'actType', label: 'Act type', type: 'select', options: ['', 'DJ Set', 'Live Band', 'Other Performer'] },
-      { name: 'genre', label: 'Genre / Style', type: 'text', placeholder: 'e.g. House, Hip-Hop, Reggae, Funk' },
-      { name: 'mixLink', label: 'Mix / Music link', type: 'text', placeholder: 'SoundCloud, Mixcloud, Spotify…' }
+      { name: 'actType', label: 'Creator type', type: 'select', options: ['', 'Video', 'Music', 'Writing', 'Design', 'Other'] },
+      { name: 'genre', label: 'Style / topics', type: 'text', placeholder: 'What do you create about?' },
+      { name: 'mixLink', label: 'Work link', type: 'text', placeholder: 'Portfolio or social link' }
     ],
     attendee: [
-      { name: 'interests', label: 'Interests', type: 'text', placeholder: 'What brings you to the event?' }
+      { name: 'interests', label: 'Interests and goals', type: 'text', placeholder: 'What are you building, learning, or looking for?' }
     ]
   };
 
   var COMPANY_LABELS = {
-    vendor: 'Business name', sponsor: 'Company name', speaker: 'Organization',
-    dj: 'Act / Label name', attendee: 'Company / Affiliation'
+    vendor: 'Business name', sponsor: 'Organization name', speaker: 'Organization',
+    dj: 'Creator name / studio', attendee: 'Project / affiliation'
   };
 
   var form = document.getElementById('profileForm');
@@ -145,8 +145,8 @@
   }
 
   async function uploadHeadshot(file) {
-    var prepared = window.BaySocial && window.BaySocial.prepareImageForUpload
-      ? await window.BaySocial.prepareImageForUpload(file)
+    var prepared = window.BeslyfeSocial && window.BeslyfeSocial.prepareImageForUpload
+      ? await window.BeslyfeSocial.prepareImageForUpload(file)
       : { dataBase64: await fileToBase64(file), contentType: file.type, filename: file.name };
     var res = await fetch(MEDIA_ENDPOINT, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -173,12 +173,11 @@
     if (p.headshotUrl) { headshotPreview.src = p.headshotUrl; headshotPreview.classList.add('show'); }
     renderExtras(p.details);
     renderAdminExtras(p);
-    document.title = 'Edit ' + (p.displayName || 'Profile') + ' — Bak\'d On The Bay';
+    document.title = 'Edit ' + (p.displayName || 'Profile') + ' — Beslyfe';
   }
 
-  // Admin-only controls. Featured vendors, sponsors and speakers are the ones
-  // promoted on the homepage. For sponsors, an admin also assigns the
-  // sponsorship tier here — the sponsor cannot pick it themselves.
+  // Admin-only controls. Featured profiles may be promoted by Beslyfe-owned
+  // discovery surfaces; members still control their descriptive fields.
   function renderAdminExtras(p) {
     if (!isAdmin()) { adminExtras.innerHTML = ''; return; }
     var d = p.details || {};
@@ -189,16 +188,6 @@
         '<input type="checkbox" id="featuredToggle" style="width:auto;margin:0"' + (featured ? ' checked' : '') + '>' +
         '<label for="featuredToggle" style="margin:0">Feature this profile on the homepage</label>' +
       '</div>';
-    if (p.role === 'sponsor') {
-      var tiers = ['', 'Platinum', 'Gold', 'Silver', 'Community'];
-      var curTier = d.tier || '';
-      html += '<div class="field-group"><label for="tierSelect">Sponsorship tier <span>(assigned by organizers)</span></label>' +
-        '<select id="tierSelect">' +
-        tiers.map(function (t) {
-          return '<option value="' + escAttr(t) + '"' + (t === curTier ? ' selected' : '') + '>' + (t || 'None') + '</option>';
-        }).join('') +
-        '</select></div>';
-    }
     adminExtras.innerHTML = html;
   }
 
@@ -258,12 +247,6 @@
       var featuredEl = document.getElementById('featuredToggle');
       if (featuredEl) details.featured = featuredEl.checked ? 'true' : 'false';
       else if (current.details && current.details.featured !== undefined) details.featured = current.details.featured;
-      // Admin-assigned sponsorship tier (empty clears it). Members have no such
-      // control; the tier they were granted is preserved and re-sent as-is.
-      var tierEl = document.getElementById('tierSelect');
-      if (tierEl) details.tier = tierEl.value || '';
-      else if (current.details && current.details.tier !== undefined) details.tier = current.details.tier;
-
       var payload = {
         id: current.id,
         role: currentRole(),
@@ -291,7 +274,7 @@
       if (me && me.id === saved.id) {
         var slim = { id: saved.id, displayName: saved.displayName || me.displayName, role: saved.role || me.role, headshotUrl: saved.headshotUrl || '' };
         localStorage.setItem(IDENTITY_KEY, JSON.stringify(slim));
-        try { document.dispatchEvent(new CustomEvent('bay-identity-change', { detail: slim })); } catch (err) {}
+        try { document.dispatchEvent(new CustomEvent('beslyfe-identity-change', { detail: slim })); } catch (err) {}
       }
 
       viewLink.href = '/profile?id=' + encodeURIComponent(saved.id);

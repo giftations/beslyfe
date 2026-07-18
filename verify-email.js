@@ -6,8 +6,8 @@
        link (action: 'resend-verification'). */
 (function () {
   var AUTH_ENDPOINT = '/.netlify/functions/auth';
-  var SESSION_KEY = 'bakd_session';
-  var IDENTITY_KEY = 'bay_active_profile';
+  var SESSION_KEY = 'beslyfe_session';
+  var IDENTITY_KEY = 'beslyfe_active_profile';
 
   function post(payload) {
     return fetch(AUTH_ENDPOINT, {

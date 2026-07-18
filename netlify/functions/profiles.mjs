@@ -155,19 +155,19 @@ async function sendProfileApprovalEmail(profile, req) {
 
   const profileUrl = `${siteOrigin(req)}/profile?id=${encodeURIComponent(profile.id)}`
   const name = profile.displayName || 'there'
-  const subject = "You're approved for Bak'd On The Bay"
+  const subject = "You're approved for Beslyfe"
   const text = [
     `Hi ${name},`,
     '',
-    "Your Bak'd On The Bay profile has been approved and is now live in the public directory.",
+    "Your Beslyfe profile has been approved and is now live in the public directory.",
     `You can view it here: ${profileUrl}`,
     '',
-    "Bak'd On The Bay",
+    "Beslyfe",
   ].join('\n')
   const html = `<p>Hi ${escapeEmail(name)},</p>` +
-    `<p>Your Bak'd On The Bay profile has been approved and is now live in the public directory.</p>` +
+    `<p>Your Beslyfe profile has been approved and is now live in the public directory.</p>` +
     `<p>You can view it here: <a href="${profileUrl}">${profileUrl}</a></p>` +
-    `<p>Bak'd On The Bay</p>`
+    `<p>Beslyfe</p>`
 
   return sendEmail({ to: profile.email, subject, text, html })
 }

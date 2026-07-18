@@ -1,5 +1,5 @@
 // =====================================
-// Bak'd On The Bay
+// Beslyfe
 // main.js
 // =====================================
 
@@ -7,7 +7,7 @@ function enterFestival() {
   const overlay = document.getElementById('welcome-overlay');
   if (!overlay) return;
   overlay.style.display = 'none';
-  localStorage.setItem('bakd_entered', '1');
+  localStorage.setItem('beslyfe_entered', '1');
 }
 
 // Timezone-explicit event date. Late September in Erie, PA is Eastern Daylight
@@ -134,7 +134,7 @@ function initSmoothScroll() {
 
 function initHomepage() {
   const overlay = document.getElementById('welcome-overlay');
-  if (localStorage.getItem('bakd_entered') === '1' && overlay) {
+  if (localStorage.getItem('beslyfe_entered') === '1' && overlay) {
     overlay.style.display = 'none';
   }
 

@@ -9,6 +9,7 @@ import {
 
 test('ecosystem configuration contract includes the platform core sections', () => {
   assert.deepEqual(REQUIRED_ECOSYSTEM_SECTIONS, [
+    'product',
     'identity',
     'ownership',
     'domains',

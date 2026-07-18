@@ -294,7 +294,7 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
 export const LAUNCH_CAMPAIGN = Object.freeze({
   id: 'beslyfe-launch-2026-07-18',
   text: 'Beslyfe is live. Build communities, coordinate work, and turn ideas into meaningful action from one living platform. Join the founding community at https://beslyfe.com/?utm_source=social&utm_medium=organic&utm_campaign=beslyfe_launch #Beslyfe #CommunityBuilding #Automation',
-  imageUrl: 'https://beslyfe.com/assets/images/beslyfe-social-preview.jpg',
+  imageUrl: 'https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png',
   linkUrl: 'https://beslyfe.com/?utm_source=facebook&utm_medium=organic&utm_campaign=beslyfe_launch',
   channels: ['facebook', 'instagram', 'threads'],
 })

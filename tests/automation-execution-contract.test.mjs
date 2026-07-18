@@ -10,7 +10,7 @@ test('automation contract exposes internal, external and hybrid execution', () =
   assert.equal(needsAutomationApproval('internal', true), true)
 })
 test('automation idempotency keys are stable and ecosystem scoped', () => {
-  assert.equal(automationIdempotencyKey({ ecosystemId: 'bakd', workflowId: 'followup', subjectId: 'person-1', window: '2026-07-17' }), 'bakd:followup:person-1:2026-07-17')
+  assert.equal(automationIdempotencyKey({ ecosystemId: 'sample', workflowId: 'followup', subjectId: 'person-1', window: '2026-07-17' }), 'sample:followup:person-1:2026-07-17')
   assert.ok(automationExecutionContract.requiredControls.includes('audit_record'))
   assert.ok(automationExecutionContract.requiredControls.includes('pause_control'))
 })

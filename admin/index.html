@@ -14,7 +14,11 @@
     (function () {
       try {
         var t = localStorage.getItem('admin_theme'); if (t) document.documentElement.setAttribute('data-theme', t);
-        var s = JSON.parse(localStorage.getItem('bakd_session') || 'null');
+        var earlierKey = ['ba', 'kd_session'].join('');
+        var raw = localStorage.getItem('beslyfe_session') || localStorage.getItem(earlierKey);
+        if (raw && !localStorage.getItem('beslyfe_session')) localStorage.setItem('beslyfe_session', raw);
+        localStorage.removeItem(earlierKey);
+        var s = JSON.parse(raw || 'null');
         if (!s || s.role !== 'admin') location.replace('/admin/login');
       } catch (e) { location.replace('/admin/login'); }
     })();

@@ -1,65 +1,62 @@
-# Public application forms — these POST to the applications DB function,
-# so submissions show up on the admin page.
-/vendors             /vendor-application.html             200
-/sponsors            /sponsor-application.html            200
-/speakers            /speaker-application.html            200
-/djs                 /dj-application.html                 200
-/dj                  /dj-application.html                 200
-/entertainment       /dj-application.html                 200
-/apply/vendor        /vendor-application.html             200
-/apply/sponsor       /sponsor-application.html            200
-/apply/speaker       /speaker-application.html            200
-/apply/dj            /dj-application.html                 200
-/attendees           /attendees.html                     200
+# Beslyfe product and shared community.
+/community           /community.html                    200
+/create              /create.html                       200
+/build               /create.html                       200
+/start               /create.html                       200
+/grow                /create.html?goal=online-sales     200
+/hub                 /hub.html                          200
+/feed                /feed.html                         200
+/reels               /reels.html                        200
+/stories             /stories.html                      200
+/library             /library.html                      200
+/groups              /groups.html                       200
+/map                 /map.html                          200
+/messages            /messages.html                     200
+/directory           /directory.html                    200
+/profiles            /directory.html                    200
+/profile/new         /profile-new.html                  200
+/profiles/new        /profile-new.html                  200
+/profile/edit        /profile-edit.html                 200
+/profiles/edit       /profile-edit.html                 200
+/profile             /profile-view.html                 200
 
-# Approval-gated package purchase (Eventbrite link unlocked after approval)
-/packages            /package-access.html                200
-/buy                 /package-access.html                200
-/access              /package-access.html                200
-
-# Community profiles (create, browse, view)
-/profile/new         /profile-new.html                   200
-/profiles/new        /profile-new.html                   200
-/profile/edit        /profile-edit.html                  200
-/profiles/edit       /profile-edit.html                  200
-/directory           /directory.html                     200
-/profiles            /directory.html                     200
-/profile             /profile-view.html                  200
-
-# Social platform — member hub and community feed
-/hub                 /hub.html                           200
-/feed                /feed.html                          200
-/community           /feed.html                          200
-/reels               /reels.html                         200
-/stories             /stories.html                       200
-/library             /library.html                       200
-/groups              /groups.html                        200
-/map                 /map.html                           200
-
-# Direct messages
-/messages            /messages.html                      200
-
-# One authentication implementation behind clear public entry points.
+# Authentication and member/admin homes.
 /login               /admin-login.html                  200
 /sign-in             /admin-login.html                  200
 /signup              /admin-login.html?mode=create      200
 /join                /admin-login.html?mode=create      200
 /admin/login         /admin-login.html?admin=1           200
+/admin               /admin/index.html                  200
+/admin/*             /admin/index.html                  200
 
-/education           /education-schedule.html            200
-/manifesto           /manifesto.html                     200
-/constitution        /CONSTITUTION.md                    200
-/privacy             /privacy.html                       200
-/terms               /terms.html                         200
+# Public platform information.
+/about               /about.html                        200
+/contact             /contact.html                      200
+/manifesto           /manifesto.html                    200
+/constitution        /CONSTITUTION.md                   200
+/privacy             /privacy.html                      200
+/terms               /terms.html                        200
 
-# Interactive, to-scale floor plan
-/floorplan           /floorplan.html                     200
-/floorplan/editor    /floorplan-editor.html              200
-
-/admin               /admin/index.html                   200
-# Deep links to any workspace resolve inside the single Admin OS shell. The
-# 200 rewrite keeps the URL in the bar so the shell opens the right module.
-# (The legacy admin pages remain reachable directly and are embedded by the OS.)
-/admin/*             /admin/index.html                   200
+# The original event implementation is isolated as proof and remains on its
+# dedicated production domain. These redirects preserve old bookmarks without
+# importing its ticketing and application assumptions into Beslyfe builds.
+/proof/original-event          /proof/bakd-on-the-bay/index.html  200
+/proof/bakd-on-the-bay         /proof/bakd-on-the-bay/index.html  200
+/vendors                       https://cannadispo.com/vendors       302!
+/sponsors                      https://cannadispo.com/sponsors      302!
+/speakers                      https://cannadispo.com/speakers      302!
+/djs                           https://cannadispo.com/djs           302!
+/dj                            https://cannadispo.com/dj            302!
+/entertainment                 https://cannadispo.com/entertainment 302!
+/apply/*                       https://cannadispo.com/:splat        302!
+/attendees                     https://cannadispo.com/attendees     302!
+/packages                      https://cannadispo.com/packages      302!
+/buy                           https://cannadispo.com/packages      302!
+/access                        https://cannadispo.com/packages      302!
+/education                     https://cannadispo.com/education     302!
+/floorplan                     https://cannadispo.com/floorplan     302!
+/floorplan/editor              https://cannadispo.com/floorplan     302!
+/floorplan-editor.html         https://cannadispo.com/floorplan     302!
+/education-schedule.html       https://cannadispo.com/education     302!
 
 /*                   /404.html                           404

@@ -1,8 +1,8 @@
 {
-  "name": "bakdonthebay",
+  "name": "beslyfe",
   "version": "1.0.0",
   "private": true,
-  "description": "Bak'd On The Bay event site — all data, including media bytes, is stored in Netlify Database (Postgres).",
+  "description": "Beslyfe community and growth platform backed by Netlify Database.",
   "scripts": {
     "test": "node --test 'tests/**/*.test.mjs'"
   },

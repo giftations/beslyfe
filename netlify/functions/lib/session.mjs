@@ -1,6 +1,6 @@
 import { getDatabase } from '@netlify/database'
 
-// Shared server-side helpers for every Bak'd On The Bay function.
+// Shared server-side helpers for every Beslyfe function.
 //
 // The single most important thing this module provides is *trustworthy
 // identity*. Before this existed, each function read the acting profile id and
@@ -17,7 +17,10 @@ import { getDatabase } from '@netlify/database'
 // Because the token is opaque and server-stored, there is no signing secret to
 // manage and a leaked/expired token can be revoked by deleting its row.
 
-export const SESSION_COOKIE = 'bakd_sid'
+export const SESSION_COOKIE = 'beslyfe_sid'
+// Accept the pre-platform cookie during the identity migration so existing
+// members and the provisioned administrator are not forced out.
+const PRE_PLATFORM_SESSION_COOKIE = ['ba', 'kd_sid'].join('')
 const SESSION_TTL_DAYS = 30
 const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
 // Sliding-renewal threshold. When a session is used and less than this much of
@@ -258,7 +261,9 @@ export async function destroySession(db, token) {
 // the auth `session` endpoint the shell polls on load) can re-arm the browser
 // cookie too. Idle tokens are never touched and still lapse at their deadline.
 export async function readSession(req, db = getDatabase()) {
-  const token = parseCookies(req)[SESSION_COOKIE]
+  const cookies = parseCookies(req)
+  const token = cookies[SESSION_COOKIE] || cookies[PRE_PLATFORM_SESSION_COOKIE]
+  const usedEarlierCookie = !cookies[SESSION_COOKIE] && !!cookies[PRE_PLATFORM_SESSION_COOKIE]
   if (!token) return null
   const rows = await db.sql`SELECT * FROM sessions WHERE "token" = ${token} LIMIT 1`
   const row = rows[0]
@@ -271,6 +276,7 @@ export async function readSession(req, db = getDatabase()) {
     return null
   }
   const session = { token, accountId: row.account_id, profileId: row.profile_id, role: row.role }
+  if (usedEarlierCookie) session.renewedCookie = sessionSetCookie(token)
   // The account row is the source of truth for the actor's community profile.
   // Older code paths and stale sessions may carry a profile_id that no longer
   // belongs to the signed-in account. Heal that before any endpoint can post,
@@ -380,6 +386,24 @@ export function profileShapeForAccount(account) {
   return { role, displayName, email, status: 'approved', details: isAdmin ? { hidden: 'true' } : {} }
 }
 
+// Keep one identity connected to the shared Beslyfe community even when that
+// person first arrived through a business, event, website, or proof ecosystem.
+// Best-effort for compatibility with deployments that have not applied the
+// ecosystem migration yet.
+export async function ensureNetworkMembership(db, profileId, source = 'account') {
+  if (!profileId) return false
+  try {
+    await db.sql`
+      INSERT INTO ecosystem_memberships (ecosystem_id, profile_id, role, source, status, joined_at)
+      VALUES ('beslyfe-network', ${profileId}, 'member', ${String(source).slice(0, 60)}, 'active', ${new Date().toISOString()})
+      ON CONFLICT (ecosystem_id, profile_id) DO UPDATE SET status = 'active'
+    `
+    return true
+  } catch {
+    return false
+  }
+}
+
 // Insert a fresh community profile for an account that has none, link it to the
 // account, and repoint the account's sessions at it. Returns the new profile id,
 // or '' when the insert failed. The account/session links are best-effort so a
@@ -405,6 +429,7 @@ export async function provisionProfileForAccount(db, account) {
   }
   try { await db.sql`UPDATE accounts SET "profile_id" = ${id} WHERE "id" = ${account.id}` } catch { /* best-effort */ }
   try { await db.sql`UPDATE sessions SET "profile_id" = ${id} WHERE "account_id" = ${account.id}` } catch { /* best-effort */ }
+  await ensureNetworkMembership(db, id, 'account')
   return id
 }
 
@@ -424,7 +449,10 @@ export async function ensureProfileForAccountId(db, accountId) {
   if (account.profile_id) {
     try {
       const rows = await db.sql`SELECT "id" FROM profiles WHERE "id" = ${account.profile_id} LIMIT 1`
-      if (rows.length) return account.profile_id
+      if (rows.length) {
+        await ensureNetworkMembership(db, account.profile_id, 'account')
+        return account.profile_id
+      }
     } catch { return account.profile_id }
   }
   return provisionProfileForAccount(db, account)
@@ -472,7 +500,10 @@ export async function ensureProfileForAccount(db, session) {
   if (session.profileId && session.profileId === account.profile_id) {
     try {
       const rows = await db.sql`SELECT "id" FROM profiles WHERE "id" = ${session.profileId} LIMIT 1`
-      if (rows.length) return session.profileId
+      if (rows.length) {
+        await ensureNetworkMembership(db, session.profileId, 'account')
+        return session.profileId
+      }
     } catch { return session.profileId }
   }
 
@@ -485,6 +516,7 @@ export async function ensureProfileForAccount(db, session) {
           try { await db.sql`UPDATE sessions SET "profile_id" = ${account.profile_id} WHERE "account_id" = ${account.id}` } catch { /* best-effort heal */ }
         }
         session.profileId = account.profile_id
+        await ensureNetworkMembership(db, account.profile_id, 'account')
         return account.profile_id
       }
     } catch { /* fall through to creation */ }

@@ -2,7 +2,7 @@
    upload and delete. Backed by the media-library function (Netlify Blobs + the
    social_media index). */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var grid = document.getElementById('grid');
   var idAvatar = document.getElementById('idAvatar');
   var idText = document.getElementById('idText');
@@ -91,7 +91,7 @@
   });
 
   idChangeBtn.addEventListener('click', function () { S.openProfilePicker(function () { renderIdentity(); load(); }); });
-  document.addEventListener('bay-identity-change', function () { renderIdentity(); load(); });
+  document.addEventListener('beslyfe-identity-change', function () { renderIdentity(); load(); });
   renderIdentity();
   load();
 })();

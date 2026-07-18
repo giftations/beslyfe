@@ -3,67 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Community Directory — Bak'd On The Bay</title>
-  <meta name="description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
+  <title>Community Directory — Beslyfe</title>
+  <meta name="description" content="Find builders, businesses, creators, organizers, mentors, and collaborators in the Beslyfe community.">
   <link rel="stylesheet" href="/profiles.css">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/favicon.svg">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Community Directory — Bak'd On The Bay">
-  <meta property="og:description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
-  <meta property="og:url" content="https://bakdonthebay.netlify.app/directory">
-  <meta property="og:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
+  <meta property="og:title" content="Community Directory — Beslyfe">
+  <meta property="og:description" content="Find people worth building with in the shared Beslyfe community.">
+  <meta property="og:url" content="https://beslyfe.com/directory">
+  <meta property="og:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Community Directory — Bak'd On The Bay">
-  <meta name="twitter:description" content="Browse vendors, sponsors, speakers and attendees of Bak'd On The Bay.">
-  <meta name="twitter:image" content="https://bakdonthebay.netlify.app/assets/images/bayfront-crowd-hero.jpg">
-  <link rel="canonical" href="https://bakdonthebay.netlify.app/directory">
+  <meta name="twitter:title" content="Community Directory — Beslyfe">
+  <meta name="twitter:description" content="Find people worth building with in the shared Beslyfe community.">
+  <meta name="twitter:image" content="https://beslyfe.com/assets/images/beslyfe-social-preview-v2.png">
+  <link rel="canonical" href="https://beslyfe.com/directory">
   <style>
     .skip-link{position:absolute;left:-9999px;top:0;background:#fff;color:#000;padding:8px;z-index:1000}
     .skip-link:focus{left:8px}
   </style>
+  <link rel="stylesheet" href="/assets/css/beslyfe-community.css">
 </head>
 <body data-cms-page="directory">
   <a class="skip-link" href="#main">Skip to content</a>
 
 
-  <header class="site-header">
-    <nav>
-      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/#about">About</a></li>
-        <li><a href="/sponsors">Sponsors</a></li>
-        <li><a href="/vendors">Vendors</a></li>
-        <li><a href="/speakers">Speakers</a></li>
-        <li><a href="/feed">Feed</a></li>
-        <li><a href="/hub" data-auth-only hidden>My Hub</a></li>
-        <li><a href="/profile/new" class="btn-nav">Create Profile</a></li>
-        <li><a href="#" data-logout="/" data-auth-only hidden>Log out</a></li>
-      </ul>
-    </nav>
-  </header>
+  <header class="site-header"><nav><a class="site-logo" href="/">beslyfe<span class="brand-dot">.</span></a><ul class="nav-links"><li><a href="/community">Community</a></li><li><a href="/feed">Feed</a></li><li><a href="/directory">People</a></li><li><a href="/create">Build</a></li></ul></nav></header>
 
   <main id="main">
   <div class="page-hero">
     <div class="event-badge" data-cms="hero.badge">Community Directory</div>
     <h1 data-cms="hero.title">Meet the <span>Community</span></h1>
-    <p class="lead" data-cms="hero.subtitle">Everyone taking part in Bak'd On The Bay — vendors, sponsors, speakers and attendees. Click any profile to learn more.</p>
+    <p class="lead" data-cms="hero.subtitle">Find builders, businesses, creators, organizers, mentors, and collaborators across every connected ecosystem.</p>
   </div>
 
   <div class="filter-bar" id="filterBar">
     <button class="filter-btn active" data-role="">Everyone</button>
-    <button class="filter-btn" data-role="vendor">Vendors</button>
-    <button class="filter-btn" data-role="sponsor">Sponsors</button>
-    <button class="filter-btn" data-role="speaker">Speakers</button>
-    <button class="filter-btn" data-role="dj">DJs &amp; Entertainment</button>
-    <button class="filter-btn" data-role="attendee">Attendees</button>
+    <button class="filter-btn" data-role="vendor">Businesses</button>
+    <button class="filter-btn" data-role="sponsor">Organizations</button>
+    <button class="filter-btn" data-role="speaker">Mentors &amp; educators</button>
+    <button class="filter-btn" data-role="dj">Creators</button>
+    <button class="filter-btn" data-role="attendee">Members</button>
   </div>
 
   <div class="directory-tools bubble" aria-label="Directory search and sorting">
     <label class="directory-search">
       <span>Search directory</span>
-      <input id="directorySearch" type="search" placeholder="Search names, companies, categories, booths" autocomplete="off">
+      <input id="directorySearch" type="search" placeholder="Search names, projects, offers, topics" autocomplete="off">
     </label>
     <label>
       <span>Sort</span>
@@ -91,13 +77,13 @@
   </main>
 
   <footer class="site-footer">
-    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p><strong style="color:#fff">Beslyfe</strong> Community · Free to join</p>
     <p style="margin-top:8px"><a href="/">Back to Home</a> · <a href="/profile/new">Create your profile</a></p>
   </footer>
 
   <script src="/directory.js"></script>
-  <script src="/homepage-admin-state.js"></script>
-  <script src="/bay-session.js"></script>
+  <script src="/assets/js/traffic.js" defer></script>
+  <script src="/beslyfe-session.js"></script>
   <script src="/assets/js/ads.js" defer></script>
 </body>
 </html>

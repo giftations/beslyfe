@@ -6,10 +6,12 @@
 
 import { MODULES } from './modules/manifest.mjs'
 import { ecosystemConfigChecklist } from './ecosystems/config-contract.mjs'
+import { productBlueprintSummary } from './ecosystems/product-blueprints.mjs'
 import { accessApplicationContractSummary } from './access/application-contract.mjs'
 import { personIdentityContractSummary } from './identity/person-contract.mjs'
 import { organizationIdentityContractSummary } from './identity/organization-contract.mjs'
 import { communityContractSummary } from './communities/contract.mjs'
+import { communityNetworkContractSummary } from './communities/network-contract.mjs'
 import { directoryDiscoveryContractSummary } from './discovery/directory-contract.mjs'
 import { notificationContractSummary } from './notifications/contract.mjs'
 import { moderationTrustSafetyContractSummary } from './moderation/trust-safety-contract.mjs'
@@ -25,6 +27,7 @@ import { knowledgeContractSummary } from './knowledge/contract.mjs'
 import { marketplaceContractSummary } from './marketplace/contract.mjs'
 import { advertisingSponsorshipContractSummary } from './advertising/sponsorship-contract.mjs'
 import { commercePaymentsContractSummary } from './commerce/payments-contract.mjs'
+import { salesEngineContractSummary } from './growth/sales-engine-contract.mjs'
 import { integrationsWebhooksContractSummary } from './integrations/webhooks-contract.mjs'
 import { operationsAuditContractSummary } from './operations/audit-contract.mjs'
 import { consentAiChecklist } from './trust/consent-ai-contract.mjs'
@@ -44,10 +47,12 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   automationExecution: automationExecutionContract,
   modules: MODULES,
   ecosystemConfiguration: ecosystemConfigChecklist(),
+  productBlueprints: productBlueprintSummary(),
   accessApplications: accessApplicationContractSummary(),
   personIdentity: personIdentityContractSummary(),
   organizationIdentity: organizationIdentityContractSummary(),
   communities: communityContractSummary(),
+  communityNetwork: communityNetworkContractSummary(),
   directoryDiscovery: directoryDiscoveryContractSummary(),
   notifications: notificationContractSummary(),
   moderationTrustSafety: moderationTrustSafetyContractSummary(),
@@ -63,6 +68,7 @@ export const PLATFORM_CONTRACT_REGISTRY = {
   marketplace: marketplaceContractSummary(),
   advertisingSponsorship: advertisingSponsorshipContractSummary(),
   commercePayments: commercePaymentsContractSummary(),
+  salesEngine: salesEngineContractSummary(),
   integrationsWebhooks: integrationsWebhooksContractSummary(),
   operationsAudit: operationsAuditContractSummary(),
   consentAndAi: consentAiChecklist(),
@@ -82,11 +88,13 @@ export function platformContractRegistrySummary() {
   return {
     moduleCount: PLATFORM_CONTRACT_REGISTRY.modules.length,
     ecosystemSectionCount: PLATFORM_CONTRACT_REGISTRY.ecosystemConfiguration.length,
+    productBlueprintCount: PLATFORM_CONTRACT_REGISTRY.productBlueprints.blueprints.length,
     accessRequestTypeCount: PLATFORM_CONTRACT_REGISTRY.accessApplications.requestTypes.length,
     personIdentityRecordCount: PLATFORM_CONTRACT_REGISTRY.personIdentity.identityRecords.length,
     organizationIdentityRecordCount:
       PLATFORM_CONTRACT_REGISTRY.organizationIdentity.identityRecords.length,
     communityTypeCount: PLATFORM_CONTRACT_REGISTRY.communities.communityTypes.length,
+    communityNetworkRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.communityNetwork.recordTypes.length,
     discoverySurfaceCount: PLATFORM_CONTRACT_REGISTRY.directoryDiscovery.discoverySurfaces.length,
     notificationTypeCount: PLATFORM_CONTRACT_REGISTRY.notifications.notificationTypes.length,
     moderationCaseTypeCount: PLATFORM_CONTRACT_REGISTRY.moderationTrustSafety.caseTypes.length,
@@ -104,6 +112,7 @@ export function platformContractRegistrySummary() {
     advertisingOfferTypeCount:
       PLATFORM_CONTRACT_REGISTRY.advertisingSponsorship.offerTypes.length,
     commerceRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.commercePayments.recordTypes.length,
+    salesModeCount: PLATFORM_CONTRACT_REGISTRY.salesEngine.modes.length,
     integrationTypeCount: PLATFORM_CONTRACT_REGISTRY.integrationsWebhooks.integrationTypes.length,
     operationsRecordTypeCount: PLATFORM_CONTRACT_REGISTRY.operationsAudit.recordTypes.length,
     consentPurposeCount: PLATFORM_CONTRACT_REGISTRY.consentAndAi.consentPurposes.length,

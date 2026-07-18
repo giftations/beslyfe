@@ -1,13 +1,14 @@
 /* Community feed: render posts, compose new ones, like, comment and manage the
-   "posting as" identity. Relies on window.BaySocial (social-common.js). */
+   "posting as" identity. Relies on window.BeslyfeSocial (beslyfe-social.js). */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var MEDIA_ENDPOINT = '/.netlify/functions/site-media';
   var AUTH_ENDPOINT = '/.netlify/functions/auth';
   var feedEl = document.getElementById('feed');
   var composer = document.getElementById('composer');
   var postBody = document.getElementById('postBody');
   var postImage = document.getElementById('postImage');
+  var postVisibility = document.getElementById('postVisibility');
   var postBtn = document.getElementById('postBtn');
   var composerError = document.getElementById('composerError');
   var postPhoto = document.getElementById('postPhoto');
@@ -195,15 +196,17 @@
     }
     var body = p.body ? '<div class="so-post-body">' + S.escHtml(p.body) + '</div>' : '';
     var canDelete = id && id.id === p.author.id;
+    var ecosystem = p.ecosystem || { name: 'Beslyfe Community', proof: false };
+    var source = '<span class="so-post-source' + (ecosystem.proof ? ' proof' : '') + '">From ' + S.escHtml(ecosystem.name || 'Beslyfe Community') + '</span>';
     var typeBadge = (p.postType && p.postType !== 'post') ? '<span class="so-role-pill">' + S.escHtml(p.postType) + '</span>' : '';
-    var music = p.music ? '<div class="reel-music" style="margin:8px 2px 0">♪ ' + S.escHtml((window.BayMusic && window.BayMusic.trackName(p.music)) || p.music) + '</div>' : '';
+    var music = p.music ? '<div class="reel-music" style="margin:8px 2px 0">♪ ' + S.escHtml((window.BeslyfeMusic && window.BeslyfeMusic.trackName(p.music)) || p.music) + '</div>' : '';
     var loc = (p.location && p.location.lat) ? '<div class="so-sub" style="margin:8px 2px 0">📍 ' + S.escHtml(p.location.label || (p.location.lat + ', ' + p.location.lng)) + '</div>' : '';
     return '<article class="so-post" data-id="' + S.escHtml(p.id) + '">' +
       '<div class="so-post-head">' +
         '<a href="' + authorLink + '">' + S.avatar(p.author) + '</a>' +
         '<div class="so-name"><a href="' + authorLink + '">' + S.escHtml(p.author.displayName) + '</a>' +
           (p.author.role ? '<span class="so-role-pill">' + S.escHtml(p.author.role) + '</span>' : '') + typeBadge +
-          '<div class="so-sub">' + S.timeAgo(p.createdAt) + '</div></div>' +
+          '<div class="so-sub">' + S.timeAgo(p.createdAt) + ' ' + source + '</div></div>' +
       '</div>' +
       body + media + music + loc +
       '<div class="so-post-actions">' +
@@ -254,7 +257,7 @@
       postBtn.textContent = 'Posting…';
       var res = await fetch(S.SOCIAL_ENDPOINT, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ kind: 'post', authorId: id ? id.id : '', body: body, imageUrl: imageUrl })
+        body: JSON.stringify({ kind: 'post', authorId: id ? id.id : '', body: body, imageUrl: imageUrl, visibility: postVisibility ? postVisibility.value : 'public' })
       });
       var data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not post');

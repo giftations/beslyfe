@@ -6,7 +6,7 @@ import { MODULES } from '../../platform/modules/manifest.mjs'
 import { PLATFORM_CONTRACT_REGISTRY, platformContractRegistrySummary } from '../../platform/contracts.mjs'
 
 // The events registry — the top-level tenant of the Event OS. Every edition of
-// Bak'd On The Bay (and every future expo, venue or partner production) is a row
+// Beslyfe (and every future expo, venue or partner production) is a row
 // here, and event-scoped entities (applications, profiles, …) carry its id.
 // Exactly one event is flagged active; it is the edition new public submissions
 // attach to and the one the admin is currently operating. Backed by Netlify
@@ -16,12 +16,12 @@ import { PLATFORM_CONTRACT_REGISTRY, platformContractRegistrySummary } from '../
 // The flagship edition, seeded on first use so the platform is never event-less.
 // A fixed id lets existing pre-multi-event records be backfilled deterministically.
 const FLAGSHIP = {
-  id: 'evt-bakd-on-the-bay-2026',
-  slug: 'bakd-on-the-bay-2026',
-  name: "Bak'd On The Bay 2026",
-  tagline: 'The Bayfront Convention Center event experience',
-  venue: 'Bayfront Convention Center',
-  location: 'Erie, PA',
+  id: 'evt-beslyfe-starter',
+  slug: 'beslyfe-starter',
+  name: 'Beslyfe Starter Workspace',
+  tagline: 'Optional event tools',
+  venue: '',
+  location: '',
 }
 
 const STATUSES = new Set(['planning', 'active', 'archived'])

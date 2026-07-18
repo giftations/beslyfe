@@ -1,7 +1,7 @@
 /* Stories: 24-hour moments grouped into a ring of bubbles by author. Tapping a
    bubble opens a full-screen viewer that steps through that author's stories. */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var row = document.getElementById('stories');
   S.renderNav('stories');
 

@@ -6,6 +6,10 @@
 // code should populate, validate, and expose.
 
 export const ECOSYSTEM_CONFIG_CONTRACT = {
+  product: {
+    required: ['productType', 'primaryOutcome', 'answers', 'capabilityPlan'],
+    purpose: 'Starts from what the owner is building and recommends only the capabilities needed for that outcome.',
+  },
   identity: {
     required: ['name', 'slug', 'description', 'status', 'lifecycle'],
     purpose: 'Names the ecosystem and defines whether it is planning, active, archived, or retired.',
@@ -23,8 +27,8 @@ export const ECOSYSTEM_CONFIG_CONTRACT = {
     purpose: 'Applies visual identity through the platform theme registry and ecosystem-level overrides.',
   },
   modules: {
-    required: ['enabled', 'configuration'],
-    purpose: 'Declares which reusable platform modules are active and how each one is configured.',
+    required: ['available', 'enabled', 'disabled', 'configuration'],
+    purpose: 'Declares which reusable capabilities are active, optional, or intentionally disabled for this ecosystem.',
   },
   roles: {
     required: ['availableRoles', 'roleLabels', 'permissions'],
@@ -35,12 +39,12 @@ export const ECOSYSTEM_CONFIG_CONTRACT = {
     purpose: 'Configures directory/profile data without hardcoding product-specific fields.',
   },
   intake: {
-    required: ['workflows', 'questions', 'statusFlow', 'contracts'],
-    purpose: 'Configures application and approval workflows for participants and organizations.',
+    required: ['enabled', 'workflows', 'questions', 'statusFlow', 'contracts'],
+    purpose: 'Configures application and approval workflows only when the selected product needs gated participation.',
   },
   marketplace: {
-    required: ['offers', 'packages', 'providers', 'disclosureRules'],
-    purpose: 'Configures tickets, packages, sponsorships, services, ads, and other exchange surfaces.',
+    required: ['enabled', 'offers', 'providers', 'disclosureRules'],
+    purpose: 'Configures products, services, bookings, donations, leads, tickets, and other exchange surfaces independently.',
   },
   privacy: {
     required: ['visibilityDefaults', 'dataUsePurposes', 'retentionRules'],

@@ -47,40 +47,40 @@ test('passwordPolicyError enforces the stricter admin floor', () => {
   assert.equal(passwordPolicyError('Abcdefgh123!', { admin: true }), null)
 })
 
-function reqWith(headers, url = 'https://bak.example/api') {
+function reqWith(headers, url = 'https://beslyfe.example/api') {
   return new Request(url, { headers })
 }
 
 test('isSameOrigin blocks cross-origin browser writes but allows header-less clients', () => {
-  assert.equal(isSameOrigin(reqWith({ Origin: 'https://bak.example' })), true)
+  assert.equal(isSameOrigin(reqWith({ Origin: 'https://beslyfe.example' })), true)
   assert.equal(isSameOrigin(reqWith({ Origin: 'https://evil.example' })), false)
   // Referer is the fallback source when Origin is absent.
-  assert.equal(isSameOrigin(reqWith({ Referer: 'https://bak.example/page' })), true)
+  assert.equal(isSameOrigin(reqWith({ Referer: 'https://beslyfe.example/page' })), true)
   assert.equal(isSameOrigin(reqWith({ Referer: 'https://evil.example/page' })), false)
   // No Origin/Referer (server-to-server, tests) is allowed through.
   assert.equal(isSameOrigin(reqWith({})), true)
 })
 
 test('requireSameOrigin returns a 403 Response only on a cross-origin request', async () => {
-  assert.equal(requireSameOrigin(reqWith({ Origin: 'https://bak.example' })), null)
+  assert.equal(requireSameOrigin(reqWith({ Origin: 'https://beslyfe.example' })), null)
   const blocked = requireSameOrigin(reqWith({ Origin: 'https://evil.example' }))
   assert.ok(blocked instanceof Response)
   assert.equal(blocked.status, 403)
 })
 
 test('readJsonBody parses objects and rejects malformed input', async () => {
-  const good = new Request('https://bak.example/api', {
+  const good = new Request('https://beslyfe.example/api', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ a: 1 }),
   })
   assert.deepEqual(await readJsonBody(good), { a: 1 })
 
-  const notJson = new Request('https://bak.example/api', { method: 'POST', body: 'not json' })
+  const notJson = new Request('https://beslyfe.example/api', { method: 'POST', body: 'not json' })
   const err1 = await readJsonBody(notJson)
   assert.ok(err1 instanceof Response)
   assert.equal(err1.status, 400)
 
   // A JSON scalar (not an object) is rejected.
-  const scalar = new Request('https://bak.example/api', {
+  const scalar = new Request('https://beslyfe.example/api', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '42',
   })
   const err2 = await readJsonBody(scalar)

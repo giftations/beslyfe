@@ -41,10 +41,21 @@ function fakeDb({ sessionProfileId = 'victim_profile', accountProfileId = 'owner
 }
 
 function sessionRequest(token = 'tok_session') {
-  return new Request('https://bak.example/.netlify/functions/auth?action=session', {
-    headers: { cookie: `bakd_sid=${encodeURIComponent(token)}` },
+  return new Request('https://beslyfe.example/.netlify/functions/auth?action=session', {
+    headers: { cookie: `beslyfe_sid=${encodeURIComponent(token)}` },
   })
 }
+
+test('readSession migrates the pre-platform cookie without invalidating the session', async () => {
+  const db = fakeDb({ sessionProfileId: 'owner_profile', accountProfileId: 'owner_profile' })
+  const earlierName = ['ba', 'kd_sid'].join('')
+  const request = new Request('https://beslyfe.example/.netlify/functions/auth?action=session', {
+    headers: { cookie: `${earlierName}=tok_session` },
+  })
+  const session = await readSession(request, db)
+  assert.equal(session.accountId, 'acct_owner')
+  assert.match(session.renewedCookie, /^beslyfe_sid=tok_session;/)
+})
 
 test('readSession heals a stale session profile to the account-owned profile', async () => {
   const db = fakeDb({ sessionProfileId: 'victim_profile', accountProfileId: 'owner_profile' })

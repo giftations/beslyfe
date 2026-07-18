@@ -3,30 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Your Profile — Bak'd On The Bay</title>
-  <meta name="description" content="Update your Bak'd On The Bay community profile and profile photo.">
+  <title>Edit Your Profile — Beslyfe</title>
+  <meta name="description" content="Update your Beslyfe community profile and profile photo.">
   <meta name="robots" content="noindex,nofollow">
   <link rel="stylesheet" href="/profiles.css">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="apple-touch-icon" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/beslyfe-community.css">
 </head>
 <body>
 
-  <header class="site-header">
-    <nav>
-      <a class="site-logo" href="/">BAK'D ON THE BAY</a>
-      <ul class="nav-links">
-        <li><a href="/">Home</a></li>
-        <li><a href="/directory">Directory</a></li>
-        <li><a href="#" id="backLink">← Back</a></li>
-        <li><a href="/hub" id="dashboardLink" class="btn-nav">My Hub</a></li>
-        <li><a href="#" id="logoutLink" hidden>Log out</a></li>
-      </ul>
-    </nav>
-  </header>
+  <header class="site-header"><nav><a class="site-logo" href="/">beslyfe<span class="brand-dot">.</span></a><ul class="nav-links"><li><a href="/community">Community</a></li><li><a href="/feed">Feed</a></li><li><a href="/directory">People</a></li><li><a href="/create">Build</a></li></ul></nav></header>
 
   <div class="page-hero">
-    <div class="event-badge">Your Profile</div>
+    <div class="event-badge">One profile · Every Beslyfe ecosystem</div>
     <h1>Edit Your <span>Profile</span></h1>
     <p class="lead">Update your details and profile photo. Changes publish to the public directory and your community profile right away.</p>
   </div>
@@ -50,23 +40,23 @@
         <div class="role-cards" id="roleCards">
           <div class="role-card">
             <input type="radio" id="role-attendee" name="role" value="attendee" checked>
-            <label for="role-attendee"><span class="role-emoji">🎟️</span><span class="role-name">Attendee</span></label>
+            <label for="role-attendee"><span class="role-emoji">👋</span><span class="role-name">Member</span></label>
           </div>
           <div class="role-card">
             <input type="radio" id="role-vendor" name="role" value="vendor">
-            <label for="role-vendor"><span class="role-emoji">🏪</span><span class="role-name">Vendor</span></label>
+            <label for="role-vendor"><span class="role-emoji">↗</span><span class="role-name">Business</span></label>
           </div>
           <div class="role-card">
             <input type="radio" id="role-sponsor" name="role" value="sponsor">
-            <label for="role-sponsor"><span class="role-emoji">⭐</span><span class="role-name">Sponsor</span></label>
+            <label for="role-sponsor"><span class="role-emoji">◎</span><span class="role-name">Organization</span></label>
           </div>
           <div class="role-card">
             <input type="radio" id="role-speaker" name="role" value="speaker">
-            <label for="role-speaker"><span class="role-emoji">🎤</span><span class="role-name">Speaker</span></label>
+            <label for="role-speaker"><span class="role-emoji">✦</span><span class="role-name">Mentor / educator</span></label>
           </div>
           <div class="role-card">
             <input type="radio" id="role-dj" name="role" value="dj">
-            <label for="role-dj"><span class="role-emoji">🎧</span><span class="role-name">DJ / Act</span></label>
+            <label for="role-dj"><span class="role-emoji">▶</span><span class="role-name">Creator</span></label>
           </div>
         </div>
 
@@ -125,12 +115,13 @@
   </div>
 
   <footer class="site-footer">
-    <p><strong style="color:#fff">Bak'd On The Bay</strong> · September 26 · Erie, PA</p>
+    <p><strong style="color:#fff">Beslyfe</strong> Community · Free to join</p>
     <p style="margin-top:8px"><a href="/">Back to Home</a> · <a href="/directory">Browse the Directory</a></p>
   </footer>
 
-  <script src="/social-common.js"></script>
-  <script src="/homepage-admin-state.js"></script>
+  <script src="/beslyfe-session.js"></script>
+  <script src="/beslyfe-social.js"></script>
+  <script src="/assets/js/traffic.js" defer></script>
   <script src="/profile-edit.js"></script>
 </body>
 </html>

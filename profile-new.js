@@ -8,32 +8,32 @@
   // free-form `details` map.
   var ROLE_EXTRAS = {
     vendor: [
-      { name: 'products', label: 'Products / What you sell', type: 'text', placeholder: 'e.g. edibles, glassware, apparel' },
-      { name: 'booth', label: 'Booth number', type: 'text', placeholder: 'If you already have one' }
+      { name: 'products', label: 'Products / services', type: 'text', placeholder: 'What can people buy or book?' },
+      { name: 'booth', label: 'Where to find you', type: 'text', placeholder: 'Website, city, or online storefront' }
     ],
     sponsor: [
-      { name: 'tier', type: 'note', text: 'Your sponsorship tier (Platinum, Gold, Silver or Community) is assigned by the Bak\'d On The Bay team based on your package for the event — there\'s nothing to pick here.' }
+      { name: 'tier', label: 'Organization focus', type: 'text', placeholder: 'Mission, members, or community served' }
     ],
     speaker: [
-      { name: 'talkTitle', label: 'Talk / Session title', type: 'text', placeholder: 'What are you presenting?' },
-      { name: 'talkTopic', label: 'Topic area', type: 'text', placeholder: 'e.g. cultivation, law, wellness' }
+      { name: 'talkTitle', label: 'How you can help', type: 'text', placeholder: 'Mentoring, teaching, advising, or coaching' },
+      { name: 'talkTopic', label: 'Areas of expertise', type: 'text', placeholder: 'What do you know well?' }
     ],
     dj: [
-      { name: 'actType', label: 'Act type', type: 'select', options: ['', 'DJ Set', 'Live Band', 'Other Performer'] },
-      { name: 'genre', label: 'Genre / Style', type: 'text', placeholder: 'e.g. House, Hip-Hop, Reggae, Funk' },
-      { name: 'mixLink', label: 'Mix / Music link', type: 'text', placeholder: 'SoundCloud, Mixcloud, Spotify…' }
+      { name: 'actType', label: 'Creator type', type: 'select', options: ['', 'Video', 'Music', 'Writing', 'Design', 'Other'] },
+      { name: 'genre', label: 'Style / topics', type: 'text', placeholder: 'What do you create about?' },
+      { name: 'mixLink', label: 'Work link', type: 'text', placeholder: 'Portfolio or social link' }
     ],
     attendee: [
-      { name: 'interests', label: 'Interests', type: 'text', placeholder: 'What brings you to the event?' }
+      { name: 'interests', label: 'Interests and goals', type: 'text', placeholder: 'What are you building, learning, or looking for?' }
     ]
   };
 
   var COMPANY_LABELS = {
     vendor: 'Business name',
-    sponsor: 'Company name',
+    sponsor: 'Organization name',
     speaker: 'Organization',
-    dj: 'Act / Label name',
-    attendee: 'Company / Affiliation'
+    dj: 'Creator name / studio',
+    attendee: 'Project / affiliation'
   };
 
   var form = document.getElementById('profileForm');
@@ -53,14 +53,14 @@
   // would die on a 401 with no explanation. Send them to create an account (or
   // sign in) first, which also sets up their profile.
   function session() {
-    try { return JSON.parse(localStorage.getItem('bakd_session') || 'null'); } catch (e) { return null; }
+    try { return JSON.parse(localStorage.getItem('beslyfe_session') || 'null'); } catch (e) { return null; }
   }
   if (!session()) {
     var card = form ? form.closest('.form-card') : null;
     if (card) {
       card.innerHTML =
         '<h2>Create your profile</h2>' +
-        '<p class="hint">Your profile lives with your free Bak’d On The Bay account. ' +
+        '<p class="hint">Your profile lives with your free Beslyfe account. ' +
         'Create an account (or sign in) and your community profile is set up for you — ' +
         'then you can add your photo, bio and role details.</p>' +
         '<div class="submit-area">' +
@@ -129,9 +129,9 @@
 
   async function uploadHeadshot(file) {
     // Resize/compress large photos and PNGs first so the upload reliably fits
-    // within the server's limits (shared helper from social-common.js).
-    var prepared = window.BaySocial && window.BaySocial.prepareImageForUpload
-      ? await window.BaySocial.prepareImageForUpload(file)
+    // within the server's limits (shared helper from beslyfe-social.js).
+    var prepared = window.BeslyfeSocial && window.BeslyfeSocial.prepareImageForUpload
+      ? await window.BeslyfeSocial.prepareImageForUpload(file)
       : { dataBase64: await fileToBase64(file), contentType: file.type, filename: file.name };
     var res = await fetch(MEDIA_ENDPOINT, {
       method: 'POST',

@@ -1,18 +1,17 @@
 /* Account auth for Beslyfe.
    Talks to the /auth function: one account = one password = one community
-   profile. Signing in stores the account session (`bakd_session`) and also sets
-   the active social identity (`bay_active_profile`) to the account's linked
+   profile. Signing in stores the account session (`beslyfe_session`) and also sets
+   the active social identity (`beslyfe_active_profile`) to the account's linked
    profile, so the member can immediately post, comment, follow and message as
    themselves — no separate "choose a profile" step. */
 (function () {
   var AUTH_ENDPOINT = '/.netlify/functions/auth';
-  // Legacy storage keys stay stable so existing members are not signed out
-  // during the Beslyfe identity migration.
-  var SESSION_KEY = 'bakd_session';
-  var IDENTITY_KEY = 'bay_active_profile';
+  // Beslyfe-owned browser state mirrors the authoritative server session.
+  var SESSION_KEY = 'beslyfe_session';
+  var IDENTITY_KEY = 'beslyfe_active_profile';
 
   // Persist the signed-in account and mirror its profile into the social
-  // identity slot that social-common.js reads.
+  // identity slot that beslyfe-social.js reads.
   function storeSession(account, profile) {
     localStorage.setItem(SESSION_KEY, JSON.stringify({
       id: account.id,
@@ -29,7 +28,7 @@
         headshotUrl: profile.headshotUrl || ''
       };
       localStorage.setItem(IDENTITY_KEY, JSON.stringify(slim));
-      try { document.dispatchEvent(new CustomEvent('bay-identity-change', { detail: slim })); } catch (e) {}
+      try { document.dispatchEvent(new CustomEvent('beslyfe-identity-change', { detail: slim })); } catch (e) {}
     }
   }
 

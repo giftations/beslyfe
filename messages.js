@@ -4,7 +4,7 @@
    conversations; right pane shows the open thread. A ?to=PROFILE_ID query (used
    by the "Message" button on profiles) opens that conversation straight away. */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var ENDPOINT = '/.netlify/functions/messages';
   var PROFILES_ENDPOINT = '/.netlify/functions/profiles';
 
@@ -26,7 +26,7 @@
   }
 
   // Upload a chosen photo/video to the member's media library and resolve to the
-  // stored { url, kind }. Images are resized/compressed first (via BaySocial) so
+  // stored { url, kind }. Images are resized/compressed first (via BeslyfeSocial) so
   // large phone photos upload reliably; videos are sent as-is.
   function uploadMedia(file) {
     var prep = S.prepareImageForUpload

@@ -1,16 +1,16 @@
-/* Bak'd On The Bay — notifications.
+/* Beslyfe — notifications.
    A Facebook/Instagram-style activity inbox. Adds a bell (with an unread badge)
    to the shared social sub-nav that opens a dropdown of recent notifications, and
    can also render a full inline panel into a member's hub. A settings view lets a
    member opt out of notifications entirely or by category.
 
-   Exposes window.BayNotify:
+   Exposes window.BeslyfeNotify:
      • initBell()            — mount the sub-nav bell (auto-runs on load)
      • mountPanel(el)        — render a full inline panel into `el` (used by the hub)
      • refresh()             — re-fetch the unread count now
 */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   if (!S) return;
   var ENDPOINT = S.NOTIFICATIONS_ENDPOINT || '/.netlify/functions/notifications';
 
@@ -332,5 +332,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { autoInit(0); });
   else autoInit(0);
 
-  window.BayNotify = { initBell: initBell, mountPanel: mountPanel, refresh: function () { if (window.__bayNotifyRefresh) window.__bayNotifyRefresh(); } };
+  window.BeslyfeNotify = { initBell: initBell, mountPanel: mountPanel, refresh: function () { if (window.__bayNotifyRefresh) window.__bayNotifyRefresh(); } };
 })();

@@ -1,10 +1,14 @@
-# Bak'd On The Bay — Event OS Architecture
+# Proof Event Architecture Appendix
 
-This document is the architectural source of truth for the platform. It records
-what exists today (a full repository audit), the target architecture (a
-multi-tenant Event Operating System), the decisions taken so far, and a phased
-roadmap. Read it before making structural changes so we **refactor and
-consolidate** rather than duplicate or fork parallel systems.
+> Historical proof documentation. The active Beslyfe architecture and roadmap
+> are defined by `platform/contracts.mjs`, `platform/ecosystems/`,
+> `platform/communities/`, `platform/growth/`, and `docs/BESLYFE_ROADMAP.md`.
+> Event-specific assumptions below apply only to the Bak'd On The Bay proof and
+> must not be used as defaults for a website, business, creator, community, or cause.
+
+This document records the original proof implementation: its repository audit,
+event operating model, and event-specific decisions retained for compatibility
+and historical context.
 
 ---
 
@@ -61,7 +65,7 @@ The guiding principles:
 | `site_settings` | Per-page admin-controlled site config (hero, theme, copy, section order, ticketing links). |
 | `site_media` | Site-wide media library (bytes in-row). |
 | `floorplan` | Draft & published floor-plan layouts. |
-| `sessions` | Server-stored login sessions; identity is read from here (never the request body) via the httpOnly `bakd_sid` cookie. |
+| `sessions` | Server-stored login sessions; identity is read from here (never the request body) via the httpOnly `beslyfe_sid` cookie. |
 | `password_resets` | Single-use, expiring, hashed password-reset tokens. |
 | `audit_log` | Append-only trail of privileged admin mutations (actor, action, resource, before/after diff, IP). |
 | `auth_attempts` | Sliding-window throttling ledger for login/signup/reset/access lookups. |
@@ -218,7 +222,7 @@ cannot drift between endpoints.
 
 Identity is never taken from the request. On login/signup `createSession` mints
 an opaque, server-stored token (row in `sessions`) and returns an httpOnly,
-`Secure`, `SameSite=Strict` cookie (`bakd_sid`). Every other function resolves
+`Secure`, `SameSite=Strict` cookie (`beslyfe_sid`). Every other function resolves
 the caller via `readSession` / `requireSession` / `requireAdmin`, reading the
 acting account/role from the session row.
 

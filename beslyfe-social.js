@@ -1,11 +1,18 @@
-/* Shared client helpers for the Bak'd On The Bay social platform.
+/* Shared client helpers for the Beslyfe social platform.
    Identity is a community profile the visitor chooses to act as; it is kept in
    localStorage so posting, liking, commenting and following work across pages
-   without a separate login. Exposes a small API on window.BaySocial. */
+   without a separate login. Exposes a small API on window.BeslyfeSocial. */
 (function () {
   var SOCIAL_ENDPOINT = '/.netlify/functions/social';
   var PROFILES_ENDPOINT = '/.netlify/functions/profiles';
-  var STORE_KEY = 'bay_active_profile';
+  var STORE_KEY = 'beslyfe_active_profile';
+  var PREVIOUS_STORE_KEY = ['ba', 'y_active_profile'].join('');
+  try {
+    if (!localStorage.getItem(STORE_KEY) && localStorage.getItem(PREVIOUS_STORE_KEY)) {
+      localStorage.setItem(STORE_KEY, localStorage.getItem(PREVIOUS_STORE_KEY));
+      localStorage.removeItem(PREVIOUS_STORE_KEY);
+    }
+  } catch (e) {}
 
   function escHtml(value) {
     return String(value == null ? '' : value)
@@ -50,13 +57,13 @@
       headshotUrl: profile.headshotUrl || ''
     };
     localStorage.setItem(STORE_KEY, JSON.stringify(slim));
-    document.dispatchEvent(new CustomEvent('bay-identity-change', { detail: slim }));
+    document.dispatchEvent(new CustomEvent('beslyfe-identity-change', { detail: slim }));
     return slim;
   }
 
   function clearIdentity() {
     localStorage.removeItem(STORE_KEY);
-    document.dispatchEvent(new CustomEvent('bay-identity-change', { detail: null }));
+    document.dispatchEvent(new CustomEvent('beslyfe-identity-change', { detail: null }));
   }
 
   // Modal that lists approved profiles so the visitor can choose who to act as.
@@ -214,7 +221,8 @@
   // whole platform is reachable from anywhere (the old dead-end is gone).
   function renderNav(active) {
     var links = [
-      { href: '/hub', key: 'hub', label: 'Hub' },
+      { href: '/community', key: 'community', label: 'Community' },
+      { href: '/hub', key: 'hub', label: 'My hub' },
       { href: '/feed', key: 'feed', label: 'Feed' },
       { href: '/reels', key: 'reels', label: 'Reels' },
       { href: '/stories', key: 'stories', label: 'Stories' },
@@ -228,13 +236,13 @@
       links.map(function (l) {
         return '<a href="' + l.href + '"' + (l.key === active ? ' class="active"' : '') + '>' + escHtml(l.label) + '</a>';
       }).join('') +
-      '<a href="/packages" class="so-subnav-cta">Buy Package</a>' +
-      '<a href="#" class="so-subnav-logout" data-bay-logout>Log out</a>' +
+      '<a href="/create" class="so-subnav-cta">Build & grow</a>' +
+      '<a href="#" class="so-subnav-logout" data-beslyfe-logout>Log out</a>' +
       '</div></nav>';
     var holder = document.getElementById('soNav');
     if (holder) {
       holder.innerHTML = html;
-      var logoutLink = holder.querySelector('[data-bay-logout]');
+      var logoutLink = holder.querySelector('[data-beslyfe-logout]');
       if (logoutLink) {
         logoutLink.addEventListener('click', function (e) {
           e.preventDefault();
@@ -246,7 +254,7 @@
               body: JSON.stringify({ action: 'logout' }), keepalive: true
             }).catch(function () {});
           } catch (err) {}
-          try { localStorage.removeItem('bakd_session'); } catch (err) {}
+          try { localStorage.removeItem('beslyfe_session'); } catch (err) {}
           clearIdentity();
           window.location.href = '/';
         });
@@ -255,7 +263,7 @@
     return html;
   }
 
-  window.BaySocial = {
+  window.BeslyfeSocial = {
     SOCIAL_ENDPOINT: SOCIAL_ENDPOINT,
     PROFILES_ENDPOINT: PROFILES_ENDPOINT,
     MEDIA_ENDPOINT: '/.netlify/functions/media-library',

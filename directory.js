@@ -15,8 +15,8 @@
   var currentPage = 1;
   var pageSize = 12;
 
-  var ROLE_LABELS = { vendor: 'Vendor', sponsor: 'Sponsor', speaker: 'Speaker', dj: 'Entertainment', attendee: 'Attendee' };
-  var ROLE_ICONS = { vendor: 'V', sponsor: 'S', speaker: 'EDU', dj: 'DJ', attendee: 'A' };
+  var ROLE_LABELS = { vendor: 'Business', sponsor: 'Organization', speaker: 'Mentor / educator', dj: 'Creator', attendee: 'Member' };
+  var ROLE_ICONS = { vendor: 'B', sponsor: 'ORG', speaker: 'EDU', dj: 'PLAY', attendee: 'M' };
 
   function escHtml(value) {
     return String(value == null ? '' : value)
@@ -59,7 +59,7 @@
     var booth = boothOf(p);
     var badges = '<div class="profile-badges">'
       + (featured(p) ? '<span class="profile-badge featured">Featured</span>' : '')
-      + (booth ? '<span class="profile-badge">Booth ' + escHtml(booth) + '</span>' : '')
+      + (booth ? '<span class="profile-badge">' + escHtml(booth) + '</span>' : '')
       + '<span class="profile-badge">' + escHtml(category) + '</span>'
       + '</div>';
     return '<a class="bubble profile-card' + (featured(p) ? ' is-featured' : '') + '" href="/profile?id=' + encodeURIComponent(p.id) + '">'

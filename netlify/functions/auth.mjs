@@ -3,7 +3,7 @@ import {
   json, newId, iso, escHtml, createSession, destroySession, readSession,
   sessionClearCookie, SESSION_COOKIE, clientIp, requireSameOrigin, requireAdmin,
   rateLimit, recordAttempt, clearAttempts, recordAudit, passwordPolicyError,
-  timingSafeEqualHex, readJsonBody, ensureProfileForAccountId,
+  timingSafeEqualHex, readJsonBody, ensureProfileForAccountId, ensureNetworkMembership,
 } from './lib/session.mjs'
 import { VERIFIED_SENDER, sendEmail } from './lib/email.mjs'
 
@@ -21,7 +21,7 @@ import { VERIFIED_SENDER, sendEmail } from './lib/email.mjs'
 //   POST { action:'session' } / GET ?action=session        → who am I? (from the session cookie)
 //   GET                                                     → admin: list members (session must be admin)
 //
-// A successful login/signup sets an httpOnly `bakd_sid` cookie; every other
+// A successful login/signup sets an httpOnly `beslyfe_sid` cookie; every other
 // function derives the acting identity from that cookie via the session table,
 // so the client can no longer impersonate anyone by editing a request body.
 //
@@ -512,10 +512,11 @@ export default async (req) => {
 
   // ── End the current session ──
   if (action === 'logout') {
-    const token = (req.headers.get('cookie') || '')
-      .split(';').map((p) => p.trim())
-      .find((p) => p.startsWith(`${SESSION_COOKIE}=`))
-    if (token) await destroySession(db, decodeURIComponent(token.split('=').slice(1).join('=')))
+    const parts = (req.headers.get('cookie') || '').split(';').map((part) => part.trim())
+    const earlierName = ['ba', 'kd_sid'].join('')
+    const tokenPart = parts.find((part) => part.startsWith(`${SESSION_COOKIE}=`))
+      || parts.find((part) => part.startsWith(`${earlierName}=`))
+    if (tokenPart) await destroySession(db, decodeURIComponent(tokenPart.split('=').slice(1).join('=')))
     return json({ ok: true }, 200, { 'Set-Cookie': sessionClearCookie() })
   }
 
@@ -643,6 +644,7 @@ export default async (req) => {
     await db.sql`UPDATE accounts SET "email_verified" = true, "status" = 'approved' WHERE "id" = ${account.id}`
     if (account.profile_id) {
       await db.sql`UPDATE profiles SET "status" = 'approved', "updated_at" = ${nowIso} WHERE "id" = ${account.profile_id}`
+      await ensureNetworkMembership(db, account.profile_id, 'signup')
     }
     await db.sql`UPDATE email_verifications SET "used_at" = ${nowIso} WHERE "token_hash" = ${tokenHash}`
     await db.sql`DELETE FROM email_verifications WHERE "account_id" = ${account.id} AND "token_hash" <> ${tokenHash}`

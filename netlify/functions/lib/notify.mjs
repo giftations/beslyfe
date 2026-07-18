@@ -1,6 +1,6 @@
 import { newId } from './session.mjs'
 
-// Notification writer for the Bak'd On The Bay community, in the style of
+// Notification writer for the Beslyfe community, in the style of
 // Facebook/Instagram. Every function that produces something a member should
 // know about — a new direct or group message, a followed member's new post, a
 // like/comment on their post, a new follower — calls in here to record it.

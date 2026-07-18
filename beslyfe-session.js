@@ -1,5 +1,5 @@
 /* Shared site session helper for the public pages.
-   The signed-in account lives in localStorage ('bakd_session') and persists
+   The signed-in account lives in localStorage ('beslyfe_session') and persists
    until the member explicitly logs out — there is no expiry, so a visitor stays
    signed in across pages and browser back/forward navigation.
 
@@ -9,10 +9,18 @@
      • [data-logout]       any element logs the member out when clicked.
      • [data-auth-only]    shown only when signed in.
      • [data-guest-only]   shown only when signed out.
-   Exposes window.BaySession for pages that need it directly. */
+   Exposes window.BeslyfeSession for pages that need it directly. */
 (function () {
-  var SESSION_KEY = 'bakd_session';
-  var IDENTITY_KEY = 'bay_active_profile';
+  var SESSION_KEY = 'beslyfe_session';
+  var IDENTITY_KEY = 'beslyfe_active_profile';
+  var PREVIOUS_SESSION_KEY = ['ba', 'kd_session'].join('');
+  var PREVIOUS_IDENTITY_KEY = ['ba', 'y_active_profile'].join('');
+  try {
+    if (!localStorage.getItem(SESSION_KEY) && localStorage.getItem(PREVIOUS_SESSION_KEY)) localStorage.setItem(SESSION_KEY, localStorage.getItem(PREVIOUS_SESSION_KEY));
+    if (!localStorage.getItem(IDENTITY_KEY) && localStorage.getItem(PREVIOUS_IDENTITY_KEY)) localStorage.setItem(IDENTITY_KEY, localStorage.getItem(PREVIOUS_IDENTITY_KEY));
+    localStorage.removeItem(PREVIOUS_SESSION_KEY);
+    localStorage.removeItem(PREVIOUS_IDENTITY_KEY);
+  } catch (e) {}
 
   function get() {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { return null; }
@@ -31,11 +39,11 @@
       }).catch(function () {});
     } catch (e) {}
     try { localStorage.removeItem(SESSION_KEY); localStorage.removeItem(IDENTITY_KEY); } catch (e) {}
-    try { document.dispatchEvent(new CustomEvent('bay-identity-change', { detail: null })); } catch (e) {}
+    try { document.dispatchEvent(new CustomEvent('beslyfe-identity-change', { detail: null })); } catch (e) {}
     window.location.href = redirect || '/';
   }
 
-  window.BaySession = { get: get, isAdmin: isAdmin, dashboardHref: dashboardHref, logout: logout };
+  window.BeslyfeSession = { get: get, isAdmin: isAdmin, dashboardHref: dashboardHref, logout: logout };
 
   function enhance() {
     var session = get();

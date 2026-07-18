@@ -2,7 +2,7 @@ import { getDatabase } from '@netlify/database'
 import { requireSession, requireSameOrigin, newId, readJsonBody } from './lib/session.mjs'
 import { createNotification } from './lib/notify.mjs'
 
-// Member-created chat groups for the Bak'd On The Bay community. A group has an
+// Member-created chat groups for the Beslyfe community. A group has an
 // owner, a roster of member profiles and a stream of messages. Public groups are
 // discoverable and anyone can join; private groups are invite-only (the owner
 // adds members). Identity is a community profile id, same as the rest of the

@@ -2,10 +2,10 @@ import { getDatabase } from '@netlify/database'
 import { readSession, requireSession, requireSameOrigin, newId, isLiveAdmin, ensureProfileForAccount, json } from './lib/session.mjs'
 import { createNotification, notifyFollowers } from './lib/notify.mjs'
 
-// Social platform for the Bak'd On The Bay community. Profiles (the existing
-// `profiles` table) are the identities: they author posts, like and comment on
-// them, and follow one another. Backed by Netlify Database so the feed is shared
-// across every browser and device.
+// Shared Beslyfe social network. Profiles are durable identities across every
+// business, website, event, creator, nonprofit, and community ecosystem. Public
+// contributions flow into one network feed while preserving their ecosystem
+// origin; followers-only, ecosystem-only, and private content keep their bounds.
 //
 //   GET  ?type=feed[&author=ID][&viewer=ID]   → recent posts and reels (optionally one author's)
 //   GET  ?type=reels[&viewer=ID]              → short videos for the reels player
@@ -25,7 +25,7 @@ const MAX_URL = 1000
 
 // Allowed enumerations for the widened post model.
 const POST_TYPES = new Set(['post', 'reel', 'story'])
-const VISIBILITIES = new Set(['public', 'followers', 'private'])
+const VISIBILITIES = new Set(['public', 'ecosystem', 'followers', 'private'])
 
 // Reduce an arbitrary location payload to a safe { lat, lng, label, visibility }
 // map. Coordinates are kept as bounded strings; an empty map means "no place".
@@ -66,6 +66,12 @@ function postRow(row) {
     filter: row.filter || '',
     music: row.music || '',
     visibility: row.visibility || 'public',
+    ecosystem: {
+      id: row.ecosystem_id || 'beslyfe-network',
+      name: row.ecosystem_name || 'Beslyfe Community',
+      slug: row.ecosystem_slug || 'beslyfe-network',
+      proof: row.ecosystem_id === 'proof-bakd-on-the-bay',
+    },
     location: location || {},
     expiresAt: iso(row.expires_at),
     createdAt: iso(row.created_at),
@@ -97,6 +103,31 @@ export default async (req) => {
     if (type === 'comments') {
       const postId = url.searchParams.get('postId')
       if (!postId) return json({ error: 'Missing postId' }, 400)
+      const post = await db.sql`
+        SELECT author_id, visibility, ecosystem_id
+        FROM social_posts WHERE id = ${postId} LIMIT 1
+      `
+      if (!post.length) return json({ error: 'That post no longer exists.' }, 404)
+      const boundary = post[0].visibility || 'public'
+      let mayRead = boundary === 'public' || (viewer && viewer === post[0].author_id)
+      if (!mayRead && viewer && boundary === 'followers') {
+        const follows = await db.sql`
+          SELECT 1 FROM social_follows
+          WHERE follower_id = ${viewer} AND followee_id = ${post[0].author_id}
+          LIMIT 1
+        `
+        mayRead = follows.length > 0
+      }
+      if (!mayRead && viewer && boundary === 'ecosystem') {
+        const memberships = await db.sql`
+          SELECT 1 FROM ecosystem_memberships
+          WHERE ecosystem_id = ${post[0].ecosystem_id || 'beslyfe-network'}
+            AND profile_id = ${viewer} AND status = 'active'
+          LIMIT 1
+        `
+        mayRead = memberships.length > 0
+      }
+      if (!mayRead) return json({ error: 'This conversation is not in your audience.' }, 403)
       const rows = await db.sql`
         SELECT c.*, p.display_name AS author_name, p.role AS author_role, p.headshot_url AS author_avatar
         FROM social_comments c
@@ -154,9 +185,11 @@ export default async (req) => {
     if (type === 'reels') {
       rows = await db.sql`
         SELECT p.*, pr.display_name AS author_name, pr.role AS author_role, pr.headshot_url AS author_avatar,
+          e.name AS ecosystem_name, e.slug AS ecosystem_slug,
           COALESCE(lc.n, 0) AS like_count, COALESCE(cc.n, 0) AS comment_count
         FROM social_posts p
         LEFT JOIN profiles pr ON pr.id = p.author_id
+        LEFT JOIN ecosystems e ON e.id = p.ecosystem_id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_likes GROUP BY post_id) lc ON lc.post_id = p.id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_comments GROUP BY post_id) cc ON cc.post_id = p.id
         WHERE p.post_type = 'reel'
@@ -166,9 +199,11 @@ export default async (req) => {
     } else if (type === 'stories') {
       rows = await db.sql`
         SELECT p.*, pr.display_name AS author_name, pr.role AS author_role, pr.headshot_url AS author_avatar,
+          e.name AS ecosystem_name, e.slug AS ecosystem_slug,
           0 AS like_count, 0 AS comment_count
         FROM social_posts p
         LEFT JOIN profiles pr ON pr.id = p.author_id
+        LEFT JOIN ecosystems e ON e.id = p.ecosystem_id
         WHERE p.post_type = 'story' AND (p.expires_at IS NULL OR p.expires_at > ${nowIso})
         ORDER BY p.created_at DESC
         LIMIT 200
@@ -176,9 +211,11 @@ export default async (req) => {
     } else if (author) {
       rows = await db.sql`
         SELECT p.*, pr.display_name AS author_name, pr.role AS author_role, pr.headshot_url AS author_avatar,
+          e.name AS ecosystem_name, e.slug AS ecosystem_slug,
           COALESCE(lc.n, 0) AS like_count, COALESCE(cc.n, 0) AS comment_count
         FROM social_posts p
         LEFT JOIN profiles pr ON pr.id = p.author_id
+        LEFT JOIN ecosystems e ON e.id = p.ecosystem_id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_likes GROUP BY post_id) lc ON lc.post_id = p.id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_comments GROUP BY post_id) cc ON cc.post_id = p.id
         WHERE p.author_id = ${author} AND p.post_type IN ('post', 'reel')
@@ -188,9 +225,11 @@ export default async (req) => {
     } else {
       rows = await db.sql`
         SELECT p.*, pr.display_name AS author_name, pr.role AS author_role, pr.headshot_url AS author_avatar,
+          e.name AS ecosystem_name, e.slug AS ecosystem_slug,
           COALESCE(lc.n, 0) AS like_count, COALESCE(cc.n, 0) AS comment_count
         FROM social_posts p
         LEFT JOIN profiles pr ON pr.id = p.author_id
+        LEFT JOIN ecosystems e ON e.id = p.ecosystem_id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_likes GROUP BY post_id) lc ON lc.post_id = p.id
         LEFT JOIN (SELECT post_id, COUNT(*)::int AS n FROM social_comments GROUP BY post_id) cc ON cc.post_id = p.id
         WHERE p.post_type IN ('post', 'reel')
@@ -207,18 +246,28 @@ export default async (req) => {
       likedSet = new Set(liked.map((r) => r.post_id))
     }
 
-    // Visibility: public posts are seen by everyone; 'followers' posts only by
-    // the author and people who follow them; 'private' only by the author.
+    // Visibility: public posts join the shared network; ecosystem posts stay
+    // inside that ecosystem; followers posts follow the social graph; private
+    // posts are visible only to their author.
     let followingSet = null
     const needsFollow = rows.some((r) => (r.visibility || 'public') === 'followers' && r.author_id !== viewer)
     if (viewer && needsFollow) {
       const f = await db.sql`SELECT followee_id FROM social_follows WHERE follower_id = ${viewer}`
       followingSet = new Set(f.map((r) => r.followee_id))
     }
+    let ecosystemSet = new Set()
+    if (viewer && rows.some((r) => (r.visibility || 'public') === 'ecosystem')) {
+      const memberships = await db.sql`
+        SELECT ecosystem_id FROM ecosystem_memberships
+        WHERE profile_id = ${viewer} AND status = 'active'
+      `
+      ecosystemSet = new Set(memberships.map((r) => r.ecosystem_id))
+    }
     const visible = rows.filter((r) => {
       const v = r.visibility || 'public'
       if (v === 'public') return true
       if (r.author_id && r.author_id === viewer) return true
+      if (v === 'ecosystem') return ecosystemSet.has(r.ecosystem_id || 'beslyfe-network')
       if (v === 'followers') return followingSet ? followingSet.has(r.author_id) : false
       return false
     })
@@ -258,6 +307,15 @@ export default async (req) => {
       const music = str(body.music, 60)
       const visibility = VISIBILITIES.has(body.visibility) ? body.visibility : 'public'
       const location = sanitizeLocation(body.location)
+      let ecosystemId = str(body.ecosystemId, 100) || 'beslyfe-network'
+      if (ecosystemId !== 'beslyfe-network') {
+        const member = await db.sql`
+          SELECT 1 FROM ecosystem_memberships
+          WHERE ecosystem_id = ${ecosystemId} AND profile_id = ${actingId} AND status = 'active'
+          LIMIT 1
+        `
+        if (!member.length) ecosystemId = 'beslyfe-network'
+      }
       if (!text && !imageUrl && !videoUrl) return json({ error: 'Write something or add a photo or video.' }, 400)
       if (postType === 'reel' && !videoUrl) return json({ error: 'A reel needs a video.' }, 400)
       const id = newId()
@@ -266,10 +324,10 @@ export default async (req) => {
       const expiresAt = postType === 'story' ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null
       await db.sql`
         INSERT INTO social_posts (
-          "id", "author_id", "body", "image_url", "video_url", "post_type",
+          "id", "ecosystem_id", "author_id", "body", "image_url", "video_url", "post_type",
           "filter", "music", "visibility", "location", "expires_at", "created_at"
         ) VALUES (
-          ${id}, ${authorId}, ${text}, ${imageUrl}, ${videoUrl}, ${postType},
+          ${id}, ${ecosystemId}, ${authorId}, ${text}, ${imageUrl}, ${videoUrl}, ${postType},
           ${filter}, ${music}, ${visibility}, ${JSON.stringify(location)}::jsonb, ${expiresAt}, ${now}
         )
       `

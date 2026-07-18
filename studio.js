@@ -1,4 +1,4 @@
-/* Bak'd On The Bay — the creation Studio.
+/* Beslyfe — the creation Studio.
    One modal for composing posts, reels and stories with: media from your
    library or a fresh upload, industry-standard filters, a public/private
    location pin, and royalty-free background music.
@@ -6,10 +6,10 @@
    The music is generated live in the browser with the Web Audio API — short
    arpeggio loops built from oscillators. Nothing is sampled or streamed, so
    there is zero copyright exposure: the "tracks" are sound the page synthesises
-   on the fly. Exposes window.BayMusic (player) and extends window.BaySocial
+   on the fly. Exposes window.BeslyfeMusic (player) and extends window.BeslyfeSocial
    with openStudio(). */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   if (!S) return;
 
   // ── Royalty-free music engine ──────────────────────────────────────────
@@ -28,7 +28,7 @@
     return '';
   }
 
-  var BayMusic = {
+  var BeslyfeMusic = {
     TRACKS: TRACKS,
     trackName: trackName,
     _ctx: null,
@@ -84,7 +84,7 @@
       this._playing = '';
     }
   };
-  window.BayMusic = BayMusic;
+  window.BeslyfeMusic = BeslyfeMusic;
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function fileToBase64(file) {
@@ -97,7 +97,7 @@
   }
 
   // Upload a file to the member's media library and return the stored item.
-  // Images are resized/compressed first (via BaySocial.prepareImageForUpload) so
+  // Images are resized/compressed first (via BeslyfeSocial.prepareImageForUpload) so
   // large photos and PNGs upload reliably; videos are sent untouched.
   function uploadToLibrary(file, ownerId, filter) {
     var prep = S.prepareImageForUpload
@@ -142,7 +142,7 @@
           '<button class="so-btn ghost" id="stLocClear" type="button">Remove</button></div>' +
         '</div></div>' +
         '<div class="studio-section"><label>Who can see this</label>' +
-          '<select id="stVis" class="studio-vis"><option value="public">Everyone</option><option value="followers">Followers</option><option value="private">Only me</option></select>' +
+          '<select id="stVis" class="studio-vis"><option value="public">Everyone on Beslyfe</option><option value="ecosystem">This ecosystem only</option><option value="followers">Followers</option><option value="private">Only me</option></select>' +
         '</div>' +
         '<div class="so-error" id="stError" hidden></div>' +
         '<button class="so-btn studio-publish" id="stPublish" type="button">Share</button>' +
@@ -163,7 +163,7 @@
     var errorEl = overlay.querySelector('#stError');
     var publishBtn = overlay.querySelector('#stPublish');
 
-    function close() { BayMusic.stop(); overlay.remove(); }
+    function close() { BeslyfeMusic.stop(); overlay.remove(); }
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     overlay.querySelector('.so-modal-close').addEventListener('click', close);
 
@@ -220,7 +220,7 @@
     });
 
     // ── Music ──
-    BayMusic.TRACKS.forEach(function (t) {
+    BeslyfeMusic.TRACKS.forEach(function (t) {
       var b = document.createElement('button');
       b.className = 'studio-chip' + (t.id === state.music ? ' active' : '');
       b.type = 'button';
@@ -229,7 +229,7 @@
         state.music = t.id;
         Array.prototype.forEach.call(musicEl.children, function (c) { c.classList.remove('active'); });
         b.classList.add('active');
-        if (t.id) BayMusic.play(t.id); else BayMusic.stop();
+        if (t.id) BeslyfeMusic.play(t.id); else BeslyfeMusic.stop();
       });
       musicEl.appendChild(b);
     });

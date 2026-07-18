@@ -2,7 +2,7 @@
    the places others have shared. Each place renders as an OpenStreetMap embed —
    no API key, no external script, just an iframe per pin. */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var idAvatar = document.getElementById('idAvatar');
   var idText = document.getElementById('idText');
   var idChangeBtn = document.getElementById('idChangeBtn');
@@ -106,7 +106,7 @@
   });
 
   idChangeBtn.addEventListener('click', function () { S.openProfilePicker(function () { renderIdentity(); loadMap(); }); });
-  document.addEventListener('bay-identity-change', function () { renderIdentity(); loadMap(); });
+  document.addEventListener('beslyfe-identity-change', function () { renderIdentity(); loadMap(); });
   renderIdentity();
   loadMap();
 })();

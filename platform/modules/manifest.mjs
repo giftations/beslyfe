@@ -4,21 +4,38 @@
 // set of them on (see platform/themes), but every module is always present in
 // the codebase. The flags describe intent, they do not gate code.
 //
-// The contract fields align to docs/PLATFORM_CORE_CONTRACT.md. They are
+// The contract fields align to the neutral Beslyfe product contracts. They are
 // documentation-as-data for now, but they make the reusable module boundary
-// explicit before code is extracted from the Bak'd On The Bay proof ecosystem.
+// explicit while the proof ecosystem remains isolated from the platform core.
 
 export const MODULES = [
   {
+    key: 'commerce',
+    label: 'Online Sales',
+    summary: 'Provider-hosted checkout, booking, donation, and lead actions that can launch without ticketing.',
+    purpose: 'Help businesses, creators, nonprofits, communities, and events turn attention into measurable revenue or leads.',
+    entities: ['person', 'organization', 'ecosystem', 'marketplace', 'opportunity'],
+    dataOwned: ['growth_channels', 'commerce_orders'],
+    dataRead: ['ecosystems', 'profiles', 'traffic_events'],
+    permissions: ['owner connects sales destination', 'public follows published action'],
+    configuration: ['sales mode', 'provider', 'offer', 'action label', 'destination link', 'campaign attribution'],
+    events: ['commerce.action_published', 'commerce.action_clicked', 'commerce.outcome_recorded'],
+    trustControls: ['provider-hosted payment', 'clear seller and offer', 'pause control', 'attribution'],
+    aiUse: 'May draft offer copy and suggest experiments; publishing and price changes require owner approval.',
+    productOverrides: ['offer copy', 'provider', 'price presentation', 'call to action'],
+    functions: ['ecosystems'],
+    pages: ['create.html'],
+  },
+  {
     key: 'ticketing',
     label: 'Ticketing',
-    summary: 'Approval-gated package purchase; Eventbrite link unlocked after review.',
-    purpose: 'Give qualified people and organizations access to paid experiences, packages, and marketplace entry points.',
+    summary: 'Optional ticket-provider connections for ecosystems that explicitly need admission or registration.',
+    purpose: 'Sell or synchronize access to an event or experience without making ticketing a platform-wide dependency.',
     entities: ['person', 'organization', 'ecosystem', 'experience', 'marketplace'],
     dataOwned: ['ticket_orders', 'ticket_providers'],
     dataRead: ['applications', 'events'],
     permissions: ['admin manages providers', 'approved participant unlocks access'],
-    configuration: ['provider', 'package rules', 'approval requirements', 'purchase links'],
+    configuration: ['enabled', 'provider', 'package rules', 'approval requirements', 'purchase links'],
     events: ['ticket.access_requested', 'ticket.order_synced', 'ticket.package_unlocked'],
     trustControls: ['approval gate', 'payment-provider disclosure', 'audit trail'],
     aiUse: 'May summarize purchase readiness only after consent and approval context are available.',
@@ -143,7 +160,7 @@ export const MODULES = [
     aiUse: 'May suggest navigation or booth discovery only from published floor-plan data.',
     productOverrides: ['venue layout', 'booth labels', 'Bayfront-specific assets'],
     functions: ['floorplan'],
-    pages: ['floorplan.html', 'floorplan-editor.html'],
+    pages: ['proof/bakd-on-the-bay/legacy/floorplan.html', 'proof/bakd-on-the-bay/legacy/floorplan-editor.html'],
   },
   {
     key: 'cms',
@@ -160,7 +177,7 @@ export const MODULES = [
     aiUse: 'May help draft public copy only when an operator explicitly requests it.',
     productOverrides: ['homepage copy', 'event page sections', 'brand imagery'],
     functions: ['site-settings', 'site-media'],
-    pages: ['admin-homepage.html'],
+    pages: ['index.html', 'create.html'],
   },
   {
     key: 'scheduling',
@@ -177,7 +194,7 @@ export const MODULES = [
     aiUse: 'May recommend sessions when profile interests and personalization consent allow it.',
     productOverrides: ['speaker lineup', 'session copy', 'event hours'],
     functions: ['events', 'site-settings'],
-    pages: ['education-schedule.html'],
+    pages: ['proof/bakd-on-the-bay/legacy/education-schedule.html'],
   },
   {
     key: 'ai',

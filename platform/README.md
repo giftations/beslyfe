@@ -1,84 +1,29 @@
-# `platform/` — the architecture layer Bak'd On The Bay runs on
+# `platform/` — Beslyfe architecture contracts
 
-This directory is the **platform layer**: the description of the system as an
-event *operating system*, not a single website. Bak'd On The Bay is one theme on
-it. The point of this layer is that adding a new event is **configuration** —
-pick a theme, enter the details — not code.
+This directory defines the reusable platform core behind every Beslyfe ecosystem. A product is configured from a blueprint and capabilities; it is never cloned from another product.
 
-It is deliberately thin. The platform is not a rewrite; it is a **map of, and a
-small amount of glue over, the system that already exists** in `netlify/functions`
-and the Netlify Database. The folders below mirror the target architecture, and
-every entry names the real tables and functions that implement it. See
-`docs/PLATFORM_ARCHITECTURE.md` for the full audit, ADRs and roadmap.
+The neutral default is the Beslyfe theme. The original event remains an explicit proof theme under `themes/bakd-on-the-bay/` and never supplies default branding or capabilities.
 
-```
-platform/
-├── core/         cross-cutting entities every event shares (manifest.mjs)
-├── modules/      capabilities an event can run (manifest.mjs)
-├── themes/       named presets: branding + copy + default modules
-│   ├── registry.mjs          single source of truth + resolver
-│   ├── bakd-on-the-bay/       ← the flagship, now just a theme
-│   ├── food-festival/
-│   ├── comic-con/
-│   └── business-expo/
-└── (api)         the public API is the existing Netlify Functions surface
-```
+## Main layers
 
-## How a theme becomes a running event
+- `core/`: cross-cutting identity and data primitives.
+- `ecosystems/`: configuration contract and business, website, community, event, creator, and nonprofit blueprints.
+- `communities/`: the shared-network membership and content-flow rules.
+- `growth/`: sales, booking, lead, donation, and optional ticket actions.
+- `modules/`: documentation-as-data for capabilities and their concrete runtime surfaces.
+- `themes/`: neutral presentation plus isolated ecosystem presets.
+- Domain contract folders: trust, consent, AI, analytics, CRM, commerce, conversations, moderation, lifecycle, automation, and operations.
 
-1. **Definition** — each `themes/<key>/theme.mjs` declares `branding` (the CSS
-   custom properties the whole site already reads), a default `tagline`, and the
-   `modules` an organizer on that theme expects to run.
-2. **Resolution** — `themes/registry.mjs` resolves a chosen theme key into the
-   fragment stored on `events.settings` (`{ theme, branding, modules }`). No
-   schema change: `events.settings` is an existing `jsonb` column.
-3. **Creation** — the Admin OS *Events* form offers the theme picker (fed by
-   `GET events?themes`). Creating an event stamps the resolved theme onto it.
-4. **Rendering** — the public site applies the active event's `branding` as
-   `:root` CSS variables (`platform-theme.js`), so a new edition *looks* like its
-   theme with zero code. The CMS (`site_settings`) remains an explicit per-page
-   override on top.
+`contracts.mjs` exposes the registry through the platform API so Admin OS and automation can inspect the same source of truth.
 
-## Core & modules are a map, not a switch
+## Non-negotiable boundaries
 
-`core/manifest.mjs` and `modules/manifest.mjs` are **documentation-as-data**:
-they name each domain/capability and the concrete tables and functions that
-already implement it, and are served read-only via `GET events?platform` (the
-Admin OS *System* view reads them). Nothing here gates behavior — the platform
-layer describes the real system so future work extends it instead of forking a
-parallel one. Module flags on a theme record *intent*, not access control.
+- One identity may belong to many ecosystems.
+- Public contributions may strengthen the shared network with origin shown.
+- Private and limited-audience data stays inside its selected boundary.
+- Ticketing, applications, floor plans, and schedules are optional event tools.
+- Websites and businesses do not inherit event modules.
+- Payment credentials remain with the chosen provider.
+- Capability intent never replaces server-side authorization.
 
-`contracts.mjs` gathers the reusable ecosystem, module, relationship, consent,
-AI, analytics, and data-boundary contracts behind one registry. The same
-`GET events?platform` response exposes it as `contracts` so tools and future
-admin surfaces can inspect the whole platform contract without adding a second
-endpoint.
-
-Theme shape, override behavior, and accessibility/trust controls are captured in
-`themes/contract.mjs` and registered through `contracts.mjs`.
-
-Operator workspace shape, navigation, mutation policies, and Admin OS trust
-controls are captured in `admin/os-contract.mjs`.
-
-Authentication, sessions, roles, same-origin writes, password policy, rate
-limits, and server-derived identity are captured in `auth/access-control-contract.mjs`.
-
-Data export scope, redaction, package expiry, and portability trust controls are
-captured in `data/portability-contract.mjs`.
-
-Import governance, additive migration rules, release gates, rollback evidence,
-and post-merge verification are captured in `lifecycle/`.
-
-## Why this and not more folders
-
-The biggest risk called out for this project was bolting on features until the
-system fragments. So this layer adds exactly one new runtime concept — the
-**theme** — and otherwise just *names* what already exists. Every future module
-(AI, notifications broadcast, organization-above-event) lands as another manifest
-entry plus a function, never a parallel app or a second datastore.
-
----
-
-The vision that motivated this layer is recorded verbatim in
-`docs/PHASE-16-PLATFORM-BLUEPRINT.md`; `docs/PLATFORM_ARCHITECTURE.md` §7 maps
-each blueprint item to what is built versus what remains on the roadmap.
+See [`../docs/BESLYFE_ROADMAP.md`](../docs/BESLYFE_ROADMAP.md) for phased execution. Historical proof-era contracts are isolated beneath [`../proof/`](../proof/).

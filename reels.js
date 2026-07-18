@@ -2,7 +2,7 @@
    (muted) when it scrolls into view; the member can like it and, when the reel
    has a chosen royalty-free track, toggle the synthesised music on. */
 (function () {
-  var S = window.BaySocial;
+  var S = window.BeslyfeSocial;
   var reelsEl = document.getElementById('reels');
   S.renderNav('reels');
 
@@ -11,7 +11,7 @@
   function card(p) {
     var css = S.filterCss(p.filter);
     var authorLink = '/profile?id=' + encodeURIComponent(p.author.id || '');
-    var music = p.music ? '<div class="reel-music">♪ ' + S.escHtml((window.BayMusic && window.BayMusic.trackName(p.music)) || p.music) + ' · tap to play</div>' : '';
+    var music = p.music ? '<div class="reel-music">♪ ' + S.escHtml((window.BeslyfeMusic && window.BeslyfeMusic.trackName(p.music)) || p.music) + ' · tap to play</div>' : '';
     var cap = p.body ? '<div class="reel-cap">' + S.escHtml(p.body) + '</div>' : '';
     return '<div class="reel-card" data-id="' + S.escHtml(p.id) + '" data-music="' + S.escHtml(p.music || '') + '">' +
       '<video src="' + S.escHtml(p.videoUrl) + '" muted loop playsinline preload="metadata" style="filter:' + css + '"></video>' +
@@ -68,9 +68,9 @@
         var likeBtn = e.target.closest('.reel-like');
         if (likeBtn) return toggleLike(likeBtn);
         var c = e.target.closest('.reel-card');
-        if (c && window.BayMusic) {
+        if (c && window.BeslyfeMusic) {
           var mid = c.getAttribute('data-music');
-          if (mid) { if (window.BayMusic._playing === mid) window.BayMusic.stop(); else window.BayMusic.play(mid); }
+          if (mid) { if (window.BeslyfeMusic._playing === mid) window.BeslyfeMusic.stop(); else window.BeslyfeMusic.play(mid); }
         }
       });
     }
@@ -95,6 +95,6 @@
   var fab = document.getElementById('createFab');
   if (fab) fab.addEventListener('click', function () { S.openStudio({ mode: 'reel', onDone: load }); });
 
-  document.addEventListener('bay-identity-change', load);
+  document.addEventListener('beslyfe-identity-change', load);
   load();
 })();

@@ -32,10 +32,10 @@ const MAX_NOTE_LEN = 4000
 const PROFILE_TYPES = new Set(['vendor', 'sponsor', 'speaker', 'dj'])
 const ACCOUNT_TYPES = new Set(['vendor', 'sponsor', 'speaker'])
 const CONTRACTS = {
-  vendor: '/assets/contracts/bakd-on-the-bay-vendor-rules.pdf',
-  sponsor: '/assets/contracts/bakd-on-the-bay-sponsor-agreement.pdf',
-  speaker: '/assets/contracts/bakd-on-the-bay-speaker-dj-entertainer-agreement.pdf',
-  dj: '/assets/contracts/bakd-on-the-bay-speaker-dj-entertainer-agreement.pdf',
+  vendor: '',
+  sponsor: '',
+  speaker: '',
+  dj: '',
 }
 const PBKDF2_ITERATIONS = 100000
 
@@ -254,12 +254,12 @@ async function sendApprovalEmail(db, app, profileId, req) {
   const eventbriteUrl = app.type === 'sponsor' ? cfg.sponsor : cfg.vendor
   const showEventbrite = isPaidRole && !!password
 
-  const subject = "You're approved for Bak'd On The Bay"
+  const subject = "You're approved for Beslyfe"
 
   const textLines = [
     `Hi ${app.name || 'there'},`,
     '',
-    "Your Bak'd On The Bay application has been approved.",
+    "Your Beslyfe application has been approved.",
     `You can sign in with the password you created during application and view your profile here: ${profileUrl}`,
   ]
   if (showEventbrite) {
@@ -274,23 +274,23 @@ async function sendApprovalEmail(db, app, profileId, req) {
         : 'The ticket link is on the Bak\'d On The Bay site under your package.',
     )
   }
-  textLines.push('', "Bak'd On The Bay")
+  textLines.push('', "Beslyfe")
   const text = textLines.join('\n')
 
   let html =
     `<p>Hi ${escapeEmail(app.name || 'there')},</p>` +
-    `<p>Your Bak'd On The Bay application has been approved.</p>` +
+    `<p>Your Beslyfe application has been approved.</p>` +
     `<p>You can sign in with the password you created during application and view your profile here: <a href="${profileUrl}">${profileUrl}</a></p>`
   if (showEventbrite) {
     const linkHtml = eventbriteUrl
       ? `<p><a href="${escapeEmail(eventbriteUrl)}">Buy your ${escapeEmail(app.type)} tickets on Eventbrite</a></p>`
-      : `<p>The ticket link is on the Bak'd On The Bay site under your package.</p>`
+      : `<p>The ticket link is on the Beslyfe site under your package.</p>`
     html +=
       `<p>To purchase your ${escapeEmail(app.type)} package, go to the ${escapeEmail(app.type)} ticket page on Eventbrite and enter this access password when prompted:</p>` +
       `<p style="font-size:18px;font-weight:bold;letter-spacing:1px">${escapeEmail(password)}</p>` +
       linkHtml
   }
-  html += `<p>Bak'd On The Bay</p>`
+  html += `<p>Beslyfe</p>`
 
   return sendEmail({ to: app.email, subject, text, html })
 }
@@ -313,21 +313,21 @@ async function sendConfirmationEmail(app, req) {
   const profileLine = PROFILE_TYPES.has(app.type)
     ? "We've created a profile for you on the site. It's pending review and will appear in the public directory once our team approves it."
     : 'Our team will review your submission and follow up with next steps.'
-  const subject = "We received your Bak'd On The Bay application"
+  const subject = "We received your Beslyfe application"
   const text = [
     `Hi ${app.name || 'there'},`,
     '',
-    `Thanks for submitting your ${role} to Bak'd On The Bay. We've received it.`,
+    `Thanks for submitting your ${role} to Beslyfe. We've received it.`,
     '',
     profileLine,
     '',
     "We'll be in touch soon.",
-    "Bak'd On The Bay",
+    "Beslyfe",
   ].join('\n')
   const html = `<p>Hi ${escapeEmail(app.name || 'there')},</p>` +
-    `<p>Thanks for submitting your ${escapeEmail(role)} to Bak'd On The Bay. We've received it.</p>` +
+    `<p>Thanks for submitting your ${escapeEmail(role)} to Beslyfe. We've received it.</p>` +
     `<p>${escapeEmail(profileLine)}</p>` +
-    `<p>We'll be in touch soon.<br>Bak'd On The Bay</p>`
+    `<p>We'll be in touch soon.<br>Beslyfe</p>`
 
   const result = await sendEmail({ to: app.email, subject, text, html })
 
