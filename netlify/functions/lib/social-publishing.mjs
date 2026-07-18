@@ -388,9 +388,12 @@ export async function publishTikTok(content = {}, env = {}, fetchImpl = fetch) {
   const connection = cleanObject(content.connection)
   const token = await currentProviderToken(content.db, 'tiktok', connection, env, fetchImpl)
   if (!token) throw new Error('TikTok publishing is not connected.')
-  if (String(env.TIKTOK_PUBLIC_POST_APPROVED || '').toLowerCase() !== 'true') {
+  const publicPostingApproved = String(env.TIKTOK_PUBLIC_POST_APPROVED || '').toLowerCase() === 'true'
+  const reviewMode = String(env.TIKTOK_REVIEW_MODE || '').toLowerCase() === 'true'
+  if (!publicPostingApproved && !reviewMode) {
     throw new Error('TikTok public posting needs Content Posting API audit approval; private-only automation is intentionally disabled.')
   }
+  const privacyLevel = publicPostingApproved ? 'PUBLIC_TO_EVERYONE' : 'SELF_ONLY'
   const imageUrl = String(content.imageUrl || '').trim()
   if (!imageUrl) throw new Error('TikTok photo publishing requires a public image URL.')
   const creator = await checkedFetch('https://open.tiktokapis.com/v2/post/publish/creator_info/query/', {
@@ -399,7 +402,7 @@ export async function publishTikTok(content = {}, env = {}, fetchImpl = fetch) {
     body: '{}',
   }, fetchImpl, 'TikTok')
   const options = creator?.data?.privacy_level_options || []
-  if (!options.includes('PUBLIC_TO_EVERYONE')) throw new Error('TikTok does not currently allow public posting for this account and app.')
+  if (!options.includes(privacyLevel)) throw new Error(`TikTok does not currently allow ${privacyLevel === 'SELF_ONLY' ? 'private review' : 'public'} posting for this account and app.`)
   const result = await checkedFetch('https://open.tiktokapis.com/v2/post/publish/content/init/', {
     method: 'POST',
     headers: { Accept: 'application/json', Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
@@ -407,7 +410,7 @@ export async function publishTikTok(content = {}, env = {}, fetchImpl = fetch) {
       post_info: {
         title: String(content.tiktokTitle || 'Build what you imagine with Beslyfe').slice(0, 90),
         description: String(content.text || '').slice(0, 4000),
-        privacy_level: 'PUBLIC_TO_EVERYONE',
+        privacy_level: privacyLevel,
         disable_comment: false,
         auto_add_music: true,
         brand_content_toggle: false,

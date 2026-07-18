@@ -235,6 +235,19 @@ test('TikTok refuses private-only automation and uses the audited photo Direct P
   assert.equal(request.post_info.brand_organic_toggle, true)
 })
 
+test('TikTok review mode is explicitly private and never implies public approval', async () => {
+  const calls = []
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), options })
+    if (calls.length === 1) return { ok: true, status: 200, json: async () => ({ data: { privacy_level_options: ['SELF_ONLY'] }, error: { code: 'ok' } }) }
+    return { ok: true, status: 200, json: async () => ({ data: { publish_id: 'review-1' }, error: { code: 'ok' } }) }
+  }
+  await publishTikTok({ text: 'Private review post', imageUrl: 'https://beslyfe.com/post.png' }, {
+    TIKTOK_ACCESS_TOKEN: 'token', TIKTOK_REVIEW_MODE: 'true', TIKTOK_PUBLIC_POST_APPROVED: 'false',
+  }, fetchImpl)
+  assert.equal(JSON.parse(calls[1].options.body).post_info.privacy_level, 'SELF_ONLY')
+})
+
 test('Instagram waits through processing without publishing early', async () => {
   let checks = 0
   const fetchImpl = async () => ({
