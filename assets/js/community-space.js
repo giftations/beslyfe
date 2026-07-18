@@ -8,7 +8,6 @@
   function esc(value) { return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
   function initials(name) { return String(name || 'Member').trim().split(/\s+/).slice(0,2).map(function(x){return x.charAt(0)}).join('').toUpperCase() }
   function safeUrl(value) { try { var url=new URL(value,location.origin); return url.protocol==='https:' || url.origin===location.origin ? url.href : '' } catch(e){ return '' } }
-  function setNumber(id,value){var el=document.getElementById(id);if(el)el.textContent=Number(value||0).toLocaleString()}
   function avatar(item){var src=safeUrl(item.headshotUrl);return src?'<img class="space-avatar" src="'+esc(src)+'" alt="" loading="lazy">':'<span class="space-avatar">'+esc(initials(item.displayName))+'</span>'}
 
   function profileCard(item){
@@ -27,10 +26,8 @@
     ageGate.hidden=true;content.hidden=false
     var profiles=document.getElementById('spaceProfiles');var posts=document.getElementById('spacePostsGrid')
     try{
-      var results=await Promise.all([fetch(endpoint+'?type=manifest').then(function(r){return r.json()}),read('profiles'),read('feed')])
-      var source=((results[0].sources||[]).filter(function(x){return x.id==='cannadispo'})[0])||{}
-      setNumber('spaceMembers',(source.counts||{}).members);setNumber('spacePosts',(source.counts||{}).contributions);setNumber('spaceReels',(source.counts||{}).reels)
-      var people=results[1].items||[];var feed=results[2].items||[]
+      var results=await Promise.all([read('profiles'),read('feed')])
+      var people=results[0].items||[];var feed=results[1].items||[]
       profiles.innerHTML=people.length?people.map(profileCard).join(''):'<p>No public profiles are available yet.</p>'
       posts.innerHTML=feed.length?feed.map(postCard).join(''):'<p>No public contributions are available yet.</p>'
     }catch(error){profiles.innerHTML='<p>'+esc(error.message)+'</p>';posts.innerHTML='<p>The protected space is temporarily unavailable. The rest of Beslyfe is still online.</p>'}
