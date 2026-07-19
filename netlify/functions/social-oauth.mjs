@@ -3,8 +3,7 @@ import { getDatabase } from '@netlify/database'
 
 import { json, requireAdmin } from './lib/session.mjs'
 import {
-  appSecretProof,
-  chooseManagedPage,
+  fetchManagedFacebookPage,
   saveSocialConnection,
 } from './lib/social-publishing.mjs'
 
@@ -105,9 +104,7 @@ async function connectFacebook(db, code, env) {
   const exchange = new URL(`https://graph.facebook.com/${env.META_GRAPH_VERSION || 'v25.0'}/oauth/access_token`)
   exchange.search = new URLSearchParams({ grant_type: 'fb_exchange_token', client_id: env.META_APP_ID, client_secret: env.META_APP_SECRET, fb_exchange_token: short.access_token })
   const longLived = await readJson(await fetch(exchange), 'Facebook')
-  const pages = new URL(`https://graph.facebook.com/${env.META_GRAPH_VERSION || 'v25.0'}/me/accounts`)
-  pages.search = new URLSearchParams({ fields: 'id,name,access_token,tasks', access_token: longLived.access_token, appsecret_proof: appSecretProof(longLived.access_token, env.META_APP_SECRET) })
-  const page = chooseManagedPage((await readJson(await fetch(pages), 'Facebook')).data)
+  const page = await fetchManagedFacebookPage(longLived.access_token, env, fetch)
   return saveSocialConnection(db, 'facebook', { accountId: String(page.id), pageId: String(page.id), pageName: String(page.name), account: String(page.name), tasks: page.tasks || [] }, String(page.access_token), env)
 }
 

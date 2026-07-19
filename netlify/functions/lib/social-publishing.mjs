@@ -123,6 +123,36 @@ export function chooseManagedPage(pages = []) {
   throw new Error(`Meta returned ${eligible.length} managed Pages and none was uniquely identifiable as Beslyfe.`)
 }
 
+export async function fetchManagedFacebookPage(userToken, env = {}, fetchImpl = fetch) {
+  const appSecret = String(env.META_APP_SECRET || '').trim()
+  const pageId = String(env.FACEBOOK_PAGE_ID || '').trim()
+  const proof = appSecretProof(userToken, appSecret)
+  const fields = 'id,name,access_token,tasks'
+  const pagesUrl = new URL(metaUrl('me/accounts', env))
+  pagesUrl.searchParams.set('fields', fields)
+  pagesUrl.searchParams.set('access_token', userToken)
+  pagesUrl.searchParams.set('appsecret_proof', proof)
+  const pagesBody = await checkedFetch(pagesUrl, { headers: { Accept: 'application/json' } }, fetchImpl, 'Facebook')
+  const pages = Array.isArray(pagesBody.data) ? pagesBody.data : []
+
+  if (pageId) {
+    const listedPage = pages.find((page) => String(page?.id || '') === pageId && page?.access_token)
+    if (listedPage) return listedPage
+
+    // Business-managed Pages can be present in granular OAuth targets while
+    // /me/accounts omits their Page token. Resolve the explicitly selected Page
+    // directly so the connection remains deterministic and least-privileged.
+    const pageUrl = new URL(metaUrl(pageId, env))
+    pageUrl.searchParams.set('fields', fields)
+    pageUrl.searchParams.set('access_token', userToken)
+    pageUrl.searchParams.set('appsecret_proof', proof)
+    const directPage = await checkedFetch(pageUrl, { headers: { Accept: 'application/json' } }, fetchImpl, 'Facebook')
+    if (directPage?.id && directPage?.name && directPage?.access_token) return directPage
+  }
+
+  return chooseManagedPage(pages)
+}
+
 export async function bootstrapFacebookConnection(db, env = {}, fetchImpl = fetch) {
   const appId = String(env.META_APP_ID || '').trim()
   const appSecret = String(env.META_APP_SECRET || '').trim()
@@ -141,12 +171,7 @@ export async function bootstrapFacebookConnection(db, env = {}, fetchImpl = fetc
   const userToken = String(longLived.access_token || '')
   if (!userToken) throw new Error('Facebook did not return a long-lived user token.')
 
-  const pagesUrl = new URL(metaUrl('me/accounts', env))
-  pagesUrl.searchParams.set('fields', 'id,name,access_token,tasks')
-  pagesUrl.searchParams.set('access_token', userToken)
-  pagesUrl.searchParams.set('appsecret_proof', appSecretProof(userToken, appSecret))
-  const pagesBody = await checkedFetch(pagesUrl, { headers: { Accept: 'application/json' } }, fetchImpl, 'Facebook')
-  const page = chooseManagedPage(pagesBody.data)
+  const page = await fetchManagedFacebookPage(userToken, env, fetchImpl)
   const pageToken = String(page.access_token || '')
   const now = new Date().toISOString()
   const state = await readPublishingState(db)

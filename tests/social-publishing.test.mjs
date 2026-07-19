@@ -9,6 +9,7 @@ import {
   decryptSocialToken,
   encryptSocialToken,
   FREE_OPPORTUNITY_CAMPAIGNS,
+  fetchManagedFacebookPage,
   LAUNCH_CAMPAIGN,
   publishCampaign,
   publishFacebookStory,
@@ -44,6 +45,29 @@ test('managed Page selection prefers the Beslyfe identity', () => {
     { id: '2', name: 'Beslyfe', access_token: 'two' },
   ])
   assert.equal(page.id, '2')
+})
+
+test('Facebook resolves an explicitly selected business Page when /me/accounts omits its token', async () => {
+  const calls = []
+  const fetchImpl = async (url) => {
+    calls.push(String(url))
+    return {
+      ok: true,
+      status: 200,
+      json: async () => calls.length === 1
+        ? ({ data: [] })
+        : ({ id: 'page-123', name: 'beslyfe', access_token: 'page-token', tasks: ['CREATE_CONTENT'] }),
+    }
+  }
+  const page = await fetchManagedFacebookPage('user-token', {
+    META_APP_SECRET: 'app-secret',
+    FACEBOOK_PAGE_ID: 'page-123',
+  }, fetchImpl)
+  assert.equal(page.id, 'page-123')
+  assert.equal(page.access_token, 'page-token')
+  assert.match(calls[0], /me\/accounts/)
+  assert.match(calls[1], /page-123/)
+  assert.doesNotMatch(calls.join('\n'), /app-secret/)
 })
 
 test('readiness exposes no token material and launch delivery is multi-channel', () => {
