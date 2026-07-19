@@ -77,10 +77,10 @@ test('free-opportunity campaign is paced, count-free, and uses committed creativ
   for (const campaign of FREE_OPPORTUNITY_CAMPAIGNS) {
     assert.match(campaign.text, /free/i)
     assert.doesNotMatch(JSON.stringify(campaign), /\b\d+\s+(?:members|users|followers)\b/i)
-    assert.match(campaign.imageUrl, /^https:\/\/beslyfe\.com\/assets\/images\/campaigns\//)
+    assert.match(campaign.imageUrl, /^https:\/\/media\.beslyfe\.com\/assets\/images\/campaigns\//)
     assert.equal(existsSync(new URL(`..${new URL(campaign.imageUrl).pathname}`, import.meta.url)), true)
     if (campaign.instagramPlacement !== 'story') {
-      assert.match(campaign.storyImageUrl, /^https:\/\/beslyfe\.com\/assets\/images\/campaigns\//)
+      assert.match(campaign.storyImageUrl, /^https:\/\/media\.beslyfe\.com\/assets\/images\/campaigns\//)
       assert.equal(existsSync(new URL(`..${new URL(campaign.storyImageUrl).pathname}`, import.meta.url)), true)
     }
     assert.ok(campaign.publishAfter)
