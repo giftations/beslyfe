@@ -191,6 +191,8 @@ export default async (req) => {
     else result = await connectX(db, code, state.verifier, env)
     return new Response(successHtml(provider, result.account), { headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } })
   } catch (error) {
-    return json({ error: String(error?.message || 'Social connection failed.').slice(0, 500) }, 502)
+    const message = String(error?.message || 'Social connection failed.').slice(0, 500)
+    console.error(`[social-oauth] ${provider} connection failed: ${message}`)
+    return json({ error: message }, 502)
   }
 }
