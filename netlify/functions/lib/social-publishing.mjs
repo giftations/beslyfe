@@ -94,6 +94,64 @@ export async function writePublishingState(db, state = {}) {
   return next
 }
 
+export async function writeDeliveryRecord(db, key, record = {}) {
+  const now = new Date().toISOString()
+  const next = {
+    version: 1,
+    connections: {},
+    deliveries: { [String(key)]: cleanObject(record) },
+    queue: [],
+    updatedAt: now,
+  }
+  await db.sql`
+    INSERT INTO site_settings ("page", "data", "updated_at")
+    VALUES (${STATE_PAGE}, ${JSON.stringify(next)}::jsonb, ${now})
+    ON CONFLICT ("page") DO UPDATE SET
+      "data" = jsonb_set(
+        jsonb_set(
+          site_settings."data",
+          '{deliveries}',
+          COALESCE(site_settings."data"->'deliveries', '{}'::jsonb) || EXCLUDED."data"->'deliveries',
+          true
+        ),
+        '{updatedAt}',
+        EXCLUDED."data"->'updatedAt',
+        true
+      ),
+      "updated_at" = EXCLUDED."updated_at"
+  `
+  return record
+}
+
+async function writeConnectionRecord(db, provider, connection = {}) {
+  const now = new Date().toISOString()
+  const next = {
+    version: 1,
+    connections: { [String(provider)]: cleanObject(connection) },
+    deliveries: {},
+    queue: [],
+    updatedAt: now,
+  }
+  await db.sql`
+    INSERT INTO site_settings ("page", "data", "updated_at")
+    VALUES (${STATE_PAGE}, ${JSON.stringify(next)}::jsonb, ${now})
+    ON CONFLICT ("page") DO UPDATE SET
+      "data" = jsonb_set(
+        jsonb_set(
+          site_settings."data",
+          '{connections}',
+          COALESCE(site_settings."data"->'connections', '{}'::jsonb) || EXCLUDED."data"->'connections',
+          true
+        ),
+        '{updatedAt}',
+        EXCLUDED."data"->'updatedAt',
+        true
+      ),
+      "updated_at" = EXCLUDED."updated_at"
+  `
+  return connection
+}
+
 async function responseJson(response) {
   try { return await response.json() } catch { return {} }
 }
@@ -174,18 +232,17 @@ export async function bootstrapFacebookConnection(db, env = {}, fetchImpl = fetc
   const page = await fetchManagedFacebookPage(userToken, env, fetchImpl)
   const pageToken = String(page.access_token || '')
   const now = new Date().toISOString()
-  const state = await readPublishingState(db)
-  state.connections.facebook = {
+  const tasks = Array.isArray(page.tasks) ? page.tasks.slice(0, 20) : []
+  await writeConnectionRecord(db, 'facebook', {
     status: 'connected',
     pageId: String(page.id),
     pageName: String(page.name),
-    tasks: Array.isArray(page.tasks) ? page.tasks.slice(0, 20) : [],
+    tasks,
     token: encryptSocialToken(pageToken, stateSecret, `facebook:${page.id}`),
     connectedAt: now,
     checkedAt: now,
-  }
-  await writePublishingState(db, state)
-  return { pageId: String(page.id), pageName: String(page.name), tasks: state.connections.facebook.tasks }
+  })
+  return { pageId: String(page.id), pageName: String(page.name), tasks }
 }
 
 function facebookConnectionToken(connection, env = {}) {
@@ -266,12 +323,11 @@ export async function saveSocialConnection(db, provider, connection = {}, access
   const stateSecret = String(env.SOCIAL_OAUTH_STATE_SECRET || '').trim()
   const accountId = String(connection.accountId || connection.pageId || '').trim()
   if (!provider || !accountId || !accessToken || !stateSecret) throw new Error('The social connection could not be saved securely.')
-  const state = await readPublishingState(db)
   const rawConnection = cleanObject(connection)
   const refreshToken = String(rawConnection.refreshToken || '')
   const publicConnection = { ...rawConnection }
   delete publicConnection.refreshToken
-  state.connections[provider] = {
+  await writeConnectionRecord(db, provider, {
     ...publicConnection,
     status: 'connected',
     accountId,
@@ -279,8 +335,7 @@ export async function saveSocialConnection(db, provider, connection = {}, access
     ...(refreshToken ? { refreshToken: encryptSocialToken(refreshToken, stateSecret, `${provider}:${accountId}:refresh`) } : {}),
     connectedAt: new Date().toISOString(),
     checkedAt: new Date().toISOString(),
-  }
-  await writePublishingState(db, state)
+  })
   return { provider, accountId, account: String(connection.account || connection.pageName || connection.username || '') }
 }
 
@@ -545,7 +600,7 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
       state.deliveries[key] = record
       results[delivery.key] = { ok: false, ...record }
     }
-    await writePublishingState(db, state)
+    await writeDeliveryRecord(db, key, state.deliveries[key])
   }
   return results
 }
@@ -557,6 +612,11 @@ export const LAUNCH_CAMPAIGN = Object.freeze({
   storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
   linkUrl: 'https://beslyfe.com/?utm_source=facebook&utm_medium=organic&utm_campaign=beslyfe_launch',
   channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
+  channelContent: {
+    x: {
+      text: 'Beslyfe is live: a 100% free place to shape an idea, connect with people, and automate the work between today and the future you want. Join the growing community: https://beslyfe.com/signup?utm_source=x&utm_medium=organic&utm_campaign=beslyfe_launch #Beslyfe #GrowTogether',
+    },
+  },
 })
 
 export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
@@ -572,6 +632,9 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     channelContent: {
       threads: {
         text: 'Your idea deserves somewhere to begin. Beslyfe is 100% free—bring the dream, shape the plan, connect with people, and automate repetitive work so you can spend more time doing what you love. Start at https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=first_step #Beslyfe #GrowTogether',
+      },
+      x: {
+        text: 'Your idea deserves somewhere to begin. Beslyfe is 100% free—shape it, connect with people, and automate busywork so you can do what you love. Start free: https://beslyfe.com/signup?utm_source=x&utm_medium=organic&utm_campaign=free_opportunity #Beslyfe #GrowTogether',
       },
     },
   }),
@@ -596,6 +659,9 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
     channelContent: {
       threads: {
         text: 'Big changes rarely begin with a perfect plan. They begin when someone shares the idea, asks a useful question, and finds people willing to help. Beslyfe is a 100% free place to begin—and a growing community to move forward with. https://beslyfe.com/signup?utm_source=threads&utm_medium=organic&utm_campaign=free_opportunity&utm_content=grow_together #Beslyfe #GrowTogether',
+      },
+      x: {
+        text: 'Big changes begin when someone shares an idea and finds people willing to help. Beslyfe is a 100% free place to begin and a growing community to move forward with. https://beslyfe.com/signup?utm_source=x&utm_medium=organic&utm_campaign=free_opportunity #Beslyfe #GrowTogether',
       },
     },
   }),

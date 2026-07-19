@@ -18,7 +18,21 @@ function publicState(state, env) {
     url: value.url || '',
     error: value.error || '',
   }]))
-  return { readiness: socialReadiness(state, env), deliveries, updatedAt: state.updatedAt || '' }
+  const xManualPosts = SOCIAL_CAMPAIGNS
+    .filter((campaign) => campaign.channels.includes('x'))
+    .map((campaign) => {
+      const text = String(campaign.channelContent?.x?.text || campaign.text || '')
+      const intent = new URL('https://x.com/intent/tweet')
+      intent.searchParams.set('text', text)
+      return {
+        campaignId: campaign.id,
+        publishAfter: campaign.publishAfter || '',
+        text,
+        intentUrl: intent.toString(),
+        status: deliveries[`${campaign.id}:x`]?.status || 'pending',
+      }
+    })
+  return { readiness: socialReadiness(state, env), deliveries, xManualPosts, updatedAt: state.updatedAt || '' }
 }
 
 export default async (req) => {
