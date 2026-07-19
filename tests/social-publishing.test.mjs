@@ -67,6 +67,7 @@ test('Facebook resolves an explicitly selected business Page when /me/accounts o
   assert.equal(page.access_token, 'page-token')
   assert.match(calls[0], /me\/accounts/)
   assert.match(calls[1], /page-123/)
+  assert.doesNotMatch(calls[1], /tasks/)
   assert.doesNotMatch(calls.join('\n'), /app-secret/)
 })
 

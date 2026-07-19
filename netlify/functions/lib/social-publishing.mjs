@@ -143,7 +143,7 @@ export async function fetchManagedFacebookPage(userToken, env = {}, fetchImpl = 
     // /me/accounts omits their Page token. Resolve the explicitly selected Page
     // directly so the connection remains deterministic and least-privileged.
     const pageUrl = new URL(metaUrl(pageId, env))
-    pageUrl.searchParams.set('fields', fields)
+    pageUrl.searchParams.set('fields', 'id,name,access_token')
     pageUrl.searchParams.set('access_token', userToken)
     pageUrl.searchParams.set('appsecret_proof', proof)
     const directPage = await checkedFetch(pageUrl, { headers: { Accept: 'application/json' } }, fetchImpl, 'Facebook')
