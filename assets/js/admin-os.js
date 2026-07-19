@@ -1478,7 +1478,8 @@
     host.innerHTML = pageHead('Social Publisher', 'Connect Beslyfe once, then deliver each approved campaign across Facebook, Instagram, Threads, TikTok and X without duplicates.') +
       '<div class="card mb-4"><div class="flex between"><div><div class="card-title">Five-network connection</div><p class="muted small">Access tokens are encrypted at rest. Facebook and Instagram feed posts also receive separate Story delivery.</p></div><button class="btn brand" id="spPublish">Publish due campaigns</button></div></div>' +
       '<div class="grid cols-2" id="spNetworks">' + loadingList() + '</div>' +
-      '<div class="card mt-4"><div class="card-title">Delivery log <button class="btn ghost sm" id="spRefresh">↻ Refresh</button></div><div id="spDeliveries">' + loadingList() + '</div></div>';
+      '<div class="card mt-4"><div class="card-title">Delivery log <button class="btn ghost sm" id="spRefresh">↻ Refresh</button></div><div id="spDeliveries">' + loadingList() + '</div></div>' +
+      '<div class="card mt-4"><div class="card-title">Post to X without API charges</div><p class="muted small">X charges for automatic API publishing. These official X Web Intent buttons open a prefilled post for your final review and confirmation—no API credits or app credentials required.</p><div id="spXFree">' + loadingList() + '</div></div>';
 
     var labels = { facebook: 'Facebook Page', instagram: 'Instagram', threads: 'Threads', tiktok: 'TikTok', x: 'X / Twitter' };
     var oauth = { facebook: true, threads: true, tiktok: true, x: true };
@@ -1490,6 +1491,7 @@
           var account = status.account ? '@' + String(status.account).replace(/^@/, '') : 'No account connected';
           var note = key === 'tiktok' && connected && !status.publicPostingApproved
             ? 'Connected, but public Direct Post remains locked until TikTok approves the app audit.'
+            : key === 'x' && connected ? 'Connected. Automatic publishing needs X API credits; use the no-cost review buttons below instead.'
             : key === 'instagram' ? 'Connected through the production Meta publishing token.'
             : connected ? 'Ready for automatic campaign delivery.'
             : status.appReady === false ? 'Provider app credentials still need to be added.' : 'Authorize the Beslyfe account.';
@@ -1503,8 +1505,14 @@
             (item.url ? '<a class="btn ghost sm" href="' + esc(item.url) + '" target="_blank" rel="noopener">Open</a>' : '') + '<span class="badge ' + badge + '">' + esc(item.status || 'pending') + '</span></div>';
         });
         $('#spDeliveries', host).innerHTML = rows.length ? '<div class="list">' + rows.join('') + '</div>' : emptyState('↗', 'No deliveries yet', 'Due campaigns will appear here after the publisher runs.');
+        var xRows = (data.xManualPosts || []).map(function (item) {
+          var when = item.publishAfter ? new Date(item.publishAfter).toLocaleString() : 'Ready now';
+          return '<div class="row"><div class="grow"><div class="name">' + esc(item.campaignId) + '</div><div class="meta">' + esc(when) + ' · ' + esc(item.text) + '</div></div>' +
+            '<a class="btn brand sm" href="' + esc(item.intentUrl) + '" target="_blank" rel="noopener">Review &amp; post on X — free</a><span class="badge neutral">Manual approval</span></div>';
+        });
+        $('#spXFree', host).innerHTML = xRows.length ? '<div class="list">' + xRows.join('') + '</div>' : emptyState('↗', 'No X campaigns ready', 'Approved campaign copy will appear here.');
       }).catch(function (error) {
-        $('#spNetworks', host).innerHTML = errorBox(error.message); $('#spDeliveries', host).innerHTML = errorBox(error.message);
+        $('#spNetworks', host).innerHTML = errorBox(error.message); $('#spDeliveries', host).innerHTML = errorBox(error.message); $('#spXFree', host).innerHTML = errorBox(error.message);
       });
     }
     $('#spRefresh', host).onclick = load;

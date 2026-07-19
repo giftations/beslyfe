@@ -20,6 +20,7 @@ import {
   SOCIAL_CAMPAIGNS,
   socialReadiness,
   waitForInstagramContainer,
+  writeDeliveryRecord,
 } from '../netlify/functions/lib/social-publishing.mjs'
 import { openOauthState, sealOauthState } from '../netlify/functions/social-oauth.mjs'
 import tiktokOauthHandler from '../netlify/functions/social-oauth-tiktok.mjs'
@@ -113,6 +114,26 @@ test('free-opportunity campaign is paced, count-free, and uses committed creativ
   assert.equal(FREE_OPPORTUNITY_CAMPAIGNS[1].instagramPlacement, 'story')
 })
 
+test('every X campaign has count-free copy that fits the post limit', () => {
+  const xCampaigns = SOCIAL_CAMPAIGNS.filter((campaign) => campaign.channels.includes('x'))
+  assert.ok(xCampaigns.length >= 1)
+  for (const campaign of xCampaigns) {
+    const text = campaign.channelContent?.x?.text || campaign.text
+    assert.ok(text.length <= 280, `${campaign.id} is ${text.length} characters`)
+    assert.doesNotMatch(text, /\b\d+\s+(?:members|users|followers)\b/i)
+  }
+})
+
+test('delivery writes update only one delivery without replacing social connections', async () => {
+  const calls = []
+  const db = { sql: async (strings, ...values) => { calls.push({ query: strings.join('?'), values }); return [] } }
+  await writeDeliveryRecord(db, 'campaign:x', { status: 'failed', error: 'payment required' })
+  assert.equal(calls.length, 1)
+  assert.match(calls[0].query, /jsonb_set/)
+  assert.match(calls[0].query, /\{deliveries\}/)
+  assert.doesNotMatch(calls[0].query, /\{connections\}/)
+})
+
 test('feed campaigns automatically receive separate Facebook and Instagram Story deliveries', () => {
   assert.deepEqual(campaignDeliveryPlan({ channels: ['facebook', 'instagram', 'threads'] }), [
     { key: 'facebook', publisher: 'facebook', placement: 'feed' },
@@ -150,7 +171,10 @@ test('Instagram feed and Story companions publish once under separate idempotenc
       const query = strings.join('?')
       if (query.includes('SELECT "data" FROM site_settings')) return storedState ? [{ data: storedState }] : []
       if (query.includes('INSERT INTO site_settings')) {
-        storedState = JSON.parse(values[1])
+        const next = JSON.parse(values[1])
+        storedState = query.includes("'{deliveries}'") && storedState
+          ? { ...storedState, deliveries: { ...storedState.deliveries, ...next.deliveries }, updatedAt: next.updatedAt }
+          : next
         return []
       }
       throw new Error(`Unexpected query: ${query}`)
