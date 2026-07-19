@@ -12,15 +12,28 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/beslyfe.css">
   <link rel="stylesheet" href="/assets/css/create.css">
+  <link rel="stylesheet" href="/assets/css/create-account-gate.css">
   <script src="/assets/js/traffic.js" defer></script>
   <script src="/beslyfe-session.js" defer></script>
   <script src="/assets/js/create.js" defer></script>
 </head>
 <body class="create-page">
-  <a class="skip" href="#builder">Skip to builder</a>
+  <a class="skip" href="#accountGate">Skip to build access</a>
   <header class="site-header"><nav class="shell primary-nav"><a class="brand" href="/">beslyfe<span>.</span></a><div class="nav-links"><a href="/community">Community</a><a class="current" href="/create">Build</a><a href="/#growth">Grow</a></div><div class="nav-actions"><a class="nav-signin" id="login-btn" href="/login">Sign in</a><a class="button small" href="/signup" data-guest-only>Join free</a></div></nav></header>
 
-  <main id="builder" class="builder-shell shell">
+  <main id="accountGate" class="builder-account-gate shell" aria-labelledby="accountGateTitle">
+    <section class="account-gate-card">
+      <div class="account-gate-mark" aria-hidden="true">b</div>
+      <p class="eyebrow"><span class="pulse"></span> Free membership required</p>
+      <h1 id="accountGateTitle">Join the community.<br><em>Then build anything.</em></h1>
+      <p class="account-gate-lead">Every Beslyfe builder is also a community member. Your free account gives your work an owner, connects it to real people, and lets the network help it grow.</p>
+      <div class="account-gate-benefits" aria-label="Free account benefits"><span>100% free</span><span>No credit card</span><span>One community identity</span><span>Your builds stay under your control</span></div>
+      <div class="actions"><a class="button" href="/signup?next=/create">Create my free account</a><a class="button secondary" href="/login?next=/create">I already have an account</a></div>
+      <p class="account-gate-status" id="accountGateStatus" role="status" aria-live="polite">Checking whether you are already signed in&hellip;</p>
+    </section>
+  </main>
+
+  <main id="builder" class="builder-shell shell" hidden aria-hidden="true">
     <aside class="builder-intro"><p class="eyebrow"><span class="pulse"></span> Guided builder</p><h1>Tell us the dream.<br><em>We will shape the system.</em></h1><p>Build something online, organize a real-world operation, or connect both. Beslyfe recommends a starting point from your answers, then helps automate the repetitive work so you can focus on what you love.</p><div class="builder-principles"><span>Questions before assumptions</span><span>Examples when you get stuck</span><span>One network identity with explicit linking</span><span>100% free to join</span></div></aside>
 
     <section class="builder-card" aria-labelledby="builderTitle">
@@ -36,7 +49,7 @@
 
         <section class="builder-step" data-step="4"><span class="step-label">Question 4 of 5</span><h2>Here is the recommended capability plan.</h2><p class="step-help">Turn anything on or off. Ticketing appears only when you explicitly select ticket sales. Automation stays pausable and under human control.</p><div class="capability-picker" id="capabilityPicker"></div><div class="recommendation-note" id="recommendationNote"></div></section>
 
-        <section class="builder-step" data-step="5"><span class="step-label">Question 5 of 5</span><h2>Name it and connect the first growth action.</h2><div class="field-row-builder"><div class="field"><label for="projectName">Project name</label><input id="projectName" name="projectName" maxlength="160" required placeholder="My business, project, or community"></div><div class="field"><label for="projectDescription">One-sentence description</label><input id="projectDescription" name="projectDescription" maxlength="300" placeholder="What it helps people do"></div></div><div class="sales-connect" id="salesConnect"><div><span class="status-pill">Optional one-touch growth</span><h3>Connect the action that creates value.</h3><p>Paste a secure checkout, booking, donation, or lead destination. Beslyfe will store the action, not payment credentials.</p></div><div class="field-row-builder"><div class="field"><label for="salesMode">Action</label><select id="salesMode"></select></div><div class="field"><label for="salesProvider">Provider</label><select id="salesProvider"></select></div></div><div class="field"><label for="salesUrl">Secure destination</label><input id="salesUrl" type="url" placeholder="https://buy.stripe.com/... or your booking link"><small>Need a checkout? <a href="https://dashboard.stripe.com/payment_links" target="_blank" rel="noopener">Create a Stripe Payment Link</a>, then paste it here.</small></div></div><label class="confirm-line"><input id="confirmPlan" type="checkbox" required> I reviewed the recommended capabilities and want Beslyfe to create this plan.</label><div class="launch-area"><button class="button" id="launchButton" type="submit">Create my Beslyfe plan</button><p id="launchHint">Sign in or join free to save it to your account.</p></div></section>
+        <section class="builder-step" data-step="5"><span class="step-label">Question 5 of 5</span><h2>Name it and connect the first growth action.</h2><div class="field-row-builder"><div class="field"><label for="projectName">Project name</label><input id="projectName" name="projectName" maxlength="160" required placeholder="My business, project, or community"></div><div class="field"><label for="projectDescription">One-sentence description</label><input id="projectDescription" name="projectDescription" maxlength="300" placeholder="What it helps people do"></div></div><div class="sales-connect" id="salesConnect"><div><span class="status-pill">Optional one-touch growth</span><h3>Connect the action that creates value.</h3><p>Paste a secure checkout, booking, donation, or lead destination. Beslyfe will store the action, not payment credentials.</p></div><div class="field-row-builder"><div class="field"><label for="salesMode">Action</label><select id="salesMode"></select></div><div class="field"><label for="salesProvider">Provider</label><select id="salesProvider"></select></div></div><div class="field"><label for="salesUrl">Secure destination</label><input id="salesUrl" type="url" placeholder="https://buy.stripe.com/... or your booking link"><small>Need a checkout? <a href="https://dashboard.stripe.com/payment_links" target="_blank" rel="noopener">Create a Stripe Payment Link</a>, then paste it here.</small></div></div><label class="confirm-line"><input id="confirmPlan" type="checkbox" required> I reviewed the recommended capabilities and want Beslyfe to create this plan.</label><div class="launch-area"><button class="button" id="launchButton" type="submit">Create my Beslyfe plan</button><p id="launchHint">This build will belong to your free Beslyfe account and strengthen the shared community.</p></div></section>
 
         <div class="builder-footer"><button type="button" class="back-button" id="backButton" hidden>Back</button><button type="button" class="button" id="nextButton">Continue</button></div>
       </form>

@@ -48,9 +48,20 @@
     return data;
   }
 
+  function requestedNextPath() {
+    var value = new URLSearchParams(window.location.search).get('next') || '';
+    if (!value || value.charAt(0) !== '/' || value.indexOf('//') === 0 || value.indexOf('\\') !== -1) return '';
+    try {
+      var parsed = new URL(value, window.location.origin);
+      if (parsed.origin !== window.location.origin) return '';
+      if (/^\/(?:login|sign-in|signup|join)(?:\/|$)/.test(parsed.pathname)) return '';
+      return parsed.pathname + parsed.search + parsed.hash;
+    } catch (e) { return ''; }
+  }
+
   function redirectFor(account) {
     if (account.role === 'admin') return '/admin/';
-    return '/hub';
+    return requestedNextPath() || '/hub';
   }
 
   // Render a "Resend verification email" action beneath a sign-in error when the
@@ -183,7 +194,7 @@
       }
       if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
 
-      callAuth({ action: 'signup', name: name, email: email, username: username, password: password, role: role })
+      callAuth({ action: 'signup', name: name, email: email, username: username, password: password, role: role, next: requestedNextPath() })
         .then(function (data) {
           // No auto-login: the account is created pending until the emailed
           // verification link is clicked. Tell the member to check their inbox.

@@ -138,7 +138,18 @@ async function sendVerificationEmail(toEmail, name, link) {
 // outstanding token, and e-mail the link. Returns whether the mail was sent.
 // Shared by the signup path and the resend-verification action so the token
 // store and the e-mailed link can never drift apart.
-async function issueVerification(db, account, origin) {
+export function safeReturnPath(value) {
+  const raw = String(value || '').trim().slice(0, 500)
+  if (!raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return ''
+  try {
+    const parsed = new URL(raw, 'https://beslyfe.local')
+    if (parsed.origin !== 'https://beslyfe.local') return ''
+    if (/^\/(?:login|sign-in|signup|join)(?:\/|$)/.test(parsed.pathname)) return ''
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`
+  } catch { return '' }
+}
+
+async function issueVerification(db, account, origin, next = '') {
   const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '')
   const tokenHash = await sha256Hex(token)
   const now = new Date()
@@ -148,7 +159,8 @@ async function issueVerification(db, account, origin) {
     INSERT INTO email_verifications ("token_hash", "account_id", "created_at", "expires_at", "used_at")
     VALUES (${tokenHash}, ${account.id}, ${now.toISOString()}, ${expires.toISOString()}, NULL)
   `
-  const link = `${origin}/verify-email.html?token=${token}`
+  const returnPath = safeReturnPath(next)
+  const link = `${origin}/verify-email.html?token=${token}${returnPath ? `&next=${encodeURIComponent(returnPath)}` : ''}`
   return sendVerificationEmail(account.email, account.name, link)
 }
 function profileRoleFor(accountRole) {
@@ -758,7 +770,7 @@ export default async (req) => {
     // 3) E-mail the verification link. The response deliberately carries no
     //    account or session — sign-in only becomes possible after verification.
     const origin = new URL(req.url).origin
-    const emailSent = await issueVerification(db, { id: accountId, name, email }, origin)
+    const emailSent = await issueVerification(db, { id: accountId, name, email }, origin, body.next)
     return json({
       ok: true,
       pendingVerification: true,

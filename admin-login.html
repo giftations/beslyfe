@@ -17,7 +17,17 @@
       if (raw && !localStorage.getItem('beslyfe_session')) localStorage.setItem('beslyfe_session', raw);
       localStorage.removeItem(earlierKey);
       var s = JSON.parse(raw || 'null');
-      if (s && s.id) window.location.replace(s.role === 'admin' ? '/admin/' : '/hub');
+      if (s && s.id) {
+        var requested = new URLSearchParams(window.location.search).get('next') || '';
+        var safe = '';
+        if (requested.charAt(0) === '/' && requested.indexOf('//') !== 0 && requested.indexOf('\\') === -1) {
+          try {
+            var parsed = new URL(requested, window.location.origin);
+            if (parsed.origin === window.location.origin && !/^\/(?:login|sign-in|signup|join)(?:\/|$)/.test(parsed.pathname)) safe = parsed.pathname + parsed.search + parsed.hash;
+          } catch (e) {}
+        }
+        window.location.replace(s.role === 'admin' ? '/admin/' : (safe || '/hub'));
+      }
     } catch (e) {}
   })();
 </script>

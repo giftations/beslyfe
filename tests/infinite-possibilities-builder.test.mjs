@@ -1,11 +1,13 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { safeReturnPath } from '../netlify/functions/auth.mjs'
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 const home = read('index.html')
 const builder = read('create.html')
 const builderLogic = read('assets/js/create.js')
+const ecosystemsFunction = read('netlify/functions/ecosystems.mjs')
 
 test('homepage keeps the living-network visual and expands the promise beyond websites', () => {
   assert.match(home, /class="network-board"/)
@@ -27,6 +29,27 @@ test('guided builder asks about operational friction and desired automation', ()
   assert.match(builderLogic, /exampleByProduct=\{publisher:/)
   assert.match(builderLogic, /retail:\{audience:/)
   assert.match(builderLogic, /property:\{audience:/)
+})
+
+test('a free community account is required before the builder unlocks', () => {
+  assert.match(builder, /id="accountGate"/)
+  assert.match(builder, /Free membership required/)
+  assert.match(builder, /Join the community[\s\S]*Then build anything/)
+  assert.match(builder, /href="\/signup\?next=\/create"/)
+  assert.match(builder, /id="builder"[^>]*hidden[^>]*aria-hidden="true"/)
+  assert.match(builderLogic, /fetch\('\/\.netlify\/functions\/auth\?action=session'/)
+  assert.match(builderLogic, /if\(!data\|\|!data\.account\)\{lockBuilder/)
+  assert.match(builderLogic, /unlockBuilder\(data\.account\)/)
+  assert.doesNotMatch(builderLogic, /beslyfe_build_draft.*setItem/)
+  assert.match(ecosystemsFunction, /const session = await requireSession\(req, db\)/)
+})
+
+test('account creation can safely return a verified member to their build', () => {
+  assert.equal(safeReturnPath('/create?type=retail&goal=online-sales'), '/create?type=retail&goal=online-sales')
+  assert.equal(safeReturnPath('/hub'), '/hub')
+  assert.equal(safeReturnPath('//evil.example/create'), '')
+  assert.equal(safeReturnPath('https://evil.example/create'), '')
+  assert.equal(safeReturnPath('/signup?next=/create'), '')
 })
 
 test('automation plans preserve human control and do not imply ticketing', () => {

@@ -1,0 +1,104 @@
+.builder-account-gate {
+  min-height: calc(100vh - 74px);
+  display: grid;
+  place-items: center;
+  padding-block: 64px;
+}
+
+.account-gate-card {
+  position: relative;
+  overflow: hidden;
+  width: min(820px, 100%);
+  padding: clamp(30px, 7vw, 72px);
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 36px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: var(--shadow);
+  text-align: center;
+  backdrop-filter: blur(20px);
+}
+
+.account-gate-card::before {
+  content: "";
+  position: absolute;
+  inset: -45% 58% 48% -15%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(89, 216, 194, .3), transparent 68%);
+  pointer-events: none;
+}
+
+.account-gate-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 26px;
+  border-radius: 22px;
+  background: var(--ink);
+  color: #fff;
+  font: 800 2.6rem/1 "Manrope", sans-serif;
+  box-shadow: 0 18px 42px rgba(22, 21, 43, .22);
+}
+
+.account-gate-card h1 {
+  position: relative;
+  margin: 0;
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  line-height: .94;
+  letter-spacing: -.065em;
+}
+
+.account-gate-card h1 em { font-style: normal; }
+
+.account-gate-lead {
+  max-width: 650px;
+  margin: 24px auto 0;
+  color: var(--ink-soft);
+  font-size: 1.12rem;
+}
+
+.account-gate-benefits {
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 28px auto;
+}
+
+.account-gate-benefits span {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.account-gate-card .actions {
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.account-gate-status {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: .84rem;
+}
+
+@media (max-width: 600px) {
+  .builder-account-gate {
+    min-height: calc(100vh - 66px);
+    padding-block: 30px;
+  }
+
+  .account-gate-card { border-radius: 24px; }
+
+  .account-gate-card .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-gate-card .button { width: 100%; }
+}

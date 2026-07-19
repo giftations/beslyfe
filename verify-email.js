@@ -42,8 +42,19 @@
     }
   }
 
+  function requestedNextPath() {
+    var value = new URLSearchParams(window.location.search).get('next') || '';
+    if (!value || value.charAt(0) !== '/' || value.indexOf('//') === 0 || value.indexOf('\\') !== -1) return '';
+    try {
+      var parsed = new URL(value, window.location.origin);
+      if (parsed.origin !== window.location.origin) return '';
+      if (/^\/(?:login|sign-in|signup|join)(?:\/|$)/.test(parsed.pathname)) return '';
+      return parsed.pathname + parsed.search + parsed.hash;
+    } catch (e) { return ''; }
+  }
+
   function redirectFor(account) {
-    return account && account.role === 'admin' ? '/admin/' : '/hub';
+    return account && account.role === 'admin' ? '/admin/' : (requestedNextPath() || '/hub');
   }
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -58,7 +69,7 @@
       post({ action: 'verify-email', token: token })
         .then(function (data) {
           storeSession(data.account, data.profile);
-          message.textContent = 'Your email is verified — taking you to the community…';
+          message.textContent = requestedNextPath() ? 'Your email is verified — taking you to the builder…' : 'Your email is verified — taking you to the community…';
           setTimeout(function () { window.location.href = redirectFor(data.account); }, 900);
         })
         .catch(function (err) {
