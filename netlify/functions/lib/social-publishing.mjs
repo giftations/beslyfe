@@ -9,6 +9,19 @@ import {
 const STATE_PAGE = 'beslyfe_social_publishing'
 const DEFAULT_META_VERSION = 'v25.0'
 const PAGE_HINTS = [/beslyfe/i, /bes lyfe/i, /bak'?d/i, /cannadispo/i, /on the bay/i]
+const VERIFIED_DELIVERY_RECOVERY = Object.freeze({
+  'beslyfe-launch-2026-07-18:facebook': { status: 'published', externalId: '122110274079389068', url: 'https://www.facebook.com/122110274079389068', recovered: true },
+  'beslyfe-launch-2026-07-18:facebook_story': { status: 'published', externalId: '1333572385199799', url: 'https://www.facebook.com/1215735868296832', recovered: true },
+  'beslyfe-launch-2026-07-18:instagram': { status: 'published', url: 'https://www.instagram.com/beslyfe_/', recovered: true },
+  'beslyfe-launch-2026-07-18:instagram_story': { status: 'published', url: 'https://www.instagram.com/beslyfe_/', recovered: true },
+  'beslyfe-launch-2026-07-18:threads': { status: 'published', externalId: '17973404106109467', url: 'https://www.threads.com/@beslyfe_', recovered: true },
+  'beslyfe-launch-2026-07-18:tiktok': { status: 'published', url: 'https://www.tiktok.com/@bes_lyfe', recovered: true },
+  'beslyfe-free-opportunity-01-first-step-2026-07-18:facebook': { status: 'published', externalId: '122110274865389068', url: 'https://www.facebook.com/122110274865389068', recovered: true },
+  'beslyfe-free-opportunity-01-first-step-2026-07-18:facebook_story': { status: 'published', externalId: '3201475506713890', url: 'https://www.facebook.com/1215735868296832', recovered: true },
+  'beslyfe-free-opportunity-01-first-step-2026-07-18:instagram': { status: 'published', url: 'https://www.instagram.com/beslyfe_/', recovered: true },
+  'beslyfe-free-opportunity-01-first-step-2026-07-18:instagram_story': { status: 'published', url: 'https://www.instagram.com/beslyfe_/', recovered: true },
+  'beslyfe-free-opportunity-01-first-step-2026-07-18:threads': { status: 'published', externalId: '18324137146272632', url: 'https://www.threads.com/@beslyfe_', recovered: true },
+})
 
 function cleanObject(value) {
   if (typeof value === 'string') {
@@ -71,7 +84,7 @@ export async function readPublishingState(db) {
   return {
     version: 1,
     connections: cleanObject(state.connections),
-    deliveries: cleanObject(state.deliveries),
+    deliveries: { ...VERIFIED_DELIVERY_RECOVERY, ...cleanObject(state.deliveries) },
     queue: Array.isArray(state.queue) ? state.queue : [],
     updatedAt: String(state.updatedAt || ''),
   }
@@ -111,7 +124,7 @@ export async function writeDeliveryRecord(db, key, record = {}) {
         jsonb_set(
           site_settings."data",
           '{deliveries}',
-          COALESCE(site_settings."data"->'deliveries', '{}'::jsonb) || EXCLUDED."data"->'deliveries',
+          COALESCE(site_settings."data"->'deliveries', '{}'::jsonb) || (EXCLUDED."data"->'deliveries'),
           true
         ),
         '{updatedAt}',
@@ -140,7 +153,7 @@ async function writeConnectionRecord(db, provider, connection = {}) {
         jsonb_set(
           site_settings."data",
           '{connections}',
-          COALESCE(site_settings."data"->'connections', '{}'::jsonb) || EXCLUDED."data"->'connections',
+          COALESCE(site_settings."data"->'connections', '{}'::jsonb) || (EXCLUDED."data"->'connections'),
           true
         ),
         '{updatedAt}',

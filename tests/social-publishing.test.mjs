@@ -17,6 +17,7 @@ import {
   publishTikTok,
   publishThreads,
   publishX,
+  readPublishingState,
   SOCIAL_CAMPAIGNS,
   socialReadiness,
   waitForInstagramContainer,
@@ -132,6 +133,14 @@ test('delivery writes update only one delivery without replacing social connecti
   assert.match(calls[0].query, /jsonb_set/)
   assert.match(calls[0].query, /\{deliveries\}/)
   assert.doesNotMatch(calls[0].query, /\{connections\}/)
+  assert.match(calls[0].query, /\|\| \(EXCLUDED\."data"->'deliveries'\)/)
+})
+
+test('verified live deliveries survive recovery from the pre-atomic state race', async () => {
+  const db = { sql: async () => [{ data: { connections: {}, deliveries: {} } }] }
+  const state = await readPublishingState(db)
+  assert.equal(state.deliveries['beslyfe-launch-2026-07-18:facebook'].status, 'published')
+  assert.equal(state.deliveries['beslyfe-free-opportunity-01-first-step-2026-07-18:threads'].status, 'published')
 })
 
 test('feed campaigns automatically receive separate Facebook and Instagram Story deliveries', () => {
