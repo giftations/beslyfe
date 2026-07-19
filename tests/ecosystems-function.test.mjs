@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import { safeDestination, slugify } from '../netlify/functions/ecosystems.mjs'
+import { paymentDestinationFromHandle } from '../platform/growth/sales-engine-contract.mjs'
 
 test('ecosystem slugs are stable and safe for public routes', () => {
   assert.equal(slugify('  My New Business!  '), 'my-new-business')
@@ -14,4 +15,10 @@ test('growth destinations accept secure provider links and reject unsafe URLs', 
   assert.equal(safeDestination('https://example.com/pay', 'external'), 'https://example.com/pay')
   assert.equal(safeDestination('', 'contact-form'), '/contact?source=beslyfe')
   assert.equal(safeDestination('/contact?offer=consulting', 'contact-form'), '/contact?offer=consulting')
+})
+
+test('growth destinations can be generated from payment usernames', () => {
+  assert.equal(paymentDestinationFromHandle('paypal', '@shopname'), 'https://paypal.me/shopname')
+  assert.equal(paymentDestinationFromHandle('cash-app', '@shopname'), 'https://cash.app/$shopname')
+  assert.equal(paymentDestinationFromHandle('venmo', '@shop_name'), 'https://venmo.com/u/shop_name')
 })

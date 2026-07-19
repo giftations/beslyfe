@@ -2,7 +2,11 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import { communityNetworkContractSummary } from '../platform/communities/network-contract.mjs'
-import { salesEngineContractSummary } from '../platform/growth/sales-engine-contract.mjs'
+import {
+  normalizePaymentHandle,
+  paymentDestinationFromHandle,
+  salesEngineContractSummary,
+} from '../platform/growth/sales-engine-contract.mjs'
 
 test('the shared network grows across ecosystems without exposing private content', () => {
   const network = communityNetworkContractSummary()
@@ -22,5 +26,19 @@ test('the sales engine supports direct sales, leads, bookings, donations, and op
   assert.ok(sales.modes.some((item) => item.key === 'donation'))
   assert.ok(sales.modes.some((item) => item.key === 'ticket'))
   assert.ok(sales.providers.some((item) => item.key === 'stripe-payment-link'))
+  assert.ok(sales.providers.some((item) => item.key === 'paypal' && item.entry === 'handle'))
+  assert.ok(sales.providers.some((item) => item.key === 'cash-app' && item.entry === 'handle'))
+  assert.ok(sales.providers.some((item) => item.key === 'venmo' && item.entry === 'handle'))
   assert.ok(sales.trustControls.includes('ticketing is enabled only when explicitly selected'))
+})
+
+test('payment usernames become complete provider URLs without credentials', () => {
+  assert.equal(normalizePaymentHandle('paypal', '@BestShop'), 'BestShop')
+  assert.equal(paymentDestinationFromHandle('paypal', '@BestShop'), 'https://paypal.me/BestShop')
+  assert.equal(paymentDestinationFromHandle('cash-app', '@BestShop'), 'https://cash.app/$BestShop')
+  assert.equal(paymentDestinationFromHandle('cash-app', '$BestShop'), 'https://cash.app/$BestShop')
+  assert.equal(paymentDestinationFromHandle('venmo', '@best_shop'), 'https://venmo.com/u/best_shop')
+  assert.equal(paymentDestinationFromHandle('paypal', '@bad-name'), '')
+  assert.equal(paymentDestinationFromHandle('venmo', '@x'), '')
+  assert.equal(paymentDestinationFromHandle('stripe-payment-link', '@BestShop'), '')
 })

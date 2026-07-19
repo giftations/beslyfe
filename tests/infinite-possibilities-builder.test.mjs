@@ -61,3 +61,14 @@ test('automation plans preserve human control and do not imply ticketing', () =>
 test('paid creative opportunities use a booking sales path', () => {
   assert.match(builderLogic, /outcomes\.indexOf\('book-opportunities'\)>=0\)mode\.value='booking'/)
 })
+
+test('payment setup accepts a username and previews the completed provider URL', () => {
+  assert.match(builder, /Choose the platform and enter only your @username/)
+  assert.match(builder, /id="salesDestination"/)
+  assert.match(builder, /id="paymentUrlPreview"/)
+  assert.match(builderLogic, /destinationTemplate:'https:\/\/paypal\.me\/\{handle\}'/)
+  assert.match(builderLogic, /destinationTemplate:'https:\/\/cash\.app\/\$\{handle\}'/)
+  assert.match(builderLogic, /destinationTemplate:'https:\/\/venmo\.com\/u\/\{handle\}'/)
+  assert.match(builderLogic, /paymentHandle:provider\.entry==='handle'\?raw:''/)
+  assert.doesNotMatch(builderLogic, /getElementById\('salesUrl'\)/)
+})

@@ -16,6 +16,7 @@ import {
 import {
   SALES_MODES,
   SALES_PROVIDERS,
+  paymentDestinationFromHandle,
   salesEngineContractSummary,
 } from '../../platform/growth/sales-engine-contract.mjs'
 import { communityNetworkContractSummary } from '../../platform/communities/network-contract.mjs'
@@ -269,8 +270,13 @@ export default async (req) => {
     if (!providerContract.supports.includes(mode)) {
       return json({ error: `${providerContract.label} does not support that sales action.` }, 400)
     }
-    const destinationUrl = safeDestination(body.destinationUrl, provider)
-    if (!destinationUrl) return json({ error: 'Connect a secure https checkout, booking, donation, or lead destination.' }, 400)
+    const paymentHandle = str(body.paymentHandle, 100)
+    const handleDestination = paymentHandle ? paymentDestinationFromHandle(provider, paymentHandle) : ''
+    if (paymentHandle && !handleDestination) {
+      return json({ error: `Enter a valid ${providerContract.label} username.` }, 400)
+    }
+    const destinationUrl = handleDestination || safeDestination(body.destinationUrl, provider)
+    if (!destinationUrl) return json({ error: 'Enter a payment username or connect a secure https checkout, booking, donation, or lead destination.' }, 400)
     const offerName = str(body.offerName, 200)
     if (!offerName) return json({ error: 'Name the offer customers will see.' }, 400)
     const actionLabel = str(body.actionLabel, 80) || (SALES_MODES.find((item) => item.key === mode)?.actionLabel || 'Get started')
