@@ -6,6 +6,7 @@ import {
   appSecretProof,
   campaignDeliveryPlan,
   chooseManagedPage,
+  dailyGrowthCampaigns,
   decryptSocialToken,
   encryptSocialToken,
   FREE_OPPORTUNITY_CAMPAIGNS,
@@ -113,6 +114,34 @@ test('free-opportunity campaign is paced, count-free, and uses committed creativ
     assert.ok(campaign.publishAfter)
   }
   assert.equal(FREE_OPPORTUNITY_CAMPAIGNS[1].instagramPlacement, 'story')
+})
+
+test('ongoing growth campaign schedules three attributed posts per local day without catch-up bursts', () => {
+  const campaigns = dailyGrowthCampaigns(new Date('2026-07-21T12:00:00Z'), 1)
+  assert.equal(campaigns.length, 6)
+  const firstDay = campaigns.filter((campaign) => campaign.id.includes('2026-07-21'))
+  assert.equal(firstDay.length, 3)
+  assert.equal(new Set(firstDay.map((campaign) => campaign.id)).size, 3)
+  for (const campaign of campaigns) {
+    assert.deepEqual(campaign.channels, ['facebook', 'instagram', 'threads', 'tiktok', 'x'])
+    assert.ok(Date.parse(campaign.publishBefore) > Date.parse(campaign.publishAfter))
+    assert.match(campaign.text, /100% free|free/i)
+    assert.match(campaign.text, /utm_campaign=beslyfe_daily_/)
+    assert.doesNotMatch(JSON.stringify(campaign), /\b\d+\s+(?:members|users|followers)\b/i)
+    assert.ok(campaign.channelContent.x.text.length <= 280)
+  }
+})
+
+test('a campaign outside its delivery window is skipped instead of posted late', async () => {
+  const db = { sql: async () => [{ data: { connections: {}, deliveries: {} } }] }
+  const results = await publishCampaign(db, {
+    id: 'expired-campaign',
+    publishAfter: '2020-01-01T00:00:00Z',
+    publishBefore: '2020-01-01T01:00:00Z',
+    channels: ['facebook', 'instagram'],
+  }, {})
+  assert.equal(results.facebook.status, 'missed_window')
+  assert.equal(results.instagram_story.status, 'missed_window')
 })
 
 test('every X campaign has count-free copy that fits the post limit', () => {

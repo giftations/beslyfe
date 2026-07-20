@@ -2,7 +2,7 @@ import { getDatabase } from '@netlify/database'
 
 import {
   bootstrapFacebookConnection,
-  SOCIAL_CAMPAIGNS,
+  campaignsForScheduler,
   LAUNCH_CAMPAIGN,
   publishCampaign,
   readPublishingState,
@@ -81,7 +81,7 @@ export default async () => {
   }
 
   const campaigns = {}
-  for (const campaign of SOCIAL_CAMPAIGNS) campaigns[campaign.id] = await publishCampaign(db, campaign, env)
+  for (const campaign of campaignsForScheduler(new Date())) campaigns[campaign.id] = await publishCampaign(db, campaign, env)
   const summary = publicRunSummary({ bootstrap, readiness, campaigns })
   console.info('social-launch result', JSON.stringify(summary))
   return new Response(JSON.stringify({ ok: true, bootstrap, readiness, ...summary }), {

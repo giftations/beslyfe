@@ -3,7 +3,7 @@ import { getDatabase } from '@netlify/database'
 import { json, readJsonBody, recordAudit, requireAdmin, requireSameOrigin } from './lib/session.mjs'
 import {
   bootstrapFacebookConnection,
-  SOCIAL_CAMPAIGNS,
+  campaignsForScheduler,
   LAUNCH_CAMPAIGN,
   publishCampaign,
   readPublishingState,
@@ -18,7 +18,7 @@ function publicState(state, env) {
     url: value.url || '',
     error: value.error || '',
   }]))
-  const xManualPosts = SOCIAL_CAMPAIGNS
+  const xManualPosts = campaignsForScheduler(new Date())
     .filter((campaign) => campaign.channels.includes('x'))
     .map((campaign) => {
       const text = String(campaign.channelContent?.x?.text || campaign.text || '')
@@ -79,7 +79,7 @@ export default async (req) => {
   }
 
   if (body.action === 'publish-campaign') {
-    const campaign = SOCIAL_CAMPAIGNS.find((item) => item.id === String(body.campaignId || ''))
+    const campaign = campaignsForScheduler(new Date()).find((item) => item.id === String(body.campaignId || ''))
     if (!campaign) return json({ error: 'Unknown social campaign.' }, 404)
     const results = await publishCampaign(db, campaign, env)
     await recordAudit(db, req, admin, {

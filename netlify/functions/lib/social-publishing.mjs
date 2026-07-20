@@ -576,6 +576,13 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
     }
     return results
   }
+  const publishBefore = Date.parse(String(campaign.publishBefore || ''))
+  if (Number.isFinite(publishBefore) && publishBefore <= Date.now()) {
+    for (const delivery of deliveries) {
+      results[delivery.key] = { ok: true, skipped: true, status: 'missed_window', publishAfter: campaign.publishAfter }
+    }
+    return results
+  }
   for (const delivery of deliveries) {
     const key = `${campaign.id}:${delivery.key}`
     const previous = cleanObject(state.deliveries[key])
@@ -681,3 +688,135 @@ export const FREE_OPPORTUNITY_CAMPAIGNS = Object.freeze([
 ])
 
 export const SOCIAL_CAMPAIGNS = Object.freeze([LAUNCH_CAMPAIGN, ...FREE_OPPORTUNITY_CAMPAIGNS])
+
+// Ongoing three-a-day organic campaign. The three candidate times for each
+// morning/midday/evening window rotate by day so attribution can show which
+// window actually sends people to Beslyfe. Times are expressed in
+// America/New_York and converted with Intl, so daylight-saving changes do not
+// silently shift the local publishing hour. A 105-minute publishBefore window
+// prevents a scheduler outage from dumping several stale posts at once.
+export const DAILY_GROWTH_START = '2026-07-21'
+export const DAILY_GROWTH_TIME_ZONE = 'America/New_York'
+export const DAILY_GROWTH_SLOTS = Object.freeze([
+  Object.freeze({
+    key: 'morning',
+    times: Object.freeze([[8, 45], [9, 15], [9, 45]]),
+    imageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-first-step-v1.png',
+    storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-story-v1.png',
+    lines: Object.freeze([
+      'The idea that keeps coming back deserves a first step. Bring it to Beslyfe, shape a practical plan, and automate the repetitive work. It is 100% free to begin.',
+      'You do not need a perfect plan to start. Bring your skill, business idea, creative project, event, or community to Beslyfe and build the next useful step for free.',
+      'Make room for the work you love. Beslyfe helps turn an idea into connected tools, clear actions, and useful automation. Start 100% free.',
+      'A better future usually starts as one unfinished idea. Beslyfe gives that idea a free place to become a plan, a project, and a community.',
+      'What would you build if the busywork stopped getting in the way? Start the system, connect the people, and automate the repetition with Beslyfe for free.',
+      'Your experience can become a service, a shop, a story, an event, or something entirely new. Beslyfe helps you begin and grow it for free.',
+      'Today is enough for one honest first step. Tell Beslyfe what you hope to build and let the platform help organize the path forward. It is 100% free.',
+    ]),
+  }),
+  Object.freeze({
+    key: 'midday',
+    times: Object.freeze([[12, 15], [13, 0], [13, 45]]),
+    imageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-community-v1.png',
+    storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
+    lines: Object.freeze([
+      'Turn the question in your head into something people can use. Beslyfe helps you clarify the goal, build the system, and find community support. Join free.',
+      'A blog, online store, local business, property operation, creative career, or community can all begin with the same thing: a clear next action. Build yours free with Beslyfe.',
+      'Ask better questions. See a working example. Choose what fits. Beslyfe helps remove the guessing between your idea and a useful working system—100% free.',
+      'Small progress compounds when the system remembers what matters. Build, connect, learn, and automate with Beslyfe. There is no charge to join.',
+      'Your project should make life simpler, not create another pile of busywork. Beslyfe helps organize the moving parts and automate what repeats. Start free.',
+      'The right people can change what is possible. Bring your project into a community built to share lessons, solve problems, and celebrate real progress. Join free.',
+      'If you can describe the outcome, Beslyfe can help break it into steps, tools, and automations. Bring the dream. The platform is 100% free.',
+    ]),
+  }),
+  Object.freeze({
+    key: 'evening',
+    times: Object.freeze([[18, 30], [19, 30], [20, 30]]),
+    imageUrl: 'https://media.beslyfe.com/assets/images/beslyfe-social-preview-v2.png',
+    storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
+    lines: Object.freeze([
+      'Imagine ending the day with your idea clearer than it was this morning. Beslyfe helps you build the plan, connect the pieces, and keep moving. Join free.',
+      'Progress feels different when you do not have to build alone. Share the goal, learn from the community, and let Beslyfe organize what comes next. 100% free.',
+      'Your success story can begin quietly: one question, one useful answer, one working piece. Beslyfe gives it a free place to grow.',
+      'Build something that keeps helping even when you step away. Beslyfe connects your work, community, and automations so you can spend more time doing what you love. Start free.',
+      'There is room here for builders, creators, business owners, organizers, and dreamers. Bring what you know and what you hope to make. Beslyfe is free.',
+      'The community grows when people share what worked, what failed, and what they learned next. Bring your journey to Beslyfe and grow together for free.',
+      'Before tomorrow begins, give the idea a home. Beslyfe helps turn possibility into a practical, connected system—and it is 100% free to join.',
+    ]),
+  }),
+])
+
+function dateKeyInZone(date, timeZone = DAILY_GROWTH_TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(date)
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return `${value.year}-${value.month}-${value.day}`
+}
+
+function addDateKeyDays(dateKey, days) {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
+}
+
+function zonedLocalDate(dateKey, hour, minute, timeZone = DAILY_GROWTH_TIME_ZONE) {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  const target = Date.UTC(year, month - 1, day, hour, minute)
+  let guess = target
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  })
+  for (let pass = 0; pass < 2; pass++) {
+    const parts = Object.fromEntries(formatter.formatToParts(new Date(guess)).map((part) => [part.type, part.value]))
+    const shown = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute))
+    guess += target - shown
+  }
+  return new Date(guess)
+}
+
+function dailyGrowthCopy(slot, weekday, dateKey, variant) {
+  const campaignTag = `beslyfe_daily_${slot.key}_${String(slot.times[variant][0]).padStart(2, '0')}${String(slot.times[variant][1]).padStart(2, '0')}`
+  const destination = `https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=${campaignTag}&utm_content=${dateKey}`
+  const text = `${slot.lines[weekday]}\n\n${destination}\n\n#Beslyfe #GrowTogether #FreeOpportunity`
+  const xText = `${slot.lines[weekday]} ${destination} #Beslyfe #GrowTogether`.slice(0, 280)
+  return { campaignTag, destination, text, xText }
+}
+
+export function dailyGrowthCampaigns(now = new Date(), horizonDays = 7) {
+  const today = dateKeyInZone(now)
+  const campaigns = []
+  for (let offset = 0; offset <= Math.max(0, Math.min(Number(horizonDays) || 0, 14)); offset++) {
+    const dateKey = addDateKeyDays(today, offset)
+    if (dateKey < DAILY_GROWTH_START) continue
+    const weekday = new Date(`${dateKey}T12:00:00Z`).getUTCDay()
+    const startDay = Date.parse(`${DAILY_GROWTH_START}T12:00:00Z`)
+    const dayNumber = Math.floor((Date.parse(`${dateKey}T12:00:00Z`) - startDay) / 86400000)
+    const variant = ((dayNumber % 3) + 3) % 3
+    for (const slot of DAILY_GROWTH_SLOTS) {
+      const [hour, minute] = slot.times[variant]
+      const publishAt = zonedLocalDate(dateKey, hour, minute)
+      const publishBefore = new Date(publishAt.getTime() + 105 * 60 * 1000)
+      const copy = dailyGrowthCopy(slot, weekday, dateKey, variant)
+      campaigns.push({
+        id: `beslyfe-daily-growth-${dateKey}-${slot.key}-${String(hour).padStart(2, '0')}${String(minute).padStart(2, '0')}`,
+        publishAfter: publishAt.toISOString(),
+        publishBefore: publishBefore.toISOString(),
+        text: copy.text,
+        imageUrl: slot.imageUrl,
+        storyImageUrl: slot.storyImageUrl,
+        linkUrl: copy.destination.replace('utm_source=social', 'utm_source=facebook'),
+        altText: 'People turning an idea into practical progress with help from a warm, connected community.',
+        channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
+        campaignTag: copy.campaignTag,
+        channelContent: {
+          threads: { text: copy.text.replace('utm_source=social', 'utm_source=threads') },
+          x: { text: copy.xText.replace('utm_source=social', 'utm_source=x') },
+        },
+      })
+    }
+  }
+  return campaigns
+}
+
+export function campaignsForScheduler(now = new Date(), horizonDays = 7) {
+  return [...SOCIAL_CAMPAIGNS, ...dailyGrowthCampaigns(now, horizonDays)]
+}

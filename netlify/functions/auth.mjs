@@ -484,7 +484,7 @@ export default async (req) => {
     // not keep showing up in the admin Users list as a phantom deleted user.
     // Accounts with no linked profile at all (e.g. an admin) are still listed.
     const rows = await db.sql`
-      SELECT id, name, email, username, role, status, profile_id, created_at
+      SELECT id, name, email, username, role, status, email_verified, profile_id, created_at
       FROM accounts
       WHERE email_lower <> 'admin'
         AND NOT (profile_id <> '' AND NOT EXISTS (SELECT 1 FROM profiles p WHERE p.id = accounts.profile_id))
@@ -499,6 +499,7 @@ export default async (req) => {
       username: r.username || '',
       role: r.role,
       status: r.status,
+      emailVerified: !!r.email_verified,
       profileId: r.profile_id,
       createdAt: iso(r.created_at),
     }))
@@ -540,6 +541,54 @@ export default async (req) => {
     const identity = await sessionIdentity(db, session)
     const headers = session.renewedCookie ? { 'Set-Cookie': session.renewedCookie } : {}
     return json(identity || { account: null, profile: null }, 200, headers)
+  }
+
+  // Admin cleanup for abandoned automated/test signups. This deliberately
+  // cannot delete a verified, approved, or administrator account; those need
+  // the fuller profile/account review path so an accidental click cannot erase
+  // a real member. The guarded DELETE is repeated in SQL to close the race where
+  // a member verifies their email between the review screen and this request.
+  if (action === 'delete-unverified-account') {
+    const admin = await requireAdmin(req, db)
+    if (admin instanceof Response) return admin
+
+    const id = String(body.id || body.accountId || '').trim()
+    if (!id) return json({ error: 'Account id required.' }, 400)
+    const rows = await db.sql`
+      SELECT id, name, email, role, status, email_verified, profile_id
+      FROM accounts
+      WHERE "id" = ${id} AND "email_lower" <> 'admin'
+      LIMIT 1
+    `
+    const account = rows[0]
+    if (!account) return json({ error: 'Account not found.' }, 404)
+    if (account.role === 'admin' || account.email_verified || account.status !== 'pending') {
+      return json({ error: 'Only pending accounts with an unverified email can be removed here.' }, 409)
+    }
+
+    await db.sql`DELETE FROM sessions WHERE "account_id" = ${id}`
+    await db.sql`DELETE FROM password_resets WHERE "account_id" = ${id}`
+    await db.sql`DELETE FROM email_verifications WHERE "account_id" = ${id}`
+    const removed = await db.sql`
+      DELETE FROM accounts
+      WHERE "id" = ${id} AND "email_verified" = false AND "status" = 'pending' AND "role" <> 'admin'
+      RETURNING "id"
+    `
+    if (!removed.length) return json({ error: 'This account changed and was not removed. Refresh the user list.' }, 409)
+    if (account.profile_id) {
+      await db.sql`
+        DELETE FROM profiles
+        WHERE "id" = ${account.profile_id}
+          AND NOT EXISTS (SELECT 1 FROM accounts WHERE "profile_id" = ${account.profile_id})
+      `
+    }
+    await recordAudit(db, req, admin, {
+      action: 'auth.unverified_account_delete',
+      resourceType: 'account',
+      resourceId: id,
+      details: { email: account.email || '', profileId: account.profile_id || '' },
+    })
+    return json({ ok: true, id, profileRemoved: !!account.profile_id })
   }
 
   // ── Request a password reset ──

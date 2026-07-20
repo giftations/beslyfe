@@ -201,8 +201,9 @@
           createForm.reset();
           successEl.textContent = (data && data.message) || 'Almost there — check your email for a link to verify your account, then sign in.';
           if (data && data.emailSent === false) {
-            successEl.textContent = 'Your account was created, but verification email delivery is not connected yet. Contact hello@beslyfe.com before trying again.';
+            successEl.textContent = 'Your account was created, but the first verification email could not be delivered. Try sending a fresh link below.';
           }
+          offerResend(email, successEl);
           if (btn) { btn.disabled = false; btn.textContent = 'Join Beslyfe Free'; }
         })
         .catch(function (err) {

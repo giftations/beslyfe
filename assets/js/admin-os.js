@@ -793,12 +793,24 @@
       var items = all.filter(function (m) { return !q || (m.name || '').toLowerCase().indexOf(q) >= 0 || (m.email || '').toLowerCase().indexOf(q) >= 0; });
       $('#uBody', host).innerHTML = items.length ? '<div class="table-wrap"><table class="data"><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr></thead><tbody>' +
         items.map(function (m) {
-          return '<tr><td><b>' + esc(m.name || '—') + '</b></td><td class="muted">' + esc(m.email || '') + '</td><td>' + roleBadge(m.role) + '</td><td>' + statusBadge(m.status) + '</td><td class="muted">' + fmtDate(m.createdAt) + '</td>' +
-            '<td>' + (m.profileId ? '<a class="btn ghost sm" href="/profile?id=' + encodeURIComponent(m.profileId) + '" target="_blank">Profile</a>' : '') + '</td></tr>';
+          var unverified = !m.emailVerified && m.status === 'pending';
+          return '<tr><td><b>' + esc(m.name || '—') + '</b></td><td class="muted">' + esc(m.email || '') + '</td><td>' + roleBadge(m.role) + '</td><td>' + statusBadge(m.status) + ' ' + (m.emailVerified ? '<span class="badge dot approved">Email verified</span>' : '<span class="badge dot pending">Email not verified</span>') + '</td><td class="muted">' + fmtDate(m.createdAt) + '</td>' +
+            '<td><div class="hstack" style="gap:6px">' + (unverified ? '<button class="btn red sm" data-delete-unverified="' + esc(m.id) + '">Delete unverified</button>' : '') + (m.profileId ? '<a class="btn ghost sm" href="/profile?id=' + encodeURIComponent(m.profileId) + '" target="_blank">Profile</a>' : '') + '</div></td></tr>';
         }).join('') + '</tbody></table></div>' : emptyState('👥', 'No users yet', 'Sign-ups appear here automatically.');
     }
     function load() { $('#uBody', host).innerHTML = loadingList(); api(API.auth).then(function (d) { all = d.items || []; paint(); }).catch(function (e) { $('#uBody', host).innerHTML = errorBox(e.message); }); }
     $('#uSearch', host).oninput = debounce(paint, 150);
+    $('#uBody', host).onclick = function (e) {
+      var b = e.target.closest('button[data-delete-unverified]'); if (!b) return;
+      var id = b.getAttribute('data-delete-unverified');
+      var member = all.filter(function (m) { return m.id === id; })[0] || {};
+      confirmModal({ title: 'Delete unverified account?', body: 'Permanently remove ' + esc(member.name || member.email || 'this pending account') + ' and its private pending profile. Verified members cannot be removed with this action. This cannot be undone.', confirm: 'Delete unverified account', danger: true }).then(function (ok) {
+        if (!ok) return; b.disabled = true;
+        api(API.auth, put({ action: 'delete-unverified-account', id: id }))
+          .then(function () { toast('Unverified account removed', { type: 'ok' }); load(); })
+          .catch(function (err) { b.disabled = false; toast(err.message, { type: 'err' }); });
+      });
+    };
     $('#uRefresh', host).onclick = load;
     load();
   }

@@ -1,6 +1,6 @@
 # Beslyfe Free Opportunity Campaign
 
-Status: active production campaign beginning July 18, 2026.
+Status: active production campaign beginning July 18, 2026, with an ongoing three-times-daily cadence beginning July 21.
 
 ## Promise
 
@@ -22,6 +22,10 @@ Beslyfe is a 100% free place to turn a hope, skill, business idea, creative prac
 | July 18, 20:30 | Instagram feed + Story; Facebook feed + Story and Threads when connected | Your idea has somewhere to begin | `beslyfe-free-opportunity-first-step-v1.png` + `beslyfe-free-opportunity-story-v1.png` |
 | July 20, 14:00 | Instagram Story | Your idea deserves a beginning | `beslyfe-free-opportunity-story-v1.png` |
 | July 22, 14:00 | Instagram feed + Story; Facebook feed + Story and Threads when connected | Big changes grow through people | `beslyfe-free-opportunity-community-v1.png` + `beslyfe-free-opportunity-journey-vertical-v1.png` |
+
+Beginning July 21, the scheduler creates three distinct posts every day across Facebook, Instagram, Threads, TikTok, and X when each provider permits publishing. Facebook and Instagram feed posts also receive a separate Story companion. Morning, midday, and evening candidate windows rotate in `America/New_York`; each carries a unique campaign attribution tag so Traffic Analytics can compare which window produces real visits. These are learning windows, not a claim that one universal posting time fits every audience. Meta's account-specific Active times and post/Story insights should be reviewed alongside Beslyfe traffic before narrowing the rotation.
+
+Missed posts expire 105 minutes after their planned time. The scheduler never catches up by publishing several stale posts at once, and every channel/placement keeps a unique delivery key so retries cannot duplicate a successful post.
 
 Feed campaigns automatically create separate Story deliveries on Instagram and Facebook. Delivery keys are campaign ID plus placement (`instagram`, `instagram_story`, `facebook`, or `facebook_story`), so a published feed or Story is never posted twice even though the scheduler checks every five minutes. Threads has no Story placement in this publisher.
 
