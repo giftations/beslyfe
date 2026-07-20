@@ -919,8 +919,11 @@
 
   // ── Analytics ──────────────────────────────────────────────────────────────
   function renderAnalytics(host) {
-    host.innerHTML = pageHead('Analytics', 'Platform metrics computed live from your event data.') +
+    host.innerHTML = pageHead('Analytics', 'Private growth, traffic, campaign, community, sales, and operational metrics computed from live platform data.') +
       '<div class="stats" id="anStats">' + statSkeletons(4) + '</div>' +
+      '<div class="card mb-4"><div class="card-title">👥 Account growth <span class="badge neutral">Admin only</span></div>' +
+      '<p class="muted small">New accounts, email verification, and campaign-attributed signups. These totals never appear in public campaign content.</p>' +
+      '<div class="stats mt-4" id="anAccountStats">' + statSkeletons(4) + '</div><div id="anSignupCampaigns" class="mt-4 muted">Loading…</div></div>' +
       '<div class="card"><div class="card-title">🎟️ Ticket sales — daily net revenue (30 days)</div><div id="anTickets" class="muted">Loading…</div></div>' +
       '<div class="grid cols-2 mt-4">' +
       '<div class="card"><div class="card-title">🎫 Tickets by tier</div><div id="anTier" class="muted">Loading…</div></div>' +
@@ -942,9 +945,25 @@
       api(API.apps).catch(function () { return { items: [], counts: {} }; }),
       api(API.profiles + '?status=all').catch(function () { return { items: [] }; }),
       api(API.tickets).catch(function () { return { totals: {}, daily: [], byTier: [], byProvider: [] }; }),
+      api(API.auth).catch(function () { return { items: [] }; }),
     ]).then(function (r) {
-      var apps = r[0].items || [], counts = r[0].counts || {}, profs = r[1].items || [], tk = r[2] || {};
+      var apps = r[0].items || [], counts = r[0].counts || {}, profs = r[1].items || [], tk = r[2] || {}, members = r[3].items || [];
       var approved = counts.approved || 0, paid = counts.paid || 0, tt = tk.totals || {};
+      var now = Date.now(), dayAgo = now - 86400000, weekAgo = now - (7 * 86400000);
+      var newDay = members.filter(function (m) { return Date.parse(m.createdAt || 0) >= dayAgo; }).length;
+      var newWeek = members.filter(function (m) { return Date.parse(m.createdAt || 0) >= weekAgo; }).length;
+      var verified = members.filter(function (m) { return m.emailVerified; }).length;
+      var unverified = members.filter(function (m) { return !m.emailVerified && m.status === 'pending'; }).length;
+      $('#anAccountStats', host).innerHTML =
+        stat(newDay, 'New accounts · 24 hours', '↗', 'accent') +
+        stat(newWeek, 'New accounts · 7 days', '📅', '') +
+        stat(verified, 'Email verified', '✓', '') +
+        stat(unverified, 'Pending verification', '✉', unverified ? 'warn' : '');
+      var signupCampaigns = {};
+      members.forEach(function (m) { if (m.signupCampaign) signupCampaigns[m.signupCampaign] = (signupCampaigns[m.signupCampaign] || 0) + 1; });
+      $('#anSignupCampaigns', host).innerHTML = Object.keys(signupCampaigns).length
+        ? '<h3 class="section-subtitle">Signups by campaign</h3>' + bars(signupCampaigns)
+        : '<span class="muted">No campaign-attributed signups yet. New social links now preserve first-touch attribution through account creation.</span>';
       $('#anStats', host).innerHTML =
         stat((tt.tickets || 0).toLocaleString(), 'Tickets sold', '🎟️', 'accent') +
         stat(money(tt.netCents, 'USD'), 'Ticket net revenue', '💰', '') +

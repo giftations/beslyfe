@@ -59,6 +59,21 @@
     } catch (e) { return ''; }
   }
 
+  function signupAttribution() {
+    if (navigator.doNotTrack === '1') return { source: '', medium: '', campaign: '' };
+    var params = new URLSearchParams(window.location.search);
+    var current = {
+      source: params.get('utm_source') || '',
+      medium: params.get('utm_medium') || '',
+      campaign: params.get('utm_campaign') || ''
+    };
+    if (current.source || current.medium || current.campaign) return current;
+    try {
+      var saved = JSON.parse(sessionStorage.getItem('beslyfe_campaign_attribution') || '{}');
+      return { source: saved.source || '', medium: saved.medium || '', campaign: saved.campaign || '' };
+    } catch (e) { return current; }
+  }
+
   function redirectFor(account) {
     if (account.role === 'admin') return '/admin/';
     return requestedNextPath() || '/hub';
@@ -194,7 +209,7 @@
       }
       if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
 
-      callAuth({ action: 'signup', name: name, email: email, username: username, password: password, role: role, next: requestedNextPath() })
+      callAuth({ action: 'signup', name: name, email: email, username: username, password: password, role: role, next: requestedNextPath(), attribution: signupAttribution() })
         .then(function (data) {
           // No auto-login: the account is created pending until the emailed
           // verification link is clicked. Tell the member to check their inbox.

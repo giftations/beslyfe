@@ -149,6 +149,19 @@ export function safeReturnPath(value) {
   } catch { return '' }
 }
 
+function attributionTag(value) {
+  return String(value || '').trim().toLowerCase().replace(/[^a-z0-9._-]+/g, '_').slice(0, 100)
+}
+
+export function normalizeSignupAttribution(value = {}) {
+  const input = value && typeof value === 'object' ? value : {}
+  return {
+    source: attributionTag(input.source),
+    medium: attributionTag(input.medium),
+    campaign: attributionTag(input.campaign),
+  }
+}
+
 async function issueVerification(db, account, origin, next = '') {
   const token = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, '')
   const tokenHash = await sha256Hex(token)
@@ -484,7 +497,17 @@ export default async (req) => {
     // not keep showing up in the admin Users list as a phantom deleted user.
     // Accounts with no linked profile at all (e.g. an admin) are still listed.
     const rows = await db.sql`
-      SELECT id, name, email, username, role, status, email_verified, profile_id, created_at
+      SELECT id, name, email, username, role, status, email_verified, profile_id, created_at,
+        COALESCE((
+          SELECT al.details->>'source' FROM audit_log al
+          WHERE al.action = 'auth.account_signup' AND al.resource_id = accounts.id
+          ORDER BY al.created_at ASC LIMIT 1
+        ), '') AS signup_source,
+        COALESCE((
+          SELECT al.details->>'campaign' FROM audit_log al
+          WHERE al.action = 'auth.account_signup' AND al.resource_id = accounts.id
+          ORDER BY al.created_at ASC LIMIT 1
+        ), '') AS signup_campaign
       FROM accounts
       WHERE email_lower <> 'admin'
         AND NOT (profile_id <> '' AND NOT EXISTS (SELECT 1 FROM profiles p WHERE p.id = accounts.profile_id))
@@ -500,6 +523,8 @@ export default async (req) => {
       role: r.role,
       status: r.status,
       emailVerified: !!r.email_verified,
+      signupSource: r.signup_source || '',
+      signupCampaign: r.signup_campaign || '',
       profileId: r.profile_id,
       createdAt: iso(r.created_at),
     }))
@@ -754,6 +779,7 @@ export default async (req) => {
     const email = String(body.email || '').trim().slice(0, 200)
     const password = String(body.password || '')
     const role = SIGNUP_ROLES.has(body.role) ? body.role : 'attendee'
+    const signupAttribution = normalizeSignupAttribution(body.attribution)
 
     if (!name || !email || !password) {
       return json({ error: 'Please provide your name, email and a password.' }, 400)
@@ -820,6 +846,12 @@ export default async (req) => {
     //    account or session — sign-in only becomes possible after verification.
     const origin = new URL(req.url).origin
     const emailSent = await issueVerification(db, { id: accountId, name, email }, origin, body.next)
+    await recordAudit(db, req, { accountId }, {
+      action: 'auth.account_signup',
+      resourceType: 'account',
+      resourceId: accountId,
+      details: signupAttribution,
+    })
     return json({
       ok: true,
       pendingVerification: true,
