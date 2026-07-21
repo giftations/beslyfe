@@ -22,7 +22,7 @@ test('public homepage presents Beslyfe rather than the proof event', () => {
 test('homepage links resolve to local assets or deliberate external destinations', () => {
   const routeMap = {
     '/login': 'admin-login.html', '/signup': 'admin-login.html', '/admin': 'admin/index.html',
-    '/community': 'community.html', '/create': 'create.html', '/feed': 'feed.html',
+    '/community': 'community.html', '/create': 'create.html', '/workspace': 'workspace.html', '/feed': 'feed.html',
     '/reels': 'reels.html', '/messages': 'messages.html', '/groups': 'groups.html',
     '/directory': 'directory.html', '/proof/bakd-on-the-bay': 'proof/bakd-on-the-bay/index.html',
   }
@@ -46,6 +46,7 @@ test('public launch exposes sign in, admin, and 100% free membership', () => {
   assert.match(login, /src="\/auth\.js"/)
   assert.match(redirects, /^\/login\s+\/admin-login\.html\s+200/m)
   assert.match(redirects, /^\/signup\s+\/admin-login\.html\?mode=create\s+200/m)
+  assert.match(redirects, /^\/workspace\s+\/workspace\.html\s+200/m)
 })
 
 test('Admin OS exposes Beslyfe growth, optional event tools, and privacy-safe traffic', () => {

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Project workspace - Beslyfe</title>
+  <meta name="description" content="Turn a Beslyfe project plan into completed, reviewable work and measurable outcomes.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/beslyfe.css">
+  <link rel="stylesheet" href="/assets/css/workspace.css">
+  <script src="/beslyfe-session.js" defer></script>
+  <script src="/assets/js/workspace.js" defer></script>
+  <script src="/assets/js/traffic.js" defer></script>
+</head>
+<body class="workspace-page">
+  <header class="site-header"><nav class="shell primary-nav"><a class="brand" href="/">beslyfe<span>.</span></a><div class="nav-links"><a href="/hub">My hub</a><a href="/community">Community</a><a href="/create">Build</a></div><div class="nav-actions"><a class="nav-signin" href="#" data-logout="/">Log out</a></div></nav></header>
+  <main class="workspace-shell shell">
+    <section class="workspace-loading" id="workspaceLoading" role="status"><span class="workspace-spinner"></span><h1>Opening your action workspace&hellip;</h1><p>Loading the plan, task ledger, and outcomes.</p></section>
+    <section id="workspaceApp" hidden>
+      <div class="workspace-breadcrumb"><a href="/hub">My hub</a><span>/</span><span id="breadcrumbProject">Project</span></div>
+      <section class="workspace-hero">
+        <div><p class="eyebrow"><span class="pulse"></span> Plan to action</p><h1 id="projectName">Your project</h1><p id="projectDescription">Complete the smallest useful test, learn from real outcomes, and grow only what earns evidence.</p></div>
+        <div class="workspace-hero-actions"><button class="button secondary" id="pausePlan" type="button">Pause bots</button><button class="button" id="runSafeTasks" type="button">Run ready bot work</button></div>
+      </section>
+      <section class="workspace-overview">
+        <article class="overview-card progress-card"><span>Seven-day progress</span><strong id="progressCount">0 of 7</strong><div class="workspace-progress"><i id="workspaceProgressFill"></i></div><small>Completed or intentionally dismissed</small></article>
+        <article class="overview-card"><span>Current state</span><strong id="planStatus">Active</strong><small id="nextAction">Finding the next action&hellip;</small></article>
+        <article class="overview-card"><span>Measured outcomes</span><strong id="outcomeSignal">No signal yet</strong><small>Conversations, leads, bookings, sales, help, and lessons</small></article>
+      </section>
+      <section class="workspace-lanes" id="planLanes"></section>
+      <section class="workspace-section">
+        <div class="workspace-section-head"><div><p class="eyebrow">Execution queue</p><h2>Work that finishes, with proof.</h2><p>Internal tasks can run safely. Anything external shows the exact target and content, then requires fresh approval.</p></div><span class="policy-badge">Human control stays on</span></div>
+        <div class="task-list" id="taskList"></div>
+      </section>
+      <section class="workspace-grid">
+        <section class="workspace-panel">
+          <p class="eyebrow">Outcome tracker</p><h2>Record what actually happened.</h2><p class="panel-intro">Results improve the Day 6 measurement and Day 7 recommendation. Engagement alone is not treated as success.</p>
+          <form id="outcomeForm">
+            <div class="workspace-field-row"><label>Outcome<select id="outcomeMetric"><option value="conversations">Real conversations</option><option value="qualified_leads">Qualified leads</option><option value="bookings">Bookings</option><option value="sales_cents">Sales in dollars</option><option value="community_help">Useful community responses</option><option value="lessons">Lessons learned</option></select></label><label>Value<input id="outcomeValue" type="number" min="0.01" step="1" value="1" required></label></div>
+            <label>What happened?<textarea id="outcomeNote" maxlength="800" placeholder="A short, honest note about the result or lesson."></textarea></label>
+            <button class="button" type="submit">Record outcome</button>
+          </form>
+          <div class="outcome-summary" id="outcomeSummary"></div>
+        </section>
+        <section class="workspace-panel community-panel">
+          <p class="eyebrow">Community advantage</p><h2>Do not build alone.</h2><p class="panel-intro">Ask for practical feedback, find relevant people, and share evidence—not hype.</p>
+          <div class="community-actions"><a href="/feed">Ask the community</a><a href="/directory">Find people</a><a href="/groups">Join a focused group</a><a href="/messages">Continue a conversation</a></div>
+          <div class="execution-policy"><strong>What bots cannot do silently</strong><p>Publish, message people, spend money, connect accounts, charge payments, or make consequential decisions. Those actions require a purpose-built connection and approval at the moment of execution.</p></div>
+        </section>
+      </section>
+      <details class="activity-ledger"><summary>Execution activity and audit trail</summary><div id="activityList"></div></details>
+    </section>
+  </main>
+  <div class="workspace-toast" id="workspaceToast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import { boolean, customType, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 // Raw binary column. Image and video bytes are stored directly in Postgres
 // (instead of Netlify Blobs) so every piece of the site's data lives in one
@@ -63,6 +64,81 @@ export const growthChannels = pgTable("growth_channels", {
 }, (t) => [
   index("growth_channels_ecosystem_idx").on(t.ecosystemId, t.status),
   index("growth_channels_owner_idx").on(t.ownerProfileId),
+]);
+
+export const ecosystemActionPlans = pgTable("ecosystem_action_plans", {
+  id: text("id").primaryKey(),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  version: integer("version").notNull().default(1),
+  status: text("status").notNull().default("active"),
+  summary: jsonb("summary").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("ecosystem_action_plans_ecosystem_idx").on(t.ecosystemId),
+  index("ecosystem_action_plans_owner_idx").on(t.ownerProfileId, t.status),
+]);
+
+export const ecosystemActionTasks = pgTable("ecosystem_action_tasks", {
+  id: text("id").primaryKey(),
+  planId: text("plan_id").notNull().default(""),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  dayNumber: integer("day_number").notNull().default(1),
+  sequence: integer("sequence").notNull().default(1),
+  actionKey: text("action_key").notNull().default(""),
+  title: text("title").notNull().default(""),
+  description: text("description").notNull().default(""),
+  mode: text("mode").notNull().default("internal"),
+  status: text("status").notNull().default("queued"),
+  requiresApproval: boolean("requires_approval").notNull().default(false),
+  dependsOnTaskId: text("depends_on_task_id").notNull().default(""),
+  input: jsonb("input").notNull().default({}),
+  approvalPreview: jsonb("approval_preview").notNull().default({}),
+  result: jsonb("result").notNull().default({}),
+  evidence: jsonb("evidence").notNull().default([]),
+  failureReason: text("failure_reason").notNull().default(""),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvalExpiresAt: timestamp("approval_expires_at", { withTimezone: true }),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("ecosystem_action_tasks_plan_day_idx").on(t.planId, t.dayNumber),
+  index("ecosystem_action_tasks_ecosystem_idx").on(t.ecosystemId, t.status, t.sequence),
+  index("ecosystem_action_tasks_owner_idx").on(t.ownerProfileId, t.status),
+]);
+
+export const ecosystemActionEvents = pgTable("ecosystem_action_events", {
+  id: text("id").primaryKey(),
+  taskId: text("task_id").notNull().default(""),
+  planId: text("plan_id").notNull().default(""),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
+  actorProfileId: text("actor_profile_id").notNull().default(""),
+  eventType: text("event_type").notNull().default(""),
+  fromStatus: text("from_status").notNull().default(""),
+  toStatus: text("to_status").notNull().default(""),
+  details: jsonb("details").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("ecosystem_action_events_task_idx").on(t.taskId, t.createdAt),
+  index("ecosystem_action_events_ecosystem_idx").on(t.ecosystemId, t.createdAt),
+]);
+
+export const ecosystemOutcomes = pgTable("ecosystem_outcomes", {
+  id: text("id").primaryKey(),
+  ecosystemId: text("ecosystem_id").notNull().default(""),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  metricKey: text("metric_key").notNull().default(""),
+  value: integer("value").notNull().default(0),
+  note: text("note").notNull().default(""),
+  source: text("source").notNull().default("member"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("ecosystem_outcomes_ecosystem_idx").on(t.ecosystemId, t.metricKey, t.createdAt),
+  index("ecosystem_outcomes_owner_idx").on(t.ownerProfileId, t.createdAt),
 ]);
 
 // ── Events ──
@@ -166,6 +242,7 @@ export const socialPosts = pgTable("social_posts", {
   music: text("music").notNull().default(""),
   visibility: text("visibility").notNull().default("public"),
   location: jsonb("location").notNull().default({}),
+  sourceTaskId: text("source_task_id").notNull().default(""),
   expiresAt: timestamp("expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -173,6 +250,7 @@ export const socialPosts = pgTable("social_posts", {
   index("social_posts_created_idx").on(t.createdAt),
   index("social_posts_type_idx").on(t.postType),
   index("social_posts_ecosystem_idx").on(t.ecosystemId, t.createdAt),
+  uniqueIndex("social_posts_source_task_idx").on(t.sourceTaskId).where(sql`${t.sourceTaskId} <> ''`),
 ]);
 
 export const socialComments = pgTable("social_comments", {

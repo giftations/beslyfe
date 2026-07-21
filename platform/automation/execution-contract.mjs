@@ -1,5 +1,5 @@
 export const AUTOMATION_MODES = Object.freeze(['internal', 'external', 'hybrid'])
-export const AUTOMATION_STATUSES = Object.freeze(['queued', 'awaiting_approval', 'approved', 'running', 'completed', 'failed', 'dismissed'])
+export const AUTOMATION_STATUSES = Object.freeze(['queued', 'awaiting_approval', 'approved', 'running', 'completed', 'failed', 'blocked', 'dismissed'])
 export const automationExecutionContract = Object.freeze({
   id: 'automation_execution',
   purpose: 'Complete repeatable ecosystem work while preserving consent, accountability, and user control.',
@@ -11,6 +11,11 @@ export const automationExecutionContract = Object.freeze({
   requiredControls: ['allowlisted_action', 'least_privilege', 'durable_run_ledger', 'expiring_lock', 'idempotency_key', 'bounded_retry', 'audit_record', 'pause_control', 'secret_redaction'],
   consequentialActions: ['approve_application', 'reject_application', 'charge_payment', 'publish_emergency_notice', 'public_social_post'],
   consequentialRule: 'Require a purpose-built workflow, explicit authority, target preview, and confirmation immediately before execution.',
+  executionWorkspace: {
+    plan: 'A persistent ecosystem-scoped seven-day plan.',
+    taskLedger: 'Every state transition, approval, run, result, failure, and completion is durable.',
+    outcomes: 'Conversations, qualified leads, bookings, sales, community help, and lessons guide the next iteration.',
+  },
 })
 export function automationMode(value) { return AUTOMATION_MODES.includes(value) ? value : 'internal' }
 export function needsAutomationApproval(mode, consequential = false) { return consequential || automationMode(mode) !== 'internal' }

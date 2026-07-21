@@ -8,10 +8,10 @@ const inheritedBrand = /Bak(?:'|’|\\')?d|bakdonthebay/i
 test('public Beslyfe surfaces contain no inherited proof-event branding', () => {
   const surfaces = [
     '404.html', 'about.html', 'contact.html', 'community.html', 'create.html',
-    'directory.html', 'feed.html', 'groups.html', 'hub.html', 'library.html',
+    'directory.html', 'feed.html', 'groups.html', 'hub.html', 'workspace.html', 'library.html',
     'manifesto.html', 'map.html', 'messages.html', 'profile-edit.html',
     'profile-new.html', 'profile-view.html', 'reels.html', 'stories.html',
-    'admin-login.html', 'auth.js', 'auth.css', 'beslyfe-social.js',
+    'admin-login.html', 'auth.js', 'auth.css', 'beslyfe-social.js', 'assets/js/workspace.js',
     'beslyfe-session.js', 'beslyfe-notifications.js', 'social.css', 'studio.js',
   ]
   for (const path of surfaces) assert.doesNotMatch(read(path), inheritedBrand, path)

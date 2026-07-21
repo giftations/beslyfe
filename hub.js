@@ -8,12 +8,12 @@
     var ecosystems = (data.items || []).filter(function (item) { return item.id !== 'beslyfe-network'; });
     var channels = data.growthChannels || [];
     if (!ecosystems.length) {
-      list.innerHTML = '<div class="hub-empty"><strong>Your first build starts with questions, not guesswork.</strong><p>Tell Beslyfe what you want to accomplish and it will recommend only the capabilities you need.</p><a href="/create">Start a build →</a></div>';
+      list.innerHTML = '<div class="hub-empty"><strong>Your first build starts with questions, not guesswork.</strong><p>Tell Beslyfe what you want to accomplish and it will create a seven-day action workspace.</p><a href="/create">Start a build →</a></div>';
       return;
     }
     list.innerHTML = ecosystems.map(function (item) {
       var active = channels.filter(function (channel) { return channel.ecosystemId === item.id && channel.status === 'active'; }).length;
-      return '<article class="build-row"><strong>' + esc(item.name) + '</strong><small>' + esc(item.productType || 'ecosystem') + ' · ' + esc(item.primaryOutcome || 'community growth') + '</small><small class="' + (active ? 'growth-live' : '') + '">' + (active ? active + ' growth action' + (active === 1 ? '' : 's') + ' connected' : 'Growth action not connected yet') + '</small></article>';
+      return '<article class="build-row"><div><strong>' + esc(item.name) + '</strong><small>' + esc(item.productType || 'ecosystem') + ' · ' + esc(item.primaryOutcome || 'community growth') + '</small><small class="' + (active ? 'growth-live' : '') + '">' + (active ? active + ' growth action' + (active === 1 ? '' : 's') + ' connected' : 'Growth action not connected yet') + '</small></div><a class="build-workspace-link" href="/workspace?ecosystem=' + encodeURIComponent(item.id) + '">Open action workspace →</a></article>';
     }).join('');
   }
   async function boot() {

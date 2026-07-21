@@ -21,6 +21,7 @@ import {
 } from '../../platform/growth/sales-engine-contract.mjs'
 import { communityNetworkContractSummary } from '../../platform/communities/network-contract.mjs'
 import { communityBridgeDefaults } from '../../platform/communities/federation-contract.mjs'
+import { ensureActionPlan } from './lib/action-plans.mjs'
 
 const PRODUCT_KEYS = new Set(PRODUCT_BLUEPRINTS.map((item) => item.key))
 const OUTCOME_KEYS = new Set(PRODUCT_OUTCOMES.map((item) => item.key))
@@ -255,7 +256,16 @@ export default async (req) => {
       ON CONFLICT (ecosystem_id, profile_id) DO UPDATE SET role = 'owner', status = 'active'
     `
     const rows = await db.sql`SELECT * FROM ecosystems WHERE id = ${id} LIMIT 1`
-    return json({ ok: true, item: ecosystemRow(rows[0]) }, 201)
+    const item = ecosystemRow(rows[0])
+    let actionPlan = null
+    try {
+      actionPlan = await ensureActionPlan(db, item, profileId)
+    } catch (error) {
+      // The ecosystem remains usable if a deploy is still applying its additive
+      // action-workspace migration. Opening the workspace repairs the plan.
+      console.error(JSON.stringify({ event:'ecosystem_action_plan_deferred', ecosystemId:id, message:String(error?.message||'unknown').slice(0,300) }))
+    }
+    return json({ ok: true, item, actionPlan }, 201)
   }
 
   const ecosystemId = str(body.ecosystemId, 100)

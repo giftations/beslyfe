@@ -6,6 +6,7 @@
 /start               /create.html                       200
 /grow                /create.html?goal=online-sales     200
 /hub                 /hub.html                          200
+/workspace           /workspace.html                    200
 /feed                /feed.html                         200
 /reels               /reels.html                        200
 /stories             /stories.html                      200

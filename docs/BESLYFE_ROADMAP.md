@@ -93,7 +93,13 @@ Exit gate: a business owner can connect one trusted destination and test a compl
 
 ## Phase 5 — Automation and task-completing bots
 
-Status: platform contracts exist; production execution is staged behind approval and observability.
+Status: the first production action workspace is implemented; connected-provider depth continues.
+
+- Every new build receives a durable seven-day action plan with dependencies, task states, evidence, and an outcome scorecard.
+- Safe internal bot work can run immediately from the member workspace.
+- Public community publishing uses a separate, exact-content approval followed by an explicit execute step; approvals expire after 15 minutes.
+- Every run writes an audit event, uses an idempotency boundary, and preserves completed evidence for the member.
+- Plans can be paused without deleting work, retried deliberately, and measured against leads, sales, bookings, collaborations, and other user-entered outcomes.
 
 Every automation has an owner, trigger, inputs, allowed actions, approval policy, idempotency key, audit log, success metric, retry policy, spend limit, and kill switch.
 
