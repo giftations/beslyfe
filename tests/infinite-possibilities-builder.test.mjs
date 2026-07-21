@@ -20,7 +20,7 @@ test('homepage keeps the living-network visual and expands the promise beyond we
 })
 
 test('guided builder asks about operational friction and desired automation', () => {
-  assert.match(builder, /What are you building or running\?/)
+  assert.match(builder, /What are you building or running first\?/)
   assert.match(builder, /id="operatingChallenge"/)
   assert.match(builder, /id="automationWish"/)
   assert.match(builder, /Automations remain reviewable, pausable/)
@@ -29,6 +29,36 @@ test('guided builder asks about operational friction and desired automation', ()
   assert.match(builderLogic, /exampleByProduct=\{publisher:/)
   assert.match(builderLogic, /retail:\{audience:/)
   assert.match(builderLogic, /property:\{audience:/)
+})
+
+test('guided builder treats uncertainty and income urgency as real starting points', () => {
+  assert.match(builder, /I don't know yet/)
+  assert.match(builder, /I need money/)
+  assert.match(builder, /How soon does earning money matter\?/)
+  assert.match(builder, /What do people already ask you for help with\?/)
+  assert.match(builder, /What problems, people, or industries do you understand from real life\?/)
+  assert.match(builder, /What can you use without taking on debt\?/)
+  assert.match(builder, /What must the plan respect\?/)
+  assert.match(builderLogic, /deriveExperiment/)
+  assert.match(builderLogic, /A seven-day discovery sprint/)
+  assert.match(builderLogic, /Near-term lane/)
+  assert.match(builderLogic, /Longer-term lane/)
+})
+
+test('whatever-it-takes answers are bounded by explicit safety and honesty rules', () => {
+  assert.match(builder, /whatever it takes/)
+  assert.match(builder, /legal and safe/)
+  assert.match(builder, /legal, honest, safe, consent-based work/)
+  assert.match(builder, /scams, deception, exploitation, illegal activity, unsafe shortcuts, predatory debt/)
+  assert.match(builderLogic, /this is a test plan, not guaranteed income/)
+  assert.match(builderLogic, /Pressure deserves a safer pace/)
+  assert.match(builderLogic, /safetyCommitment:/)
+})
+
+test('discovery context is preserved with the ecosystem plan', () => {
+  for (const answer of ['startingPoint', 'incomeTiming', 'incomeTarget', 'weeklyTime', 'strengths', 'problemsUnderstood', 'workPreferences', 'resources', 'hardLimits', 'riskMindset', 'guidanceSummary']) {
+    assert.match(builderLogic, new RegExp(`${answer}:`))
+  }
 })
 
 test('a free community account is required before the builder unlocks', () => {
