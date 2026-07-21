@@ -1,3 +1,6 @@
+.builder-account-gate[hidden],
+.builder-shell[hidden] { display: none !important; }
+
 .guide-response,
 .path-recommendation,
 .safety-boundary {

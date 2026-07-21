@@ -54,6 +54,7 @@
   function selectedValue(name) { var input=document.querySelector('input[name="'+name+'"]:checked'); return input?input.value:'' }
   function fieldValue(id) { var field=document.getElementById(id); return field?field.value.trim():'' }
   function selectText(id) { var field=document.getElementById(id); return field&&field.selectedIndex>=0?field.options[field.selectedIndex].text:'' }
+  function isUnknownAnswer(value) { return !String(value||'').trim()||/^(?:i\s+)?(?:do not|don['’]?t)\s+know(?:\s+yet)?$|^not\s+sure(?:\s+yet)?$|^idk$/i.test(String(value).trim()) }
 
   function salesModes() { return state.contracts&&state.contracts.sales?state.contracts.sales.modes:[{key:'product',label:'Sell a product',actionLabel:'Buy now'},{key:'service',label:'Sell a service',actionLabel:'Get started'},{key:'booking',label:'Book an appointment',actionLabel:'Book now'},{key:'lead',label:'Collect a lead',actionLabel:'Request details'},{key:'donation',label:'Accept a donation',actionLabel:'Support this work'},{key:'ticket',label:'Sell a ticket',actionLabel:'Get tickets'}] }
   function salesProviders() { return state.contracts&&state.contracts.sales?state.contracts.sales.providers:[{key:'paypal',label:'PayPal.Me',entry:'handle',handleExample:'@YourPayPalName',handlePattern:'^[A-Za-z0-9]{1,20}$',destinationTemplate:'https://paypal.me/{handle}',supports:['product','service','booking','donation','ticket']},{key:'cash-app',label:'Cash App',entry:'handle',handleExample:'@YourCashtag',handlePattern:'^[A-Za-z][A-Za-z0-9]{0,19}$',destinationTemplate:'https://cash.app/${handle}',supports:['product','service','booking','donation','ticket']},{key:'venmo',label:'Venmo',entry:'handle',handleExample:'@YourVenmoName',handlePattern:'^[A-Za-z0-9_-]{5,30}$',destinationTemplate:'https://venmo.com/u/{handle}',supports:['product','service','booking','donation','ticket']},{key:'stripe-payment-link',label:'Stripe Payment Link',supports:['product','service','booking','donation','ticket']},{key:'shopify-buy-button',label:'Shopify Buy Button',supports:['product']},{key:'square-checkout',label:'Square Online Checkout',supports:['product','service','booking','donation','ticket']},{key:'booking-link',label:'Booking provider',supports:['booking','service']},{key:'contact-form',label:'Beslyfe lead form',entry:'built-in',supports:['lead']},{key:'external',label:'Another secure checkout',supports:['product','service','booking','donation','ticket']}] }
@@ -157,13 +158,21 @@
     if(!fieldValue('offer'))document.getElementById('offer').value=plan.offer
     var urgent=discovery.startingPoint==='income'||['urgent','month'].indexOf(discovery.incomeTiming)>=0
     var pressure=discovery.riskMindset==='pressured'
-    var time=discovery.weeklyTimeLabel||'the time you have available'
-    var target=discovery.incomeTarget?' Your stated target is '+discovery.incomeTarget+'.':''
+    var timeDescriptions={'under-3':'less than 3 reliable hours per week','3-8':'3 to 8 reliable hours per week','9-20':'9 to 20 reliable hours per week','over-20':'more than 20 available hours per week',varies:'a schedule that changes week to week',unsure:'a weekly schedule that is still uncertain'}
+    var time=timeDescriptions[discovery.weeklyTime]||'the time you have available'
+    var target=!isUnknownAnswer(discovery.incomeTarget)?' Your stated target is '+discovery.incomeTarget+'.':''
     var laneOne=urgent?'Near-term lane':'First evidence lane'
+    var immediate=plan.immediate
+    if(discovery.resources.indexOf('none')>=0)immediate='Start inside the free Beslyfe community: ask three to five people what small problem they would trust you to help solve, choose one response to test, and do not spend money before you have evidence.'
     var riskItem=pressure?'<li><strong>Pressure check:</strong> do not accept illegal, deceptive, unsafe, or high-debt shortcuts. Slow down any decision that asks for money, secrecy, credentials, or immediate commitment.</li>':''
     var noGuarantee=urgent?'<li><strong>Reality check:</strong> this is a test plan, not guaranteed income. If essentials or safety are at immediate risk, use appropriate local support services too.</li>':'<li><strong>Decision gate:</strong> do not expand until real people respond, participate, book, or buy.</li>'
-    document.getElementById('pathRecommendation').innerHTML='<h3>'+esc(plan.label)+'</h3><p>Recommended from '+esc(time)+'.'+esc(target)+'</p><ul><li><strong>'+esc(laneOne)+':</strong> '+esc(plan.immediate)+'</li><li><strong>Longer-term lane:</strong> '+esc(plan.durable)+'</li>'+riskItem+noGuarantee+'</ul>'
-    state.guidanceSummary=plan.label+' | '+laneOne+': '+plan.immediate+' | Longer-term lane: '+plan.durable
+    var contextItems=''
+    if(!isUnknownAnswer(discovery.strengths))contextItems+='<li><strong>Strength clue:</strong> '+esc(discovery.strengths)+'</li>'
+    if(!isUnknownAnswer(discovery.problemsUnderstood))contextItems+='<li><strong>Real-life knowledge:</strong> '+esc(discovery.problemsUnderstood)+'</li>'
+    if(!isUnknownAnswer(discovery.hardLimits))contextItems+='<li><strong>Plan boundary:</strong> '+esc(discovery.hardLimits)+'</li>'
+    if(discovery.resources.indexOf('none')>=0)contextItems+='<li><strong>Resource rule:</strong> begin with free community conversations and what is already available; do not borrow to fund an unproven idea.</li>'
+    document.getElementById('pathRecommendation').innerHTML='<h3>'+esc(plan.label)+'</h3><p>Recommended for '+esc(time)+'.'+esc(target)+'</p><ul><li><strong>'+esc(laneOne)+':</strong> '+esc(immediate)+'</li><li><strong>Longer-term lane:</strong> '+esc(plan.durable)+'</li>'+contextItems+riskItem+noGuarantee+'</ul>'
+    state.guidanceSummary=plan.label+' | '+laneOne+': '+immediate+' | Longer-term lane: '+plan.durable
     renderProducts()
     renderOutcomes()
     recommend()

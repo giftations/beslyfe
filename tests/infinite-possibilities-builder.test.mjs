@@ -7,6 +7,7 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 const home = read('index.html')
 const builder = read('create.html')
 const builderLogic = read('assets/js/create.js')
+const builderDiscoveryStyles = read('assets/css/builder-discovery.css')
 const ecosystemsFunction = read('netlify/functions/ecosystems.mjs')
 
 test('homepage keeps the living-network visual and expands the promise beyond websites', () => {
@@ -43,6 +44,8 @@ test('guided builder treats uncertainty and income urgency as real starting poin
   assert.match(builderLogic, /A seven-day discovery sprint/)
   assert.match(builderLogic, /Near-term lane/)
   assert.match(builderLogic, /Longer-term lane/)
+  assert.match(builderLogic, /isUnknownAnswer/)
+  assert.match(builderLogic, /begin with free community conversations/)
 })
 
 test('whatever-it-takes answers are bounded by explicit safety and honesty rules', () => {
@@ -70,6 +73,7 @@ test('a free community account is required before the builder unlocks', () => {
   assert.match(builderLogic, /fetch\('\/\.netlify\/functions\/auth\?action=session'/)
   assert.match(builderLogic, /if\(!data\|\|!data\.account\)\{lockBuilder/)
   assert.match(builderLogic, /unlockBuilder\(data\.account\)/)
+  assert.match(builderDiscoveryStyles, /\.builder-account-gate\[hidden\][\s\S]*\.builder-shell\[hidden\][\s\S]*display: none !important/)
   assert.doesNotMatch(builderLogic, /beslyfe_build_draft.*setItem/)
   assert.match(ecosystemsFunction, /const session = await requireSession\(req, db\)/)
 })
