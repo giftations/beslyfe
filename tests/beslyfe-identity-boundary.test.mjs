@@ -11,7 +11,7 @@ test('public Beslyfe surfaces contain no inherited proof-event branding', () => 
     'directory.html', 'feed.html', 'groups.html', 'hub.html', 'workspace.html', 'library.html',
     'manifesto.html', 'map.html', 'messages.html', 'profile-edit.html',
     'profile-new.html', 'profile-view.html', 'reels.html', 'stories.html',
-    'admin-login.html', 'auth.js', 'auth.css', 'beslyfe-social.js', 'assets/js/workspace.js',
+    'admin-login.html', 'auth.js', 'auth.css', 'beslyfe-social.js', 'assets/js/workspace.js', 'assets/js/home-discovery.js',
     'beslyfe-session.js', 'beslyfe-notifications.js', 'social.css', 'studio.js',
   ]
   for (const path of surfaces) assert.doesNotMatch(read(path), inheritedBrand, path)

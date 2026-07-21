@@ -44,9 +44,12 @@
   var builder = document.getElementById('builder')
   var accountGate = document.getElementById('accountGate')
   var accountGateStatus = document.getElementById('accountGateStatus')
+  var builderSaveState = document.getElementById('builderSaveState')
+  var localDraftKey = 'beslyfe_build_draft'
+  var saveTimer = null
 
-  function lockBuilder(message) { state.account=null; builder.hidden=true; builder.setAttribute('aria-hidden','true'); accountGate.hidden=false; if(message) accountGateStatus.textContent=message }
-  function unlockBuilder(account) { state.account=account; accountGate.hidden=true; builder.hidden=false; builder.setAttribute('aria-hidden','false'); var skip=document.querySelector('.skip'); if(skip){skip.setAttribute('href','#builder');skip.textContent='Skip to builder'} document.getElementById('launchHint').textContent='This build will belong to your free Beslyfe account and strengthen the shared community.' }
+  function showAccountCheckpoint(message) { builder.hidden=true;builder.setAttribute('aria-hidden','true');accountGate.hidden=false;if(message)accountGateStatus.textContent=message;accountGate.scrollIntoView({behavior:'smooth',block:'start'}) }
+  function unlockBuilder(account) { state.account=account||null;accountGate.hidden=true;builder.hidden=false;builder.setAttribute('aria-hidden','false');var skip=document.querySelector('.skip');if(skip){skip.setAttribute('href','#builder');skip.textContent='Skip to questions'}if(state.account){builderSaveState.innerHTML='<strong>Saved to your account.</strong><span>Beslyfe keeps this questionnaire resumable after an interruption or on another device.</span>';document.getElementById('launchHint').textContent='This build will belong to your free Beslyfe account and strengthen the shared community.'}else{builderSaveState.innerHTML='<strong>Questions first.</strong><span>Your early answers save on this device. After discovery, create a free account so the complete plan stays with you.</span>';document.getElementById('launchHint').textContent='A free community account is required only when you are ready to create and save the plan.'} }
   function esc(value) { return String(value==null?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;') }
   function products() { return state.contracts&&state.contracts.products?state.contracts.products.blueprints:fallbackProducts }
   function outcomes() { return state.contracts&&state.contracts.products?state.contracts.products.outcomes:fallbackOutcomes }
@@ -204,10 +207,71 @@
   }
   function showError(message) { var old=document.querySelector('.builder-error');if(old)old.remove();var p=document.createElement('p');p.className='builder-error';p.style.color='#b42318';p.style.fontWeight='700';p.textContent=message;document.querySelector('.builder-step.active').appendChild(p) }
 
+  function snapshotForm(stepOverride) {
+    var fields={}
+    var selections={}
+    form.querySelectorAll('input,select,textarea').forEach(function(field){
+      var type=String(field.type||'').toLowerCase()
+      if(type==='radio'||type==='checkbox'){
+        if(field.name){if(!selections[field.name])selections[field.name]=[];if(field.checked)selections[field.name].push(field.value)}
+        else if(field.id)fields[field.id]=Boolean(field.checked)
+      }else if(field.id)fields[field.id]=field.value
+    })
+    return {version:1,step:Number(stepOverride||state.step),state:{startingPoint:state.startingPoint,productType:state.productType,productChosenManually:state.productChosenManually,recommendedProduct:state.recommendedProduct,recommendedOutcomes:state.recommendedOutcomes,outcomes:state.outcomes,capabilities:state.capabilities,guidanceSummary:state.guidanceSummary,paymentInputs:state.paymentInputs},fields:fields,selections:selections,savedAt:new Date().toISOString()}
+  }
+
+  function readLocalDraft() { try { var value=JSON.parse(localStorage.getItem(localDraftKey)||'null');return value&&typeof value==='object'?value:null } catch(_){return null} }
+
+  function writeLocalDraft(stepOverride) {
+    var snapshot=snapshotForm(stepOverride)
+    try { localStorage.setItem(localDraftKey,JSON.stringify(snapshot)) } catch(_) {}
+    return snapshot
+  }
+
+  function applySnapshot(snapshot) {
+    if(!snapshot||typeof snapshot!=='object')return
+    var savedState=snapshot.state&&typeof snapshot.state==='object'?snapshot.state:{}
+    ;['startingPoint','productType','recommendedProduct','guidanceSummary'].forEach(function(key){if(typeof savedState[key]==='string')state[key]=savedState[key]})
+    ;['recommendedOutcomes','outcomes','capabilities'].forEach(function(key){if(Array.isArray(savedState[key]))state[key]=savedState[key]})
+    state.productChosenManually=Boolean(savedState.productChosenManually)
+    state.paymentInputs=savedState.paymentInputs&&typeof savedState.paymentInputs==='object'?savedState.paymentInputs:{}
+    renderProducts();renderOutcomes();recommend();syncSalesDefaults()
+    Object.keys(snapshot.fields||{}).forEach(function(id){var field=document.getElementById(id);if(!field)return;if(typeof snapshot.fields[id]==='boolean')field.checked=snapshot.fields[id];else field.value=snapshot.fields[id]})
+    Object.keys(snapshot.selections||{}).forEach(function(name){var chosen=new Set(snapshot.selections[name]||[]);document.querySelectorAll('input[name="'+name+'"]').forEach(function(field){field.checked=chosen.has(field.value)})})
+    state.startingPoint=selectedValue('startingPoint')||state.startingPoint
+    state.productType=selectedValue('productType')||state.productType
+    state.outcomes=checkedValues('outcome').length?checkedValues('outcome'):state.outcomes
+    updateStartingResponse();if(Number(snapshot.step)>=3)applyDiscoveryRecommendation();else recommend();syncSalesDefaults();syncPaymentField();showStep(Number(snapshot.step)||1)
+  }
+
+  function remoteSave(snapshot) {
+    if(!state.account)return Promise.resolve(null)
+    return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'save-draft',draft:snapshot})}).then(function(response){if(!response.ok)throw new Error('save');return response.json()}).then(function(){builderSaveState.innerHTML='<strong>Saved to your account.</strong><span>You can close this page and resume later.</span>';return true}).catch(function(){builderSaveState.innerHTML='<strong>Saved on this device.</strong><span>The account copy could not update yet; Beslyfe will retry after your next answer.</span>';return null})
+  }
+
+  function scheduleSave(stepOverride) {
+    var snapshot=writeLocalDraft(stepOverride)
+    if(!state.account)return snapshot
+    clearTimeout(saveTimer)
+    saveTimer=setTimeout(function(){remoteSave(snapshot)},450)
+    return snapshot
+  }
+
+  function clearSavedDraft() {
+    try { localStorage.removeItem(localDraftKey) } catch(_) {}
+    if(state.account)fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete-draft'})}).catch(function(){})
+  }
+
+  function newerDraft(localDraft,serverDraft) {
+    if(!localDraft)return serverDraft
+    if(!serverDraft)return localDraft
+    return Date.parse(localDraft.savedAt||0)>=Date.parse(serverDraft.savedAt||0)?localDraft:serverDraft
+  }
+
   var exampleByProduct={publisher:{audience:'Readers who want practical, trustworthy ideas they can use and share.',offer:'A consistent publication with clear topics, useful resources, and an easy way to subscribe.',challenge:'Planning, drafting, publishing, distribution, and follow-up are scattered across too many tools.',automation:'Prepare the publishing checklist, repurpose approved posts, schedule reminders, and summarize what performs.'},creator:{audience:'Brands, photographers, clients, collaborators, and supporters looking for the right creative fit.',offer:'A portfolio and media kit that make it easy to understand the work and request a booking.',challenge:'Inquiries, availability, project details, follow-ups, and content updates take time away from creative work.',automation:'Organize inquiries, remind me about follow-ups, prepare booking details, and surface the next best opportunity.'},retail:{audience:'Local shoppers, online customers, store employees, and suppliers.',offer:'Make products easy to discover and buy while giving staff one dependable way to run the day.',challenge:'Inventory updates, staff handoffs, promotions, supplier follow-up, and daily reporting happen in different places.',automation:'Flag low stock, prepare task reminders, follow up with customers, and create one daily operating summary.'},property:{audience:'Property owners, prospective tenants, current residents, vendors, and the management team.',offer:'A dependable place for listings, applications, maintenance, payments, inspections, and clear communication.',challenge:'Requests arrive through different channels and maintenance, rent, inspections, and owner updates are easy to miss.',automation:'Triage requests, route work, send approved reminders, track deadlines, and prepare owner reports.'},custom:{audience:'The people who use, deliver, support, or benefit from the idea.',offer:'A clear result that is easier to request, deliver, measure, and improve.',challenge:'Important work repeats manually, information is scattered, and nobody has one complete view.',automation:'Handle repeatable steps, reminders, summaries, and handoffs while keeping approvals under human control.'},default:{audience:'People who need a trustworthy, simple solution and want to understand their options before they act.',offer:'A clear first step that solves one urgent problem, proves the value, and makes it easy to continue.',challenge:'Leads, tasks, follow-ups, content, and reporting are spread across different tools.',automation:'Organize the next actions, prepare follow-ups, send approved reminders, and summarize what needs attention.'}}
 
-  next.addEventListener('click',function(){var error=validateStep();if(error){showError(error);return}if(state.step===2)applyDiscoveryRecommendation();if(state.step===3||state.step===4||state.step===5)recommend();showStep(state.step+1)})
-  back.addEventListener('click',function(){showStep(state.step-1)})
+  next.addEventListener('click',function(){var error=validateStep();if(error){showError(error);return}if(state.step===2){applyDiscoveryRecommendation();if(!state.account){scheduleSave(3);showAccountCheckpoint('Your answers are saved on this device. Create or sign in to your free account to keep going from Question 3.');return}}if(state.step===3||state.step===4||state.step===5)recommend();showStep(state.step+1);scheduleSave()})
+  back.addEventListener('click',function(){showStep(state.step-1);scheduleSave()})
   document.querySelectorAll('.step-dots button').forEach(function(btn){btn.addEventListener('click',function(){var target=Number(btn.getAttribute('data-go'));if(target<state.step)showStep(target)})})
   document.getElementById('startingChoices').addEventListener('change',updateStartingResponse)
   document.getElementById('incomeTiming').addEventListener('change',syncIncomeDetails)
@@ -215,6 +279,8 @@
   document.getElementById('productChoices').addEventListener('change',function(event){state.productType=event.target.value;state.productChosenManually=true;recommend()})
   document.getElementById('outcomeChoices').addEventListener('change',function(){state.outcomes=checkedValues('outcome');recommend();syncSalesDefaults()})
   document.querySelector('.example-answer').addEventListener('click',function(){var example=exampleByProduct[state.productType]||exampleByProduct.default;document.getElementById('audience').value=example.audience;document.getElementById('offer').value=example.offer;document.getElementById('operatingChallenge').value=example.challenge;document.getElementById('automationWish').value=example.automation})
+  form.addEventListener('input',function(){scheduleSave()})
+  form.addEventListener('change',function(){scheduleSave()})
 
   function draft() {
     var minimumAge=Number(document.getElementById('minimumAge').value||0)
@@ -222,10 +288,17 @@
     return {action:'create',name:fieldValue('projectName'),description:fieldValue('projectDescription'),productType:state.productType,outcomes:state.outcomes,primaryOutcome:state.outcomes[0]||'community-growth',capabilities:state.capabilities,minimumAge:minimumAge,contentRating:minimumAge>=18?'regulated-adult':'general',answers:{startingPoint:discovery.startingPoint,incomeTiming:discovery.incomeTiming,incomeTarget:discovery.incomeTarget,currentIncome:discovery.currentIncome,weeklyTime:discovery.weeklyTime,strengths:discovery.strengths,problemsUnderstood:discovery.problemsUnderstood,workPreferences:discovery.workPreferences,resources:discovery.resources,startingExperiment:deriveExperiment(discovery),hardLimits:discovery.hardLimits,riskMindset:discovery.riskMindset,safetyCommitment:discovery.safetyCommitment,guidanceSummary:state.guidanceSummary,audience:fieldValue('audience'),offer:fieldValue('offer'),operatingChallenge:fieldValue('operatingChallenge'),automationWish:fieldValue('automationWish'),minimumAge:minimumAge}}
   }
   function renderResult(item,channel) { form.hidden=true;var host=document.getElementById('builderResult');host.hidden=false;var caps=(item&&item.capabilities)||state.capabilities;host.innerHTML='<div class="result-mark">✓</div><h2>Your Beslyfe action workspace is ready.</h2><p><strong>'+esc(item.name)+'</strong> now has a seven-day execution queue, measurable outcomes, and a modular capability plan. The first safe bot task is prepared automatically from your answers.</p><div class="result-capabilities">'+caps.map(function(x){return '<span>'+esc(labels[x]||x)+'</span>'}).join('')+'</div>'+(channel?'<p class="result-note">Your <strong>'+esc(channel.actionLabel)+'</strong> growth action is active through '+esc(channel.provider)+'.</p>':'<p class="result-note">External actions still require a target preview and fresh approval. Ticketing remains '+(caps.indexOf('ticketing')>=0?'enabled by choice':'off')+'.</p>')+'<div class="result-actions"><a class="button" href="/workspace?ecosystem='+encodeURIComponent(item.id)+'">Start my first test</a><a class="button secondary" href="/community">Enter the community</a></div>' }
-  form.addEventListener('submit',function(e){e.preventDefault();if(!state.account){lockBuilder('Your session ended. Sign in again before building.');return}var payload=draft();if(!payload.name){showError('Give your project a name.');return}var chosenProvider=selectedSalesProvider(),paymentInput=document.getElementById('salesDestination').value.trim(),preparedUrl=paymentDestination(chosenProvider,paymentInput);if(paymentInput&&!preparedUrl){showError(chosenProvider&&chosenProvider.entry==='handle'?'Enter a valid '+chosenProvider.label+' @username.':'Paste a complete secure https payment link.');return}var button=document.getElementById('launchButton');button.disabled=true;button.textContent='Creating...';fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Could not create the plan.');return d})}).then(function(data){var mode=document.getElementById('salesMode').value;var provider=selectedSalesProvider();var raw=document.getElementById('salesDestination').value.trim();var url=paymentDestination(provider,raw);if(!url&&mode==='lead'&&provider&&provider.key==='contact-form'&&state.outcomes.indexOf('qualified-leads')>=0)url='/contact?ecosystem='+encodeURIComponent(data.item.id);if(!url)return {item:data.item,channel:null};return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'growth-channel',ecosystemId:data.item.id,mode:mode,provider:provider.key,paymentHandle:provider.entry==='handle'?raw:'',offerName:fieldValue('offer').slice(0,200)||data.item.name,actionLabel:(salesModes().find(function(x){return x.key===mode})||{}).actionLabel,destinationUrl:url})}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'The plan was saved, but the growth link needs attention.');return {item:data.item,channel:d.item}})})}).then(function(result){try{localStorage.removeItem('beslyfe_build_draft')}catch(err){}renderResult(result.item,result.channel)}).catch(function(err){button.disabled=false;button.textContent='Create my Beslyfe plan';showError(err.message)})})
+  form.addEventListener('submit',function(e){e.preventDefault();if(!state.account){scheduleSave(7);showAccountCheckpoint('Create or sign in to your free account to save and create this plan. Every answer will be waiting when you return.');return}var payload=draft();if(!payload.name){showError('Give your project a name.');return}var chosenProvider=selectedSalesProvider(),paymentInput=document.getElementById('salesDestination').value.trim(),preparedUrl=paymentDestination(chosenProvider,paymentInput);if(paymentInput&&!preparedUrl){showError(chosenProvider&&chosenProvider.entry==='handle'?'Enter a valid '+chosenProvider.label+' @username.':'Paste a complete secure https payment link.');return}var button=document.getElementById('launchButton');button.disabled=true;button.textContent='Creating...';fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'Could not create the plan.');return d})}).then(function(data){clearSavedDraft();var mode=document.getElementById('salesMode').value;var provider=selectedSalesProvider();var raw=document.getElementById('salesDestination').value.trim();var url=paymentDestination(provider,raw);if(!url&&mode==='lead'&&provider&&provider.key==='contact-form'&&state.outcomes.indexOf('qualified-leads')>=0)url='/contact?ecosystem='+encodeURIComponent(data.item.id);if(!url)return {item:data.item,channel:null};return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'growth-channel',ecosystemId:data.item.id,mode:mode,provider:provider.key,paymentHandle:provider.entry==='handle'?raw:'',offerName:fieldValue('offer').slice(0,200)||data.item.name,actionLabel:(salesModes().find(function(x){return x.key===mode})||{}).actionLabel,destinationUrl:url})}).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error||'The plan was saved, but the growth link needs attention.');return {item:data.item,channel:d.item}})})}).then(function(result){renderResult(result.item,result.channel)}).catch(function(err){button.disabled=false;button.textContent='Create my Beslyfe plan';showError(err.message)})})
 
-  function initializeBuilder() {
+  function initializeBuilder(snapshot) {
     var params=new URLSearchParams(location.search)
+    var starting=params.get('starting')
+    if(['known','ideas','unsure','income'].indexOf(starting)>=0){
+      state.startingPoint=starting
+      var startingInput=document.getElementById('start-'+starting)
+      if(startingInput)startingInput.checked=true
+      updateStartingResponse()
+    }
     var requested=params.get('type')
     if(products().some(function(x){return x.key===requested})){
       state.startingPoint='known'
@@ -242,7 +315,26 @@
     renderSales()
     recommend()
     syncSalesDefaults()
+    if(snapshot)applySnapshot(snapshot)
+    else if(starting||requested)showStep(2)
   }
 
-  fetch('/.netlify/functions/auth?action=session',{headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('session');return r.json()}).then(function(data){if(!data||!data.account){lockBuilder('Create a free account or sign in to unlock the builder.');return}unlockBuilder(data.account);return fetch(endpoint+'?type=blueprints').then(function(r){if(!r.ok)throw new Error('blueprints');return r.json()}).then(function(contracts){state.contracts=contracts}).catch(function(){state.contracts=null}).then(initializeBuilder)}).catch(function(){lockBuilder('We could not verify your account. Sign in again to continue.')})
+  async function boot() {
+    var sessionData=null
+    try { var sessionResponse=await fetch('/.netlify/functions/auth?action=session',{headers:{Accept:'application/json'}});if(sessionResponse.ok)sessionData=await sessionResponse.json() } catch(_) {}
+    state.account=sessionData&&sessionData.account?sessionData.account:null
+    try { var contractResponse=await fetch(endpoint+'?type=blueprints');if(contractResponse.ok)state.contracts=await contractResponse.json() } catch(_) { state.contracts=null }
+    unlockBuilder(state.account)
+    var localDraft=readLocalDraft()
+    var serverDraft=null
+    if(state.account){
+      try { var draftResponse=await fetch(endpoint+'?type=draft',{headers:{Accept:'application/json'}});if(draftResponse.ok){var draftData=await draftResponse.json();serverDraft=draftData&&draftData.item?draftData.item.payload:null} } catch(_) {}
+    }
+    var snapshot=newerDraft(localDraft,serverDraft)
+    initializeBuilder(snapshot)
+    if(!state.account&&snapshot&&Number(snapshot.step)>=3){showAccountCheckpoint('Your saved answers are ready. Create or sign in to your free account to continue from Question '+Number(snapshot.step)+'.');return}
+    if(state.account&&snapshot)remoteSave(snapshot)
+  }
+
+  boot()
 })()

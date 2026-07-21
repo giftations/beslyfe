@@ -19,26 +19,27 @@
   <script src="/assets/js/create.js" defer></script>
 </head>
 <body class="create-page">
-  <a class="skip" href="#accountGate">Skip to build access</a>
+  <a class="skip" href="#builder">Skip to questions</a>
   <header class="site-header"><nav class="shell primary-nav"><a class="brand" href="/">beslyfe<span>.</span></a><div class="nav-links"><a href="/community">Community</a><a class="current" href="/create">Build</a><a href="/#growth">Grow</a></div><div class="nav-actions"><a class="nav-signin" id="login-btn" href="/login">Sign in</a><a class="button small" href="/signup" data-guest-only>Join free</a></div></nav></header>
 
-  <main id="accountGate" class="builder-account-gate shell" aria-labelledby="accountGateTitle">
+  <main id="accountGate" class="builder-account-gate shell" hidden aria-labelledby="accountGateTitle">
     <section class="account-gate-card">
       <div class="account-gate-mark" aria-hidden="true">b</div>
-      <p class="eyebrow"><span class="pulse"></span> Free membership required</p>
-      <h1 id="accountGateTitle">Join the community.<br><em>Then build anything.</em></h1>
-      <p class="account-gate-lead">Every Beslyfe builder is also a community member. Your free account gives your work an owner, connects it to real people, and lets the network help it grow.</p>
+      <p class="eyebrow"><span class="pulse"></span> Save your progress</p>
+      <h1 id="accountGateTitle">Keep every answer.<br><em>Join free.</em></h1>
+      <p class="account-gate-lead">You started with the honest discovery questions. Create your free community account now so Beslyfe can save the rest of your plan, resume it after an interruption, and keep every future project under your control.</p>
       <div class="account-gate-benefits" aria-label="Free account benefits"><span>100% free</span><span>No credit card</span><span>One community identity</span><span>Your builds stay under your control</span></div>
-      <div class="actions"><a class="button" href="/signup?next=/create">Create my free account</a><a class="button secondary" href="/login?next=/create">I already have an account</a></div>
-      <p class="account-gate-status" id="accountGateStatus" role="status" aria-live="polite">Checking whether you are already signed in&hellip;</p>
+      <div class="actions"><a class="button" id="saveSignupLink" href="/signup?next=%2Fcreate%3Fresume%3D1">Create my free account and save</a><a class="button secondary" id="saveLoginLink" href="/login?next=%2Fcreate%3Fresume%3D1">I already have an account</a></div>
+      <p class="account-gate-status" id="accountGateStatus" role="status" aria-live="polite">Your answers are saved safely on this device while you create the account.</p>
     </section>
   </main>
 
-  <main id="builder" class="builder-shell shell" hidden aria-hidden="true">
+  <main id="builder" class="builder-shell shell" aria-hidden="false">
     <aside class="builder-intro">
       <p class="eyebrow"><span class="pulse"></span> Guided builder</p>
       <h1>Tell us the truth.<br><em>We will find a path.</em></h1>
       <p>You do not need a business idea or perfect answers. Beslyfe starts with your real situation, recommends a low-risk first test, and helps build the system once there is something worth growing.</p>
+      <div class="builder-save-state" id="builderSaveState" role="status" aria-live="polite"><strong>Questions first.</strong><span>Your early answers save on this device. Beslyfe will ask you to create a free account during discovery so everything after that stays with you.</span></div>
       <div class="builder-principles"><span>Not knowing is an acceptable answer</span><span>Urgent income and long-term growth are separate lanes</span><span>Legal, honest, safe opportunities only</span><span>100% free to join</span></div>
     </aside>
 

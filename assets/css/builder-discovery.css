@@ -1,6 +1,20 @@
 .builder-account-gate[hidden],
 .builder-shell[hidden] { display: none !important; }
 
+.builder-save-state {
+  display: grid;
+  gap: 5px;
+  margin-top: 22px;
+  padding: 15px 17px;
+  border: 1px solid rgba(105, 86, 232, .2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .72);
+  color: var(--ink-soft);
+  font-size: .82rem;
+}
+
+.builder-save-state strong { color: var(--ink); }
+
 .guide-response,
 .path-recommendation,
 .safety-boundary {

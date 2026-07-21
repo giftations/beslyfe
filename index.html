@@ -23,10 +23,12 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/beslyfe.css">
   <link rel="stylesheet" href="/assets/css/possibilities.css">
+  <link rel="stylesheet" href="/assets/css/home-discovery.css">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Beslyfe","url":"https://beslyfe.com/","logo":"https://beslyfe.com/assets/favicon.svg","description":"The shared community and growth platform for people building useful things.","sameAs":["https://www.instagram.com/beslyfe_/","https://www.tiktok.com/@bes_lyfe"]}</script>
   <script src="/assets/js/traffic.js" defer></script>
   <script src="/beslyfe-session.js" defer></script>
   <script src="/assets/js/home-community.js" defer></script>
+  <script src="/assets/js/home-discovery.js" defer></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -47,16 +49,45 @@
   </header>
 
   <main id="main">
+    <section class="entry-discovery" id="entryDiscovery" aria-labelledby="entryTitle" aria-live="polite">
+      <div class="entry-glow" aria-hidden="true"></div>
+      <div class="shell entry-shell">
+        <div class="entry-loading" id="entryLoading"><span class="entry-mark">b</span><p>Finding your Beslyfe starting point&hellip;</p></div>
+        <div class="entry-question" id="entryQuestion" hidden>
+          <p class="eyebrow"><span class="pulse"></span> Start with one honest answer</p>
+          <h1 id="entryTitle">Which feels most true <em>today?</em></h1>
+          <p>You do not need a business idea, money, or perfect plan. Your answer changes what Beslyfe shows you next.</p>
+          <div class="entry-choices" role="group" aria-label="Choose your starting point">
+            <button type="button" data-entry-answer="known"><strong>I know what I want to build</strong><span>Help me turn it into something real.</span></button>
+            <button type="button" data-entry-answer="ideas"><strong>I have a few ideas</strong><span>Help me compare them without betting everything.</span></button>
+            <button type="button" data-entry-answer="unsure"><strong>I don't know yet</strong><span>Ask about my life, strengths, and real options.</span></button>
+            <button type="button" data-entry-answer="income"><strong>I need money</strong><span>Start with a legal, honest, low-risk income path.</span></button>
+          </div>
+          <button class="entry-explore" id="entryExplore" type="button">I want to look around first</button>
+          <p class="entry-reassurance">No account is needed for this first answer. During discovery, Beslyfe will ask you to join free so every answer can be saved.</p>
+        </div>
+        <div class="entry-resume" id="entryResume" hidden>
+          <p class="eyebrow"><span class="pulse"></span> Your progress is waiting</p>
+          <h1>Welcome back.<br><em>Keep going.</em></h1>
+          <p>Beslyfe found your saved questions. Continue from the exact place you stopped.</p>
+          <a class="button" href="/create?resume=1">Resume my questions</a>
+          <button class="entry-explore" id="entryResumeExplore" type="button">Visit the homepage first</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="homeExperience" hidden>
     <section class="hero shell">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="pulse"></span> One community. Infinite useful things.</p>
-        <h1>Build it.<br><em>Grow it together.</em></h1>
-        <p class="lead">Create a blog, modeling career hub, online business, retail operating system, property-management workspace, event, community, or something nobody has named yet. Beslyfe helps assemble it, grow it, and automate the repetitive work.</p>
+        <p class="eyebrow" id="homePathEyebrow"><span class="pulse"></span> One community. Infinite useful things.</p>
+        <h1 id="homePathTitle">Build it.<br><em>Grow it together.</em></h1>
+        <p class="lead" id="homePathLead">Create a blog, modeling career hub, online business, retail operating system, property-management workspace, event, community, or something nobody has named yet. Beslyfe helps assemble it, grow it, and automate the repetitive work.</p>
         <p class="free-callout"><strong>100% free to join.</strong> No card, subscription, or paywall.</p>
         <div class="actions">
-          <a class="button" href="/signup?next=/create">Join free to build</a>
+          <a class="button" id="homePathAction" href="/create">Answer the next question</a>
           <a class="button secondary" href="/community">Enter the community</a>
         </div>
+        <button class="change-entry-answer" id="changeEntryAnswer" type="button">Change my starting answer</button>
         <div class="hero-trust">
           <span>Posts, reels, and stories</span>
           <span>Groups and direct messages</span>
@@ -171,6 +202,7 @@
       <p>Join the founding Beslyfe community without a credit card, trial clock, or member subscription. Build toward more time doing what you love.</p>
       <div class="actions centered"><a class="button" href="/signup">Create a free account</a><a class="button secondary" href="/community">Explore first</a></div>
     </section>
+    </div>
   </main>
 
   <footer>

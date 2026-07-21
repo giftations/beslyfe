@@ -7,10 +7,17 @@ const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf
 const home = read('index.html')
 const builder = read('create.html')
 const builderLogic = read('assets/js/create.js')
+const homeDiscovery = read('assets/js/home-discovery.js')
 const builderDiscoveryStyles = read('assets/css/builder-discovery.css')
+const schema = read('db/schema.ts')
 const ecosystemsFunction = read('netlify/functions/ecosystems.mjs')
 
 test('homepage keeps the living-network visual and expands the promise beyond websites', () => {
+  assert.match(home, /Start with one honest answer/)
+  assert.match(home, /Which feels most true/)
+  assert.match(home, /id="homeExperience" hidden/)
+  assert.match(homeDiscovery, /hasProject\)\{showHome/)
+  assert.match(homeDiscovery, /if\(draft\.item\|\|localDraft\(\)\)\{showResume/)
   assert.match(home, /class="network-board"/)
   assert.match(home, /Your idea \+ automation/)
   for (const phrase of ['Blogging &amp; media', 'Modeling &amp; creative work', 'Brick-and-mortar retail', 'Property management', 'Something entirely new']) {
@@ -64,17 +71,21 @@ test('discovery context is preserved with the ecosystem plan', () => {
   }
 })
 
-test('a free community account is required before the builder unlocks', () => {
+test('questions begin before signup and require a free account during discovery', () => {
   assert.match(builder, /id="accountGate"/)
-  assert.match(builder, /Free membership required/)
-  assert.match(builder, /Join the community[\s\S]*Then build anything/)
-  assert.match(builder, /href="\/signup\?next=\/create"/)
-  assert.match(builder, /id="builder"[^>]*hidden[^>]*aria-hidden="true"/)
+  assert.match(builder, /Save your progress/)
+  assert.match(builder, /Create my free account and save/)
+  assert.match(builder, /id="accountGate"[^>]*hidden/)
+  assert.match(builder, /id="builder"[^>]*aria-hidden="false"/)
   assert.match(builderLogic, /fetch\('\/\.netlify\/functions\/auth\?action=session'/)
-  assert.match(builderLogic, /if\(!data\|\|!data\.account\)\{lockBuilder/)
-  assert.match(builderLogic, /unlockBuilder\(data\.account\)/)
+  assert.match(builderLogic, /if\(!state\.account\)\{scheduleSave\(3\);showAccountCheckpoint/)
+  assert.match(builderLogic, /localStorage\.setItem\(localDraftKey/)
+  assert.match(builderLogic, /action:'save-draft'/)
+  assert.match(builderLogic, /endpoint\+'\?type=draft'/)
   assert.match(builderDiscoveryStyles, /\.builder-account-gate\[hidden\][\s\S]*\.builder-shell\[hidden\][\s\S]*display: none !important/)
-  assert.doesNotMatch(builderLogic, /beslyfe_build_draft.*setItem/)
+  assert.match(schema, /builderDrafts = pgTable\("builder_drafts"/)
+  assert.match(ecosystemsFunction, /type === 'draft'/)
+  assert.match(ecosystemsFunction, /action === 'save-draft'/)
   assert.match(ecosystemsFunction, /const session = await requireSession\(req, db\)/)
 })
 

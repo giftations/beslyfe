@@ -171,6 +171,11 @@ export default async (req) => {
     const session = await requireSession(req, db)
     if (session instanceof Response) return session
     const profileId = await ensureProfileForAccount(db, session)
+    if (type === 'draft') {
+      const drafts = await db.sql`SELECT * FROM builder_drafts WHERE owner_profile_id = ${profileId} LIMIT 1`
+      const row = drafts[0]
+      return json({ item: row ? { id: row.id, payload: parseJson(row.payload, {}), updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at } : null })
+    }
     const rows = await db.sql`
       SELECT DISTINCT e.*
       FROM ecosystems e
@@ -215,6 +220,26 @@ export default async (req) => {
     VALUES ('beslyfe-network', ${profileId}, 'member', 'account', 'active', ${new Date().toISOString()})
     ON CONFLICT (ecosystem_id, profile_id) DO UPDATE SET status = 'active'
   `
+
+  if (action === 'save-draft') {
+    if (!body.draft || typeof body.draft !== 'object' || Array.isArray(body.draft)) return json({ error: 'Expected a builder draft.' }, 400)
+    const serialized = JSON.stringify(body.draft)
+    if (serialized.length > 100000) return json({ error: 'The builder draft is too large.' }, 413)
+    const now = new Date().toISOString()
+    const id = newId('draft_')
+    await db.sql`
+      INSERT INTO builder_drafts (id, owner_profile_id, payload, created_at, updated_at)
+      VALUES (${id}, ${profileId}, ${serialized}::jsonb, ${now}, ${now})
+      ON CONFLICT (owner_profile_id) DO UPDATE SET payload = ${serialized}::jsonb, updated_at = ${now}
+    `
+    const rows = await db.sql`SELECT id, updated_at FROM builder_drafts WHERE owner_profile_id = ${profileId} LIMIT 1`
+    return json({ ok: true, item: { id: rows[0].id, updatedAt: rows[0].updated_at instanceof Date ? rows[0].updated_at.toISOString() : rows[0].updated_at } })
+  }
+
+  if (action === 'delete-draft') {
+    await db.sql`DELETE FROM builder_drafts WHERE owner_profile_id = ${profileId}`
+    return json({ ok: true })
+  }
 
   if (action === 'create') {
     const name = str(body.name, MAX_NAME)

@@ -66,6 +66,19 @@ export const growthChannels = pgTable("growth_channels", {
   index("growth_channels_owner_idx").on(t.ownerProfileId),
 ]);
 
+// One resumable guided-builder draft per member. The browser keeps a local
+// copy before signup; after authentication this row makes the same questions
+// resumable after an interruption or on another device.
+export const builderDrafts = pgTable("builder_drafts", {
+  id: text("id").primaryKey(),
+  ownerProfileId: text("owner_profile_id").notNull().default(""),
+  payload: jsonb("payload").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("builder_drafts_owner_idx").on(t.ownerProfileId),
+]);
+
 export const ecosystemActionPlans = pgTable("ecosystem_action_plans", {
   id: text("id").primaryKey(),
   ecosystemId: text("ecosystem_id").notNull().default(""),
