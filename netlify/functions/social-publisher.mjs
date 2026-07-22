@@ -3,14 +3,16 @@ import { getDatabase } from '@netlify/database'
 import { json, readJsonBody, recordAudit, requireAdmin, requireSameOrigin } from './lib/session.mjs'
 import {
   bootstrapFacebookConnection,
+  campaignAllowedByGrowthGoal,
   campaignsForScheduler,
   LAUNCH_CAMPAIGN,
   publishCampaign,
+  readDailyGrowthGoal,
   readPublishingState,
   socialReadiness,
 } from './lib/social-publishing.mjs'
 
-function publicState(state, env) {
+function publicState(state, env, growthGoal) {
   const deliveries = Object.fromEntries(Object.entries(state.deliveries || {}).map(([key, value]) => [key, {
     status: value.status || '',
     publishedAt: value.publishedAt || '',
@@ -32,7 +34,7 @@ function publicState(state, env) {
         status: deliveries[`${campaign.id}:x`]?.status || 'pending',
       }
     })
-  return { readiness: socialReadiness(state, env), deliveries, xManualPosts, updatedAt: state.updatedAt || '' }
+  return { readiness: socialReadiness(state, env), deliveries, xManualPosts, growthGoal, updatedAt: state.updatedAt || '' }
 }
 
 export default async (req) => {
@@ -42,8 +44,8 @@ export default async (req) => {
   const env = globalThis.process?.env || {}
 
   if (req.method === 'GET') {
-    const state = await readPublishingState(db)
-    return json(publicState(state, env))
+    const [state, growthGoal] = await Promise.all([readPublishingState(db), readDailyGrowthGoal(db)])
+    return json(publicState(state, env, growthGoal))
   }
   if (req.method !== 'POST') return json({ error: 'Method Not Allowed' }, 405, { Allow: 'GET, POST' })
   const cross = requireSameOrigin(req)
@@ -60,8 +62,8 @@ export default async (req) => {
         resourceId: connection.pageId,
         details: { pageName: connection.pageName, tasks: connection.tasks },
       })
-      const state = await readPublishingState(db)
-      return json({ ok: true, connection, ...publicState(state, env) })
+      const [state, growthGoal] = await Promise.all([readPublishingState(db), readDailyGrowthGoal(db)])
+      return json({ ok: true, connection, ...publicState(state, env, growthGoal) })
     } catch (error) {
       return json({ error: String(error?.message || 'Facebook connection failed.').slice(0, 500) }, 502)
     }
@@ -78,9 +80,28 @@ export default async (req) => {
     return json({ ok: Object.values(results).some((result) => result.ok), results })
   }
 
+  if (body.action === 'publish-due') {
+    const growthGoal = await readDailyGrowthGoal(db)
+    const campaigns = {}
+    for (const campaign of campaignsForScheduler(new Date()).filter((item) => campaignAllowedByGrowthGoal(item, growthGoal))) {
+      campaigns[campaign.id] = await publishCampaign(db, campaign, env)
+    }
+    await recordAudit(db, req, admin, {
+      action: 'social.campaigns.publish_due',
+      resourceType: 'social_campaign',
+      resourceId: 'due',
+      details: { campaignIds: Object.keys(campaigns), growthGoalActive: growthGoal.active },
+    })
+    return json({ ok: true, campaigns, growthGoal })
+  }
+
   if (body.action === 'publish-campaign') {
     const campaign = campaignsForScheduler(new Date()).find((item) => item.id === String(body.campaignId || ''))
     if (!campaign) return json({ error: 'Unknown social campaign.' }, 404)
+    const growthGoal = await readDailyGrowthGoal(db)
+    if (!campaignAllowedByGrowthGoal(campaign, growthGoal)) {
+      return json({ error: 'This growth campaign has reached its verified-member goal and is paused.', growthGoal }, 409)
+    }
     const results = await publishCampaign(db, campaign, env)
     await recordAudit(db, req, admin, {
       action: 'social.campaign.publish',

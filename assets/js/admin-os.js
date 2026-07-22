@@ -1508,6 +1508,7 @@
   function renderSocialPublishing(host) {
     host.innerHTML = pageHead('Social Publisher', 'Connect Beslyfe once, then deliver each approved campaign across Facebook, Instagram, Threads, TikTok and X without duplicates.') +
       '<div class="card mb-4"><div class="flex between"><div><div class="card-title">Five-network connection</div><p class="muted small">Access tokens are encrypted at rest. Facebook and Instagram feed posts also receive separate Story delivery.</p></div><button class="btn brand" id="spPublish">Publish due campaigns</button></div></div>' +
+      '<div class="card mb-4" id="spGoal">' + loadingList() + '</div>' +
       '<div class="grid cols-2" id="spNetworks">' + loadingList() + '</div>' +
       '<div class="card mt-4"><div class="card-title">Delivery log <button class="btn ghost sm" id="spRefresh">↻ Refresh</button></div><div id="spDeliveries">' + loadingList() + '</div></div>' +
       '<div class="card mt-4"><div class="card-title">Post to X without API charges</div><p class="muted small">X charges for automatic API publishing. These official X Web Intent buttons open a prefilled post for your final review and confirmation—no API credits or app credentials required.</p><div id="spXFree">' + loadingList() + '</div></div>';
@@ -1517,6 +1518,12 @@
     function load() {
       api(API.socialPublisher).then(function (data) {
         var readiness = data.readiness || {};
+        var goal = data.growthGoal || {};
+        var verified = Math.max(0, Number(goal.verifiedMembers || 0));
+        var target = Math.max(0, Number(goal.target || 0));
+        var remaining = Math.max(0, Number(goal.remaining || 0));
+        $('#spGoal', host).innerHTML = '<div class="flex between"><div><div class="card-title">Erie Builders verified-member campaign</div><p class="muted small">' + esc(goal.audience || 'Targeted growth cohort') + '</p></div><span class="badge ' + (goal.active ? 'approved' : 'neutral') + '">' + (goal.active ? 'Active' : 'Goal reached') + '</span></div>' +
+          '<div class="stats mt-4">' + stat(verified, 'Verified members', '✓', 'accent') + stat(remaining, 'Remaining', '↗', '') + stat(target, 'Stop target', '◎', '') + '</div>';
         $('#spNetworks', host).innerHTML = ['facebook', 'instagram', 'threads', 'tiktok', 'x'].map(function (key) {
           var status = readiness[key] || {}, connected = !!status.ready;
           var account = status.account ? '@' + String(status.account).replace(/^@/, '') : 'No account connected';
@@ -1543,13 +1550,13 @@
         });
         $('#spXFree', host).innerHTML = xRows.length ? '<div class="list">' + xRows.join('') + '</div>' : emptyState('↗', 'No X campaigns ready', 'Approved campaign copy will appear here.');
       }).catch(function (error) {
-        $('#spNetworks', host).innerHTML = errorBox(error.message); $('#spDeliveries', host).innerHTML = errorBox(error.message); $('#spXFree', host).innerHTML = errorBox(error.message);
+        $('#spGoal', host).innerHTML = errorBox(error.message); $('#spNetworks', host).innerHTML = errorBox(error.message); $('#spDeliveries', host).innerHTML = errorBox(error.message); $('#spXFree', host).innerHTML = errorBox(error.message);
       });
     }
     $('#spRefresh', host).onclick = load;
     $('#spPublish', host).onclick = function () {
       var button = this; button.disabled = true; button.textContent = 'Publishing…';
-      api(API.socialPublisher, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'publish-launch' }) })
+      api(API.socialPublisher, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'publish-due' }) })
         .then(function () { toast('Publisher finished safely', { type: 'ok' }); load(); })
         .catch(function (error) { toast(error.message, { type: 'err' }); })
         .finally(function () { button.disabled = false; button.textContent = 'Publish due campaigns'; });

@@ -697,6 +697,11 @@ export const SOCIAL_CAMPAIGNS = Object.freeze([LAUNCH_CAMPAIGN, ...FREE_OPPORTUN
 // prevents a scheduler outage from dumping several stale posts at once.
 export const DAILY_GROWTH_START = '2026-07-21'
 export const DAILY_GROWTH_TIME_ZONE = 'America/New_York'
+export const DAILY_GROWTH_GOAL = Object.freeze({
+  key: 'erie-builders-verified-members',
+  target: 100,
+  audience: 'Erie-area first-time entrepreneurs, side-hustle builders, and small-business owners with limited startup money or no clear starting idea',
+})
 export const DAILY_GROWTH_SLOTS = Object.freeze([
   Object.freeze({
     key: 'morning',
@@ -704,13 +709,13 @@ export const DAILY_GROWTH_SLOTS = Object.freeze([
     imageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-first-step-v1.png',
     storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-story-v1.png',
     lines: Object.freeze([
-      'The idea that keeps coming back deserves a first step. Bring it to Beslyfe, shape a practical plan, and automate the repetitive work. It is 100% free to begin.',
-      'You do not need a perfect plan to start. Bring your skill, business idea, creative project, event, or community to Beslyfe and build the next useful step for free.',
-      'Make room for the work you love. Beslyfe helps turn an idea into connected tools, clear actions, and useful automation. Start 100% free.',
-      'A better future usually starts as one unfinished idea. Beslyfe gives that idea a free place to become a plan, a project, and a community.',
-      'What would you build if the busywork stopped getting in the way? Start the system, connect the people, and automate the repetition with Beslyfe for free.',
-      'Your experience can become a service, a shop, a story, an event, or something entirely new. Beslyfe helps you begin and grow it for free.',
-      'Today is enough for one honest first step. Tell Beslyfe what you hope to build and let the platform help organize the path forward. It is 100% free.',
+      'Erie builders: need more income but have no idea what to start? Beslyfe asks the questions that uncover useful skills, real needs, and a first step you can afford. It is 100% free.',
+      'You do not need startup money or a perfect business idea. Tell Beslyfe what you know, what you need, and how much time you have. We will help you find a realistic first move for free.',
+      'If your answer is “I just need money,” that is enough to begin. Beslyfe helps Erie-area builders turn experience, time, and local problems into practical options—100% free.',
+      'Your first business does not have to begin with inventory or a loan. Start with one skill, one problem, and one person you can help. Beslyfe will help organize the path for free.',
+      'Not sure what you want to build? Beslyfe can compare service, online, creative, retail, and community ideas against your time, strengths, and budget. Start 100% free.',
+      'Whatever it takes should never mean guessing alone. Beslyfe helps you choose a legal, useful, realistic path and turns it into small actions you can actually finish. Join free.',
+      'Erie has people with useful skills and unfinished ideas. Bring yours to Beslyfe, answer a few honest questions, and leave with a clearer next step. It is 100% free.',
     ]),
   }),
   Object.freeze({
@@ -719,13 +724,13 @@ export const DAILY_GROWTH_SLOTS = Object.freeze([
     imageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-community-v1.png',
     storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
     lines: Object.freeze([
-      'Turn the question in your head into something people can use. Beslyfe helps you clarify the goal, build the system, and find community support. Join free.',
-      'A blog, online store, local business, property operation, creative career, or community can all begin with the same thing: a clear next action. Build yours free with Beslyfe.',
-      'Ask better questions. See a working example. Choose what fits. Beslyfe helps remove the guessing between your idea and a useful working system—100% free.',
-      'Small progress compounds when the system remembers what matters. Build, connect, learn, and automate with Beslyfe. There is no charge to join.',
-      'Your project should make life simpler, not create another pile of busywork. Beslyfe helps organize the moving parts and automate what repeats. Start free.',
-      'The right people can change what is possible. Bring your project into a community built to share lessons, solve problems, and celebrate real progress. Join free.',
-      'If you can describe the outcome, Beslyfe can help break it into steps, tools, and automations. Bring the dream. The platform is 100% free.',
+      'Try this free business test: name one problem people near you already ask you to solve. Beslyfe can turn that answer into an offer, a simple page, and the next action.',
+      'A zero-inventory start can be a service, booking page, digital product, local lead system, or useful community. Beslyfe helps you compare the options and build the right one free.',
+      'Before buying a logo or filing paperwork, find one real person with the problem you want to solve. Beslyfe helps Erie builders test demand and organize what comes next—free.',
+      'Have a skill but no customers? Beslyfe helps shape the offer, create the online path, connect payment, and automate follow-up. Bring the skill; starting is free.',
+      'Your idea should answer three questions: who needs it, what changes for them, and what is the smallest proof it works? Beslyfe helps you work through all three for free.',
+      'A side hustle becomes steadier when leads, follow-up, payment, and delivery live in one clear system. Beslyfe helps you build that system without a platform fee.',
+      'If you can describe the outcome somebody wants, Beslyfe can help break it into an offer, a simple test, and repeatable steps. Erie-area builders can start free.',
     ]),
   }),
   Object.freeze({
@@ -734,13 +739,13 @@ export const DAILY_GROWTH_SLOTS = Object.freeze([
     imageUrl: 'https://media.beslyfe.com/assets/images/beslyfe-social-preview-v2.png',
     storyImageUrl: 'https://media.beslyfe.com/assets/images/campaigns/beslyfe-free-opportunity-journey-vertical-v1.png',
     lines: Object.freeze([
-      'Imagine ending the day with your idea clearer than it was this morning. Beslyfe helps you build the plan, connect the pieces, and keep moving. Join free.',
-      'Progress feels different when you do not have to build alone. Share the goal, learn from the community, and let Beslyfe organize what comes next. 100% free.',
-      'Your success story can begin quietly: one question, one useful answer, one working piece. Beslyfe gives it a free place to grow.',
-      'Build something that keeps helping even when you step away. Beslyfe connects your work, community, and automations so you can spend more time doing what you love. Start free.',
-      'There is room here for builders, creators, business owners, organizers, and dreamers. Bring what you know and what you hope to make. Beslyfe is free.',
-      'The community grows when people share what worked, what failed, and what they learned next. Bring your journey to Beslyfe and grow together for free.',
-      'Before tomorrow begins, give the idea a home. Beslyfe helps turn possibility into a practical, connected system—and it is 100% free to join.',
+      'Erie builders should not have to figure everything out alone. Share the goal, ask for useful feedback, and learn beside people taking their own next step. Beslyfe is free.',
+      'Maybe you need income. Maybe you have a half-built idea. Maybe you only know you are ready for change. All three belong in a community that helps turn questions into action.',
+      'Your first win might be a clearer offer, a first lead, or one task finally automated. Bring the progress and the obstacle—Beslyfe helps the community grow together for free.',
+      'A useful local business can begin with one neighbor helping another. Beslyfe gives Erie-area builders a free place to share the journey and build the system behind it.',
+      'No hype and no promise of overnight money—just better questions, practical steps, useful tools, and people willing to help. That is the free Beslyfe community.',
+      'Share what worked, what failed, and what you are trying next. Your lesson may unlock somebody else’s project, and their experience may unlock yours. Join Beslyfe free.',
+      'Before tomorrow begins, give the idea a home where the plan, people, progress, and automation can stay connected. Beslyfe is 100% free to join.',
     ]),
   }),
 ])
@@ -774,10 +779,16 @@ function zonedLocalDate(dateKey, hour, minute, timeZone = DAILY_GROWTH_TIME_ZONE
 }
 
 function dailyGrowthCopy(slot, weekday, dateKey, variant) {
-  const campaignTag = `beslyfe_daily_${slot.key}_${String(slot.times[variant][0]).padStart(2, '0')}${String(slot.times[variant][1]).padStart(2, '0')}`
-  const destination = `https://beslyfe.com/signup?utm_source=social&utm_medium=organic&utm_campaign=${campaignTag}&utm_content=${dateKey}`
-  const text = `${slot.lines[weekday]}\n\n${destination}\n\n#Beslyfe #GrowTogether #FreeOpportunity`
-  const xText = `${slot.lines[weekday]} ${destination} #Beslyfe #GrowTogether`.slice(0, 280)
+  const campaignTag = 'erie_builder_100'
+  const timeKey = `${String(slot.times[variant][0]).padStart(2, '0')}${String(slot.times[variant][1]).padStart(2, '0')}`
+  const destination = `https://beslyfe.com/?utm_source=social&utm_medium=organic&utm_campaign=${campaignTag}&utm_content=${dateKey}_${slot.key}_${timeKey}`
+  const text = `${slot.lines[weekday]}\n\n${destination}\n\n#Beslyfe #EriePA #SmallBusiness #StartForFree`
+  const xSuffix = ` ${destination} #Beslyfe #EriePA`
+  const xBodyLimit = 280 - xSuffix.length
+  const xBody = slot.lines[weekday].length <= xBodyLimit
+    ? slot.lines[weekday]
+    : `${slot.lines[weekday].slice(0, Math.max(0, xBodyLimit - 1)).trimEnd()}…`
+  const xText = `${xBody}${xSuffix}`
   return { campaignTag, destination, text, xText }
 }
 
@@ -807,6 +818,8 @@ export function dailyGrowthCampaigns(now = new Date(), horizonDays = 7) {
         altText: 'People turning an idea into practical progress with help from a warm, connected community.',
         channels: ['facebook', 'instagram', 'threads', 'tiktok', 'x'],
         campaignTag: copy.campaignTag,
+        growthGoalKey: DAILY_GROWTH_GOAL.key,
+        targetAudience: DAILY_GROWTH_GOAL.audience,
         channelContent: {
           threads: { text: copy.text.replace('utm_source=social', 'utm_source=threads') },
           x: { text: copy.xText.replace('utm_source=social', 'utm_source=x') },
@@ -815,6 +828,25 @@ export function dailyGrowthCampaigns(now = new Date(), horizonDays = 7) {
     }
   }
   return campaigns
+}
+
+export async function readDailyGrowthGoal(db) {
+  const rows = await db.sql`
+    SELECT COUNT(*)::int AS "verified_members"
+    FROM accounts
+    WHERE "email_verified" = true AND "status" = 'approved' AND "role" <> 'admin'
+  `
+  const verifiedMembers = Math.max(0, Number(rows?.[0]?.verified_members || 0))
+  return {
+    ...DAILY_GROWTH_GOAL,
+    verifiedMembers,
+    remaining: Math.max(0, DAILY_GROWTH_GOAL.target - verifiedMembers),
+    active: verifiedMembers < DAILY_GROWTH_GOAL.target,
+  }
+}
+
+export function campaignAllowedByGrowthGoal(campaign, goal) {
+  return campaign?.growthGoalKey !== DAILY_GROWTH_GOAL.key || !!goal?.active
 }
 
 export function campaignsForScheduler(now = new Date(), horizonDays = 7) {

@@ -2,9 +2,11 @@ import { getDatabase } from '@netlify/database'
 
 import {
   bootstrapFacebookConnection,
+  campaignAllowedByGrowthGoal,
   campaignsForScheduler,
   LAUNCH_CAMPAIGN,
   publishCampaign,
+  readDailyGrowthGoal,
   readPublishingState,
   socialReadiness,
 } from './lib/social-publishing.mjs'
@@ -22,7 +24,7 @@ function safeResults(results = {}) {
   }]))
 }
 
-function publicRunSummary({ bootstrap, readiness, campaigns }) {
+function publicRunSummary({ bootstrap, readiness, campaigns, growthGoal }) {
   return {
     bootstrap: {
       attempted: bootstrap.attempted,
@@ -58,6 +60,11 @@ function publicRunSummary({ bootstrap, readiness, campaigns }) {
     },
     results: safeResults(campaigns[LAUNCH_CAMPAIGN.id]),
     campaigns: Object.fromEntries(Object.entries(campaigns).map(([id, results]) => [id, safeResults(results)])),
+    growthCampaign: {
+      active: growthGoal.active,
+      targetReached: !growthGoal.active,
+      audience: growthGoal.audience,
+    },
   }
 }
 
@@ -80,9 +87,12 @@ export default async () => {
     }
   }
 
+  const growthGoal = await readDailyGrowthGoal(db)
   const campaigns = {}
-  for (const campaign of campaignsForScheduler(new Date())) campaigns[campaign.id] = await publishCampaign(db, campaign, env)
-  const summary = publicRunSummary({ bootstrap, readiness, campaigns })
+  for (const campaign of campaignsForScheduler(new Date()).filter((item) => campaignAllowedByGrowthGoal(item, growthGoal))) {
+    campaigns[campaign.id] = await publishCampaign(db, campaign, env)
+  }
+  const summary = publicRunSummary({ bootstrap, readiness, campaigns, growthGoal })
   console.info('social-launch result', JSON.stringify(summary))
   return new Response(JSON.stringify({ ok: true, bootstrap, readiness, ...summary }), {
     headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },

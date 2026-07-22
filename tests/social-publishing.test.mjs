@@ -1,12 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 import {
   appSecretProof,
+  campaignAllowedByGrowthGoal,
   campaignDeliveryPlan,
   chooseManagedPage,
   dailyGrowthCampaigns,
+  DAILY_GROWTH_GOAL,
   decryptSocialToken,
   encryptSocialToken,
   FREE_OPPORTUNITY_CAMPAIGNS,
@@ -18,6 +20,7 @@ import {
   publishTikTok,
   publishThreads,
   publishX,
+  readDailyGrowthGoal,
   readPublishingState,
   SOCIAL_CAMPAIGNS,
   socialReadiness,
@@ -126,10 +129,39 @@ test('ongoing growth campaign schedules three attributed posts per local day wit
     assert.deepEqual(campaign.channels, ['facebook', 'instagram', 'threads', 'tiktok', 'x'])
     assert.ok(Date.parse(campaign.publishBefore) > Date.parse(campaign.publishAfter))
     assert.match(campaign.text, /100% free|free/i)
-    assert.match(campaign.text, /utm_campaign=beslyfe_daily_/)
+    assert.match(campaign.text, /utm_campaign=erie_builder_100/)
+    assert.match(campaign.text, /https:\/\/beslyfe\.com\/\?utm_source=/)
+    assert.equal(campaign.growthGoalKey, DAILY_GROWTH_GOAL.key)
+    assert.match(campaign.targetAudience, /Erie-area first-time entrepreneurs/)
     assert.doesNotMatch(JSON.stringify(campaign), /\b\d+\s+(?:members|users|followers)\b/i)
     assert.ok(campaign.channelContent.x.text.length <= 280)
   }
+})
+
+test('targeted campaign counts only verified approved non-admin accounts and stops at its goal', async () => {
+  const queries = []
+  const db = { sql: async (strings) => {
+    queries.push(strings.join(' '))
+    return [{ verified_members: 100 }]
+  } }
+  const goal = await readDailyGrowthGoal(db)
+  assert.equal(goal.verifiedMembers, 100)
+  assert.equal(goal.remaining, 0)
+  assert.equal(goal.active, false)
+  assert.match(queries[0], /"email_verified" = true/)
+  assert.match(queries[0], /"status" = 'approved'/)
+  assert.match(queries[0], /"role" <> 'admin'/)
+  assert.equal(campaignAllowedByGrowthGoal({ growthGoalKey: DAILY_GROWTH_GOAL.key }, goal), false)
+  assert.equal(campaignAllowedByGrowthGoal({ id: 'unrelated' }, goal), true)
+})
+
+test('admin social publisher exposes goal progress and its due button publishes due campaigns', () => {
+  const admin = readFileSync(new URL('../assets/js/admin-os.js', import.meta.url), 'utf8')
+  const publisher = readFileSync(new URL('../netlify/functions/social-publisher.mjs', import.meta.url), 'utf8')
+  assert.match(admin, /Erie Builders verified-member campaign/)
+  assert.match(admin, /action: 'publish-due'/)
+  assert.match(publisher, /body\.action === 'publish-due'/)
+  assert.match(publisher, /campaignAllowedByGrowthGoal/)
 })
 
 test('a campaign outside its delivery window is skipped instead of posted late', async () => {
