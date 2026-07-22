@@ -570,24 +570,20 @@ export async function publishCampaign(db, campaign, env = {}, fetchImpl = fetch)
   const deliveries = campaignDeliveryPlan(campaign)
   const results = {}
   const publishAt = Date.parse(String(campaign.publishAfter || ''))
-  if (Number.isFinite(publishAt) && publishAt > Date.now()) {
-    for (const delivery of deliveries) {
-      results[delivery.key] = { ok: true, skipped: true, status: 'scheduled', publishAfter: campaign.publishAfter }
-    }
-    return results
-  }
   const publishBefore = Date.parse(String(campaign.publishBefore || ''))
-  if (Number.isFinite(publishBefore) && publishBefore <= Date.now()) {
-    for (const delivery of deliveries) {
-      results[delivery.key] = { ok: true, skipped: true, status: 'missed_window', publishAfter: campaign.publishAfter }
-    }
-    return results
-  }
   for (const delivery of deliveries) {
     const key = `${campaign.id}:${delivery.key}`
     const previous = cleanObject(state.deliveries[key])
     if (previous.status === 'published') {
       results[delivery.key] = { ok: true, skipped: true, ...previous }
+      continue
+    }
+    if (Number.isFinite(publishAt) && publishAt > Date.now()) {
+      results[delivery.key] = { ok: true, skipped: true, status: 'scheduled', publishAfter: campaign.publishAfter }
+      continue
+    }
+    if (Number.isFinite(publishBefore) && publishBefore <= Date.now()) {
+      results[delivery.key] = { ok: true, skipped: true, status: 'missed_window', publishAfter: campaign.publishAfter }
       continue
     }
     try {

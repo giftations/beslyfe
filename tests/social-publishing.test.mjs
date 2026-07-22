@@ -176,6 +176,21 @@ test('a campaign outside its delivery window is skipped instead of posted late',
   assert.equal(results.instagram_story.status, 'missed_window')
 })
 
+test('published deliveries remain authoritative after their delivery window closes', async () => {
+  const published = { status: 'published', externalId: 'post-123', publishedAt: '2026-07-22T17:05:00.000Z' }
+  const db = { sql: async () => [{ data: { connections: {}, deliveries: { 'expired-campaign:facebook': published } } }] }
+  const results = await publishCampaign(db, {
+    id: 'expired-campaign',
+    publishAfter: '2020-01-01T00:00:00Z',
+    publishBefore: '2020-01-01T01:00:00Z',
+    channels: ['facebook'],
+    storyCompanion: false,
+  }, {})
+  assert.equal(results.facebook.status, 'published')
+  assert.equal(results.facebook.externalId, 'post-123')
+  assert.equal(results.facebook.skipped, true)
+})
+
 test('every X campaign has count-free copy that fits the post limit', () => {
   const xCampaigns = SOCIAL_CAMPAIGNS.filter((campaign) => campaign.channels.includes('x'))
   assert.ok(xCampaigns.length >= 1)
