@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 import {
   normalizePaymentHandle,
@@ -10,6 +12,11 @@ import {
   preparePaymentDestination,
   securePaymentDestination,
 } from '../platform/growth/payment-destination.mjs'
+
+test('payment destination browser controller has valid JavaScript syntax', () => {
+  const controller = fileURLToPath(new URL('../assets/js/payment-destination-controller.mjs', import.meta.url))
+  execFileSync(process.execPath, ['--check', controller], { stdio: 'pipe' })
+})
 
 test('Beslyfe lead form is a built-in destination with no payment input', () => {
   assert.equal(paymentInputKind('contact-form'), 'built-in')
