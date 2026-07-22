@@ -2,6 +2,13 @@
 // The first release deliberately uses provider-hosted checkout links so an
 // owner can start selling without Beslyfe storing card data or payment secrets.
 
+import {
+  normalizePaymentHandle,
+  paymentDestinationFromHandle,
+} from './payment-destination.mjs'
+
+export { normalizePaymentHandle, paymentDestinationFromHandle }
+
 export const SALES_MODES = [
   { key: 'product', label: 'Sell a product', actionLabel: 'Buy now' },
   { key: 'service', label: 'Sell a service', actionLabel: 'Get started' },
@@ -12,31 +19,16 @@ export const SALES_MODES = [
 ]
 
 export const SALES_PROVIDERS = [
-  { key: 'paypal', label: 'PayPal.Me', effort: 'username', entry: 'handle', handlePrefix: '@', handleExample: '@YourPayPalName', handlePattern: '^[A-Za-z0-9]{1,20}$', destinationTemplate: 'https://paypal.me/{handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
-  { key: 'cash-app', label: 'Cash App', effort: 'username', entry: 'handle', handlePrefix: '@', handleExample: '@YourCashtag', handlePattern: '^[A-Za-z][A-Za-z0-9]{0,19}$', destinationTemplate: 'https://cash.app/${handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
-  { key: 'venmo', label: 'Venmo', effort: 'username', entry: 'handle', handlePrefix: '@', handleExample: '@YourVenmoName', handlePattern: '^[A-Za-z0-9_-]{5,30}$', destinationTemplate: 'https://venmo.com/u/{handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
-  { key: 'stripe-payment-link', label: 'Stripe Payment Link', effort: 'paste-link', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
-  { key: 'shopify-buy-button', label: 'Shopify Buy Button', effort: 'paste-link-or-embed', supports: ['product'] },
-  { key: 'square-checkout', label: 'Square Online Checkout', effort: 'paste-link', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
-  { key: 'booking-link', label: 'Booking provider', effort: 'paste-link', supports: ['booking', 'service'] },
+  { key: 'paypal', label: 'PayPal.Me', effort: 'username', entry: 'handle', handlePrefix: '@', handleLabel: 'PayPal.Me username', handleExample: '@YourPayPalName', handlePattern: '^[A-Za-z0-9]{1,20}$', destinationTemplate: 'https://paypal.me/{handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'cash-app', label: 'Cash App', effort: 'username', entry: 'handle', handlePrefix: '$', handleLabel: 'Cash App $Cashtag', handleExample: '$YourCashtag', handlePattern: '^[A-Za-z][A-Za-z0-9]{0,19}$', destinationTemplate: 'https://cash.app/${handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'venmo', label: 'Venmo', effort: 'username', entry: 'handle', handlePrefix: '@', handleLabel: 'Venmo username', handleExample: '@YourVenmoName', handlePattern: '^[A-Za-z0-9_-]{5,30}$', destinationTemplate: 'https://venmo.com/u/{handle}', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'stripe-payment-link', label: 'Stripe Payment Link', effort: 'paste-link', entry: 'url', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'shopify-buy-button', label: 'Shopify Buy Button', effort: 'paste-link-or-embed', entry: 'url', supports: ['product'] },
+  { key: 'square-checkout', label: 'Square Online Checkout', effort: 'paste-link', entry: 'url', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'booking-link', label: 'Booking provider', effort: 'paste-link', entry: 'url', supports: ['booking', 'service'] },
   { key: 'contact-form', label: 'Beslyfe lead form', effort: 'built-in', entry: 'built-in', supports: ['lead'] },
-  { key: 'external', label: 'Another secure checkout', effort: 'paste-link', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
+  { key: 'external', label: 'Another secure checkout', effort: 'paste-link', entry: 'url', supports: ['product', 'service', 'booking', 'donation', 'ticket'] },
 ]
-
-export function normalizePaymentHandle(providerKey, value) {
-  const provider = SALES_PROVIDERS.find((item) => item.key === providerKey)
-  if (!provider || provider.entry !== 'handle') return ''
-  const handle = String(value || '').trim().replace(/^[@$]+/, '')
-  if (!handle || !(new RegExp(provider.handlePattern).test(handle))) return ''
-  return handle
-}
-
-export function paymentDestinationFromHandle(providerKey, value) {
-  const provider = SALES_PROVIDERS.find((item) => item.key === providerKey)
-  const handle = normalizePaymentHandle(providerKey, value)
-  if (!provider || !handle) return ''
-  return provider.destinationTemplate.replace('{handle}', encodeURIComponent(handle))
-}
 
 export const SALES_REQUIRED_FIELDS = [
   'ecosystemId',
