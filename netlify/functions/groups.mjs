@@ -15,12 +15,13 @@ import { createNotification } from './lib/notify.mjs'
 //   POST { kind:'join', groupId, profileId }
 //   POST { kind:'leave', groupId, profileId }
 //   POST { kind:'add', groupId, ownerId, profileId }       (owner invites a member)
-//   POST { kind:'message', groupId, senderId, body, mediaUrl }
+//   POST { kind:'message', groupId, senderId, body, mediaUrl, mediaKind }
 
 const MAX_NAME = 120
 const MAX_DESC = 600
 const MAX_BODY = 4000
 const MAX_URL = 1000
+const VIDEO_URL_PATTERN = /\.(mp4|webm|ogg|ogv|mov|m4v)(?:[?#]|$)/i
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -36,6 +37,33 @@ function str(value, max) {
 
 function iso(value) {
   return value instanceof Date ? value.toISOString() : value
+}
+
+function resolveMediaKind(value, mediaUrl) {
+  if (!mediaUrl) return ''
+  const explicit = str(value, 20).trim().toLowerCase()
+  if (explicit === 'image' || explicit === 'video') return explicit
+  // Messages created before media_kind existed still need to render. Keep the
+  // old extension heuristic only as a fallback for those legacy records.
+  return VIDEO_URL_PATTERN.test(mediaUrl) ? 'video' : 'image'
+}
+
+// New attachments must be an item from the sender's own media library. The
+// stored row is authoritative for kind, so cached clients that omit mediaKind
+// still send videos correctly and callers cannot inject external tracker URLs.
+export async function resolveOwnedGroupMedia(db, mediaUrl, senderId) {
+  if (!mediaUrl) return { ok: true, mediaUrl: '', mediaKind: '' }
+  const rows = await db.sql`
+    SELECT "owner_id", "kind", "url" FROM social_media
+    WHERE "url" = ${mediaUrl} LIMIT 1
+  `
+  if (!rows.length || (rows[0].kind !== 'image' && rows[0].kind !== 'video')) {
+    return { ok: false, status: 400, error: 'Choose a photo or video from your media library.' }
+  }
+  if (rows[0].owner_id !== senderId) {
+    return { ok: false, status: 403, error: 'You can only attach media from your own library.' }
+  }
+  return { ok: true, mediaUrl: rows[0].url, mediaKind: rows[0].kind }
 }
 
 async function isMember(db, groupId, profileId) {
@@ -116,6 +144,7 @@ export default async (req) => {
           senderId: gm.sender_id,
           body: gm.body,
           mediaUrl: gm.media_url,
+          mediaKind: resolveMediaKind(gm.media_kind, gm.media_url),
           mine: gm.sender_id === me,
           createdAt: iso(gm.created_at),
           sender: {
@@ -261,11 +290,14 @@ export default async (req) => {
       if (!groupId) return json({ error: 'Missing group.' }, 400)
       if (!text && !mediaUrl) return json({ error: 'Write a message first.' }, 400)
       if (!(await isMember(db, groupId, senderId))) return json({ error: 'Join the group to send messages.' }, 403)
+      const media = await resolveOwnedGroupMedia(db, mediaUrl, senderId)
+      if (!media.ok) return json({ error: media.error }, media.status)
+      const mediaKind = media.mediaKind
       const id = newId()
       const now = new Date().toISOString()
       await db.sql`
-        INSERT INTO social_group_messages ("id", "group_id", "sender_id", "body", "media_url", "created_at")
-        VALUES (${id}, ${groupId}, ${senderId}, ${text}, ${mediaUrl}, ${now})
+        INSERT INTO social_group_messages ("id", "group_id", "sender_id", "body", "media_url", "media_kind", "created_at")
+        VALUES (${id}, ${groupId}, ${senderId}, ${text}, ${media.mediaUrl}, ${mediaKind}, ${now})
       `
       // Notify the group's other members (best-effort, honoring their prefs). The
       // group name gives the preview context, and the link opens Groups.

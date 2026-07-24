@@ -19,6 +19,24 @@ const MAX_BODY = 4000
 const MAX_URL = 1000
 const MEDIA_KINDS = new Set(['image', 'video'])
 
+// Attachments must come from the sender's own media library. The stored row is
+// authoritative for kind, so a cached client cannot mislabel a video as an
+// image and callers cannot inject arbitrary external URLs.
+export async function resolveOwnedMessageMedia(db, mediaUrl, senderId) {
+  if (!mediaUrl) return { ok: true, mediaUrl: '', mediaKind: '' }
+  const rows = await db.sql`
+    SELECT "owner_id", "kind", "url" FROM social_media
+    WHERE "url" = ${mediaUrl} LIMIT 1
+  `
+  if (!rows.length || !MEDIA_KINDS.has(rows[0].kind)) {
+    return { ok: false, status: 400, error: 'Choose a photo or video from your media library.' }
+  }
+  if (rows[0].owner_id !== senderId) {
+    return { ok: false, status: 403, error: 'You can only attach media from your own library.' }
+  }
+  return { ok: true, mediaUrl: rows[0].url, mediaKind: rows[0].kind }
+}
+
 // A one-line preview for a conversation list. A media-only message has no text,
 // so show what it carried instead of a blank line.
 function preview(body, mediaKind) {
@@ -164,9 +182,6 @@ export default async (req) => {
     const recipientId = str(body.recipientId, 100)
     const text = str(body.body, MAX_BODY).trim()
     const mediaUrl = str(body.mediaUrl, MAX_URL)
-    let mediaKind = str(body.mediaKind, 20)
-    if (mediaUrl && !MEDIA_KINDS.has(mediaKind)) mediaKind = 'image'
-    if (!mediaUrl) mediaKind = ''
     if (!recipientId) return json({ error: 'Missing recipient.' }, 400)
     if (senderId === recipientId) return json({ error: 'You cannot message yourself.' }, 400)
     if (!text && !mediaUrl) return json({ error: 'Write a message or add a photo or video.' }, 400)
@@ -174,18 +189,20 @@ export default async (req) => {
     // The recipient must be a real profile.
     const exists = await db.sql`SELECT id FROM profiles WHERE id = ${recipientId} LIMIT 1`
     if (!exists.length) return json({ error: 'That profile no longer exists.' }, 404)
+    const media = await resolveOwnedMessageMedia(db, mediaUrl, senderId)
+    if (!media.ok) return json({ error: media.error }, media.status)
 
     const id = newId()
     const now = new Date().toISOString()
     await db.sql`
       INSERT INTO social_messages ("id", "sender_id", "recipient_id", "body", "media_url", "media_kind", "read_at", "created_at")
-      VALUES (${id}, ${senderId}, ${recipientId}, ${text}, ${mediaUrl}, ${mediaKind}, NULL, ${now})
+      VALUES (${id}, ${senderId}, ${recipientId}, ${text}, ${media.mediaUrl}, ${media.mediaKind}, NULL, ${now})
     `
     // Notify the recipient (respects their notification preferences). Best-effort:
     // a failure here never fails the send.
     await createNotification(db, {
       recipientId, actorId: senderId, type: 'message', messageId: id,
-      body: preview(text, mediaKind), link: `/messages?to=${encodeURIComponent(senderId)}`,
+      body: preview(text, media.mediaKind), link: `/messages?to=${encodeURIComponent(senderId)}`,
     })
     return json({ ok: true, id, createdAt: now })
   }

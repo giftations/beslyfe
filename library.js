@@ -49,15 +49,6 @@
       .catch(function () { grid.innerHTML = '<p class="so-empty">Could not load your library.</p>'; });
   }
 
-  function fileToBase64(file) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () { resolve(String(reader.result).split(',')[1]); };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
   uploadBtn.addEventListener('click', function () {
     if (!me()) { S.openProfilePicker(function () { renderIdentity(); load(); }); return; }
     uploadInput.click();
@@ -68,12 +59,13 @@
     var id = me(); if (!id) return;
     uploadError.hidden = true;
     uploadBtn.disabled = true; uploadBtn.textContent = 'Uploading…';
-    fileToBase64(f).then(function (dataBase64) {
-      return fetch(S.MEDIA_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ownerId: id.id, filename: f.name, contentType: f.type, dataBase64: dataBase64 })
-      });
-    }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Upload failed'); return d; }); })
+    var upload = S.uploadMediaFile
+      ? S.uploadMediaFile(f, {
+          ownerId: id.id,
+          onProgress: function (percent) { uploadBtn.textContent = 'Uploading ' + percent + '%'; }
+        })
+      : Promise.reject(new Error('Upload tools could not start.'));
+    upload
       .then(function () { uploadInput.value = ''; load(); })
       .catch(function (err) { uploadError.textContent = err.message; uploadError.hidden = false; })
       .finally(function () { uploadBtn.disabled = false; uploadBtn.textContent = '⬆ Upload photo or video'; });

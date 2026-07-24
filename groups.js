@@ -16,22 +16,10 @@
 
   function me() { return S.getIdentity(); }
 
-  // Upload a chosen photo/video to the member's media library, resolving to the
-  // stored { url, kind }. Images are resized first so large photos upload cleanly.
+  // Upload a chosen photo/video through the shared MIME-aware path.
   function uploadMedia(file) {
-    var prep = S.prepareImageForUpload
-      ? S.prepareImageForUpload(file)
-      : new Promise(function (resolve) {
-          var r = new FileReader();
-          r.onload = function () { resolve({ dataBase64: String(r.result).split(',')[1] || '', contentType: file.type, filename: file.name }); };
-          r.readAsDataURL(file);
-        });
-    return prep.then(function (prepared) {
-      return fetch(S.MEDIA_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: prepared.filename, contentType: prepared.contentType, dataBase64: prepared.dataBase64 })
-      }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Upload failed'); return d; }); });
-    });
+    if (!S.uploadMediaFile) return Promise.reject(new Error('Upload tools could not start.'));
+    return S.uploadMediaFile(file);
   }
 
   function renderIdentity() {
@@ -91,6 +79,8 @@
   });
 
   function openGroup(groupId) {
+    if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+    groupMedia = null;
     openGroupId = groupId;
     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
     Array.prototype.forEach.call(listEl.querySelectorAll('.group-item'), function (el) { el.classList.toggle('active', el.getAttribute('data-id') === groupId); });
@@ -105,6 +95,11 @@
   var latest = { group: null, members: [] };
   var groupMedia = null;   // { file, kind, preview } chosen but not yet sent
 
+  window.addEventListener('pagehide', function () {
+    if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  });
+
   function buildGroupShell(g, isMember) {
     var form = isMember
       ? '<form class="gc-form" id="gcForm">' +
@@ -112,7 +107,8 @@
           '<button class="dm-attach" id="gcAttach" type="button" title="Add photo or video" aria-label="Add photo or video">📎</button>' +
           '<input type="text" id="gcInput" placeholder="Message…" maxlength="4000" autocomplete="off">' +
           '<button class="so-btn" type="submit">Send</button></form>' +
-        '<div class="dm-preview" id="gcPreview" hidden></div>'
+        '<div class="dm-preview" id="gcPreview" hidden></div>' +
+        '<p class="so-error" id="gcError" hidden></p>'
       : '<div class="gc-form"><button class="so-btn" id="gcJoin" type="button" style="width:100%">Join to chat</button></div>';
 
     chatEl.innerHTML =
@@ -125,6 +121,9 @@
     var fileInput = chatEl.querySelector('#gcFile');
     var attachBtn = chatEl.querySelector('#gcAttach');
     var previewEl = chatEl.querySelector('#gcPreview');
+    var errorEl = chatEl.querySelector('#gcError');
+    var sending = false;
+    if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
     groupMedia = null;
 
     function renderPreview() {
@@ -132,48 +131,131 @@
       if (!groupMedia) { previewEl.hidden = true; previewEl.innerHTML = ''; return; }
       previewEl.hidden = false;
       var inner = groupMedia.kind === 'video'
-        ? '<video src="' + S.escHtml(groupMedia.preview) + '" muted playsinline></video>'
-        : '<img src="' + S.escHtml(groupMedia.preview) + '" alt="">';
+        ? '<video src="' + S.escHtml(groupMedia.preview) + '" muted playsinline aria-label="Selected group video preview"></video>'
+        : '<img src="' + S.escHtml(groupMedia.preview) + '" alt="Selected group attachment preview">';
       previewEl.innerHTML = inner + '<button type="button" class="dm-preview-x" title="Remove">×</button>';
       previewEl.querySelector('.dm-preview-x').addEventListener('click', function () {
+        if (sending) return;
+        if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
         groupMedia = null; if (fileInput) fileInput.value = ''; renderPreview();
       });
     }
     if (attachBtn) attachBtn.addEventListener('click', function () { fileInput.click(); });
     if (fileInput) fileInput.addEventListener('change', function () {
       var f = fileInput.files[0]; if (!f) return;
-      var kind = f.type.indexOf('video') === 0 ? 'video' : 'image';
-      var reader = new FileReader();
-      reader.onload = function () { groupMedia = { file: f, kind: kind, preview: reader.result }; renderPreview(); };
-      reader.readAsDataURL(f);
+      if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+      groupMedia = null;
+      renderPreview();
+      var kind = S.mediaKindForFile ? S.mediaKindForFile(f) : '';
+      if (!kind) {
+        if (errorEl) {
+          errorEl.textContent = 'Choose a photo or video file.';
+          errorEl.hidden = false;
+        }
+        fileInput.value = '';
+        return;
+      }
+      if (errorEl) errorEl.hidden = true;
+      var previewPromise = S.createMediaPreview
+        ? S.createMediaPreview(f)
+        : Promise.reject(new Error('Preview tools could not start.'));
+      function isCurrentSelection() {
+        return openGroupId === g.id
+          && chatEl.querySelector('#gcFile') === fileInput
+          && fileInput.files[0] === f;
+      }
+      previewPromise.then(function (preview) {
+        if (!isCurrentSelection()) {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(preview);
+          return;
+        }
+        groupMedia = {
+          file: f,
+          kind: kind,
+          preview: preview.preview,
+          previewObjectUrl: preview.previewObjectUrl
+        };
+        renderPreview();
+      }).catch(function (error) {
+        if (!isCurrentSelection()) return;
+        groupMedia = null;
+        fileInput.value = '';
+        renderPreview();
+        if (errorEl) {
+          errorEl.textContent = error.message || 'Could not preview that file.';
+          errorEl.hidden = false;
+        }
+      });
     });
 
     var f = chatEl.querySelector('#gcForm');
     if (f) f.addEventListener('submit', function (e) {
       e.preventDefault();
+      if (sending) return;
       var input = chatEl.querySelector('#gcInput');
       var submitBtn = f.querySelector('button[type=submit]');
       var text = input.value.trim(); if (!text && !groupMedia) return;
       var who = me(); if (!who) return;
+      var targetGroupId = openGroupId;
+      var submittedMedia = groupMedia;
+      function isCurrentComposer() {
+        return openGroupId === targetGroupId
+          && chatEl.querySelector('#gcForm') === f;
+      }
+      if (errorEl) errorEl.hidden = true;
+      sending = true;
       input.disabled = true;
       if (submitBtn) submitBtn.disabled = true;
       if (attachBtn) attachBtn.disabled = true;
-      var ready = groupMedia
-        ? (submitBtn && (submitBtn.textContent = 'Sending…'), uploadMedia(groupMedia.file).then(function (d) { return d.url; }))
-        : Promise.resolve('');
-      ready.then(function (mediaUrl) {
-        return fetch(S.GROUPS_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'message', groupId: openGroupId, body: text, mediaUrl: mediaUrl }) })
+      var removeBtn = previewEl && previewEl.querySelector('.dm-preview-x');
+      if (removeBtn) removeBtn.disabled = true;
+      var ready = submittedMedia
+        ? (submitBtn && (submitBtn.textContent = 'Sending…'),
+          submittedMedia.url
+            ? Promise.resolve({ mediaUrl: submittedMedia.url, mediaKind: submittedMedia.kind })
+            : uploadMedia(submittedMedia.file).then(function (d) {
+                // Keep the successful library item if delivery fails, so retrying
+                // does not upload a duplicate and consume quota again.
+                submittedMedia.file = null;
+                submittedMedia.url = d.url;
+                submittedMedia.kind = d.kind;
+                return { mediaUrl: d.url, mediaKind: d.kind };
+              }))
+        : Promise.resolve({ mediaUrl: '', mediaKind: '' });
+      ready.then(function (media) {
+        return fetch(S.GROUPS_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          kind: 'message',
+          groupId: targetGroupId,
+          body: text,
+          mediaUrl: media.mediaUrl,
+          mediaKind: media.mediaKind
+        }) })
           .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Failed'); }); });
       }).then(function () {
+        loadList();
+        if (!isCurrentComposer()) return;
+        sending = false;
         input.value = ''; input.disabled = false;
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
         if (attachBtn) attachBtn.disabled = false;
-        groupMedia = null; if (fileInput) fileInput.value = ''; renderPreview();
+        if (groupMedia === submittedMedia) {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(submittedMedia);
+          groupMedia = null;
+          if (fileInput) fileInput.value = '';
+        }
+        renderPreview();
         input.focus(); renderChat(false);
-      }).catch(function () {
+      }).catch(function (error) {
+        if (!isCurrentComposer()) return;
+        sending = false;
         input.disabled = false;
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
         if (attachBtn) attachBtn.disabled = false;
+        if (removeBtn && removeBtn.isConnected) removeBtn.disabled = false;
+        if (errorEl) {
+          errorEl.textContent = error && error.message ? error.message : 'Your message could not be sent. Please try again.';
+          errorEl.hidden = false;
+        }
       });
     });
 
@@ -195,7 +277,14 @@
         : 'Leave this group?';
       if (!window.confirm(prompt)) return;
       fetch(S.GROUPS_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'leave', groupId: openGroupId }) })
-        .then(function () { openGroupId = null; currentShellKey = null; if (pollTimer) clearInterval(pollTimer); chatEl.innerHTML = '<div class="gc-empty">You left the group.</div>'; loadList(); });
+        .then(function () {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+          groupMedia = null;
+          openGroupId = null; currentShellKey = null;
+          if (pollTimer) clearInterval(pollTimer);
+          chatEl.innerHTML = '<div class="gc-empty">You left the group.</div>';
+          loadList();
+        });
     });
 
     var info = chatEl.querySelector('#gcInfo');
@@ -212,7 +301,10 @@
     box.innerHTML = messages.map(function (m) {
       var media = '';
       if (m.mediaUrl) {
-        media = /\.(mp4|webm|ogg|ogv|mov|m4v)(\?|#|$)/i.test(m.mediaUrl)
+        var mediaKind = m.mediaKind === 'video' || m.mediaKind === 'image'
+          ? m.mediaKind
+          : (/\.(mp4|webm|ogg|ogv|mov|m4v)(\?|#|$)/i.test(m.mediaUrl) ? 'video' : 'image');
+        media = mediaKind === 'video'
           ? '<video class="gc-media" src="' + S.escHtml(m.mediaUrl) + '" controls playsinline preload="metadata"></video>'
           : '<a href="' + S.escHtml(m.mediaUrl) + '" target="_blank" rel="noopener"><img class="gc-media" src="' + S.escHtml(m.mediaUrl) + '" alt="" loading="lazy"></a>';
       }
@@ -225,21 +317,36 @@
 
   function renderChat(showLoading) {
     var id = me();
+    var requestedGroupId = openGroupId;
     if (showLoading) { chatEl.innerHTML = '<div class="gc-empty">Loading…</div>'; currentShellKey = null; }
-    var url = S.GROUPS_ENDPOINT + '?type=group&id=' + encodeURIComponent(openGroupId) + (id ? '&me=' + encodeURIComponent(id.id) : '');
+    var url = S.GROUPS_ENDPOINT + '?type=group&id=' + encodeURIComponent(requestedGroupId) + (id ? '&me=' + encodeURIComponent(id.id) : '');
     fetch(url).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); }).then(function (res) {
-      if (!res.ok) { chatEl.innerHTML = '<div class="gc-empty">' + S.escHtml(res.d.error || 'Could not open group.') + '</div>'; currentShellKey = null; return; }
+      if (openGroupId !== requestedGroupId) return;
+      if (!res.ok) {
+        if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+        groupMedia = null;
+        chatEl.innerHTML = '<div class="gc-empty">' + S.escHtml(res.d.error || 'Could not open group.') + '</div>';
+        currentShellKey = null;
+        return;
+      }
       var data = res.d;
       latest.group = data.group;
       latest.members = data.members || [];
       // Rebuild the shell only when the group or membership changes (or it's gone).
-      var shellKey = openGroupId + ':' + (data.isMember ? '1' : '0');
+      var shellKey = requestedGroupId + ':' + (data.isMember ? '1' : '0');
       if (currentShellKey !== shellKey || !chatEl.querySelector('.gc-msgs')) {
         buildGroupShell(data.group, data.isMember);
         currentShellKey = shellKey;
       }
       renderGroupMessages(data.messages);
-    }).catch(function () { if (showLoading) chatEl.innerHTML = '<div class="gc-empty">Could not open group.</div>'; });
+    }).catch(function () {
+      if (openGroupId !== requestedGroupId) return;
+      if (showLoading) {
+        if (S.releaseMediaPreview) S.releaseMediaPreview(groupMedia);
+        groupMedia = null;
+        chatEl.innerHTML = '<div class="gc-empty">Could not open group.</div>';
+      }
+    });
   }
 
   // ── New group modal ──

@@ -246,7 +246,7 @@
     var body = postBody.value.trim();
     var imageUrl = postImage.value.trim();
     composerError.hidden = true;
-    if (!body && !imageUrl && !selectedPhoto) { composerError.textContent = 'Write something or add a photo.'; composerError.hidden = false; return; }
+    if (!body && !imageUrl && !selectedPhoto) { composerError.textContent = 'Write something, or choose an optional photo.'; composerError.hidden = false; return; }
     postBtn.disabled = true; postBtn.textContent = 'Posting…';
     try {
       // Upload an attached photo first, then post with its URL.

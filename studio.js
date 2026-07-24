@@ -87,27 +87,14 @@
   window.BeslyfeMusic = BeslyfeMusic;
 
   // ── Helpers ─────────────────────────────────────────────────────────────
-  function fileToBase64(file) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () { resolve(String(reader.result).split(',')[1]); };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  // Upload a file to the member's media library and return the stored item.
-  // Images are resized/compressed first (via BeslyfeSocial.prepareImageForUpload) so
-  // large photos and PNGs upload reliably; videos are sent untouched.
-  function uploadToLibrary(file, ownerId, filter) {
-    var prep = S.prepareImageForUpload
-      ? S.prepareImageForUpload(file)
-      : fileToBase64(file).then(function (b) { return { dataBase64: b, contentType: file.type, filename: file.name }; });
-    return prep.then(function (prepared) {
-      return fetch(S.MEDIA_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ownerId: ownerId, filename: prepared.filename, contentType: prepared.contentType, dataBase64: prepared.dataBase64, filter: filter || '' })
-      }).then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Upload failed'); return d; }); });
+  // Upload a file through the shared MIME-aware path. Images are optimized;
+  // videos stay untouched and use resumable chunks when needed.
+  function uploadToLibrary(file, ownerId, filter, onProgress) {
+    if (!S.uploadMediaFile) return Promise.reject(new Error('Upload tools could not start.'));
+    return S.uploadMediaFile(file, {
+      ownerId: ownerId,
+      filter: filter || '',
+      onProgress: onProgress
     });
   }
 
@@ -120,6 +107,7 @@
 
     var mode = opts.mode || 'post';
     var state = { media: null, filter: '', music: '', location: null };
+    var submitting = false;
 
     var overlay = document.createElement('div');
     overlay.className = 'so-modal-overlay';
@@ -163,12 +151,24 @@
     var errorEl = overlay.querySelector('#stError');
     var publishBtn = overlay.querySelector('#stPublish');
 
-    function close() { BeslyfeMusic.stop(); overlay.remove(); }
+    function close() {
+      if (submitting) return;
+      BeslyfeMusic.stop();
+      if (S.releaseMediaPreview) S.releaseMediaPreview(state.media);
+      overlay.remove();
+    }
+    function setBusy(busy) {
+      submitting = busy;
+      Array.prototype.forEach.call(overlay.querySelectorAll('button,input,textarea,select'), function (control) {
+        control.disabled = busy;
+      });
+    }
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     overlay.querySelector('.so-modal-close').addEventListener('click', close);
 
     // Tabs switch the mode in place.
     overlay.querySelector('.studio-tabs').addEventListener('click', function (e) {
+      if (submitting) return;
       var t = e.target.closest('.studio-tab'); if (!t) return;
       mode = t.getAttribute('data-mode');
       Array.prototype.forEach.call(overlay.querySelectorAll('.studio-tab'), function (b) { b.classList.toggle('active', b === t); });
@@ -176,13 +176,43 @@
     });
 
     // ── Media stage ──
-    drop.addEventListener('click', function () { fileInput.click(); });
+    drop.addEventListener('click', function () { if (!submitting) fileInput.click(); });
     fileInput.addEventListener('change', function () {
+      if (submitting) return;
       var f = fileInput.files[0]; if (!f) return;
-      var kind = f.type.indexOf('video') === 0 ? 'video' : 'image';
-      var reader = new FileReader();
-      reader.onload = function () { state.media = { file: f, kind: kind, preview: reader.result, url: '' }; renderStage(); };
-      reader.readAsDataURL(f);
+      if (S.releaseMediaPreview) S.releaseMediaPreview(state.media);
+      state.media = null;
+      renderStage();
+      var kind = S.mediaKindForFile ? S.mediaKindForFile(f) : '';
+      if (!kind) {
+        errorEl.textContent = 'Choose a photo or video file.';
+        errorEl.hidden = false;
+        fileInput.value = '';
+        return;
+      }
+      errorEl.hidden = true;
+      var previewPromise = S.createMediaPreview
+        ? S.createMediaPreview(f)
+        : Promise.reject(new Error('Preview tools could not start.'));
+      previewPromise.then(function (preview) {
+        if (!overlay.isConnected || fileInput.files[0] !== f) {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(preview);
+          return;
+        }
+        state.media = {
+          file: f,
+          kind: kind,
+          preview: preview.preview,
+          previewObjectUrl: preview.previewObjectUrl,
+          url: ''
+        };
+        renderStage();
+      }).catch(function (error) {
+        if (!overlay.isConnected || fileInput.files[0] !== f) return;
+        fileInput.value = '';
+        errorEl.textContent = error.message || 'Could not preview that file.';
+        errorEl.hidden = false;
+      });
     });
 
     function renderStage() {
@@ -195,11 +225,17 @@
           stage.innerHTML = '<img src="' + S.escHtml(src) + '" alt="" style="filter:' + css + '">' + clearBtn();
         }
         var cb = stage.querySelector('.studio-clear');
-        if (cb) cb.addEventListener('click', function () { state.media = null; renderStage(); });
+        if (cb) cb.addEventListener('click', function () {
+          if (submitting) return;
+          if (S.releaseMediaPreview) S.releaseMediaPreview(state.media);
+          state.media = null;
+          fileInput.value = '';
+          renderStage();
+        });
       } else {
-        var need = mode === 'reel' ? 'Add a video for your reel' : (mode === 'story' ? 'Add a photo or video for your story' : '+ Add photo or video');
+        var need = mode === 'reel' ? 'Add a video for your reel' : '+ Add an optional photo or video';
         stage.innerHTML = '<div class="studio-drop" id="stDrop2"><span>' + S.escHtml(need) + '</span><small>or choose from your library below</small></div>';
-        stage.querySelector('#stDrop2').addEventListener('click', function () { fileInput.click(); });
+        stage.querySelector('#stDrop2').addEventListener('click', function () { if (!submitting) fileInput.click(); });
       }
     }
     function clearBtn() { return '<button class="studio-clear" type="button" title="Remove">×</button>'; }
@@ -211,6 +247,7 @@
       b.type = 'button';
       b.innerHTML = '<span class="studio-filter-sw" style="filter:' + f.css + '"></span>' + S.escHtml(f.name);
       b.addEventListener('click', function () {
+        if (submitting) return;
         state.filter = f.id;
         Array.prototype.forEach.call(filtersEl.children, function (c) { c.classList.remove('active'); });
         b.classList.add('active');
@@ -226,6 +263,7 @@
       b.type = 'button';
       b.textContent = t.id ? '♪ ' + t.name : t.name;
       b.addEventListener('click', function () {
+        if (submitting) return;
         state.music = t.id;
         Array.prototype.forEach.call(musicEl.children, function (c) { c.classList.remove('active'); });
         b.classList.add('active');
@@ -240,17 +278,19 @@
     var locVis = overlay.querySelector('#stLocVis');
     var locLabel = overlay.querySelector('#stLocLabel');
     overlay.querySelector('#stLocClear').addEventListener('click', function () {
+      if (submitting) return;
       state.location = null; locPicked.hidden = true; locBtn.hidden = false;
     });
     locBtn.addEventListener('click', function () {
+      if (submitting) return;
       if (!navigator.geolocation) { errorEl.textContent = 'Location is not available in this browser.'; errorEl.hidden = false; return; }
       locBtn.disabled = true; locBtn.textContent = 'Locating…';
       navigator.geolocation.getCurrentPosition(function (pos) {
         state.location = { lat: String(pos.coords.latitude.toFixed(6)), lng: String(pos.coords.longitude.toFixed(6)) };
-        locBtn.hidden = true; locBtn.disabled = false; locBtn.textContent = '📍 Add my location';
+        locBtn.hidden = true; locBtn.disabled = submitting; locBtn.textContent = '📍 Add my location';
         locPicked.hidden = false;
       }, function () {
-        locBtn.disabled = false; locBtn.textContent = '📍 Add my location';
+        locBtn.disabled = submitting; locBtn.textContent = '📍 Add my location';
         errorEl.textContent = 'Could not get your location. Please allow access and try again.'; errorEl.hidden = false;
       });
     });
@@ -268,10 +308,16 @@
             : '<img src="' + S.escHtml(it.url) + '" alt="" style="filter:' + css + '">';
           return '<button class="studio-lib-item" type="button" data-url="' + S.escHtml(it.url) + '" data-kind="' + S.escHtml(it.kind) + '" data-filter="' + S.escHtml(it.filter) + '">' + thumb + '</button>';
         }).join('') + '</div>';
+        if (submitting) {
+          Array.prototype.forEach.call(libraryEl.querySelectorAll('button'), function (button) { button.disabled = true; });
+        }
         libraryEl.addEventListener('click', function (e) {
+          if (submitting) return;
           var b = e.target.closest('.studio-lib-item'); if (!b) return;
+          if (S.releaseMediaPreview) S.releaseMediaPreview(state.media);
           state.media = { file: null, kind: b.getAttribute('data-kind'), preview: '', url: b.getAttribute('data-url') };
           state.filter = b.getAttribute('data-filter') || state.filter;
+          fileInput.value = '';
           renderStage();
         });
       })
@@ -279,42 +325,62 @@
 
     // ── Publish ──
     publishBtn.addEventListener('click', function () {
+      if (submitting) return;
       var caption = captionEl.value.trim();
       errorEl.hidden = true;
       if (mode === 'reel' && (!state.media || state.media.kind !== 'video')) { errorEl.textContent = 'A reel needs a video.'; errorEl.hidden = false; return; }
-      if (mode === 'story' && !state.media) { errorEl.textContent = 'A story needs a photo or video.'; errorEl.hidden = false; return; }
-      if (mode === 'post' && !caption && !state.media) { errorEl.textContent = 'Write something or add media.'; errorEl.hidden = false; return; }
+      if (mode !== 'reel' && !caption && !state.media) { errorEl.textContent = 'Write something, or choose optional media.'; errorEl.hidden = false; return; }
 
-      publishBtn.disabled = true; publishBtn.textContent = 'Sharing…';
-      var ensureMedia = Promise.resolve(state.media);
+      // Snapshot the draft before any asynchronous work. All controls stay
+      // disabled until the post succeeds or fails, so the uploaded media cannot
+      // be published under a different tab/filter/audience.
+      var draftMode = mode;
+      var draftMedia = state.media;
+      var draftFilter = state.filter;
+      var draftMusic = state.music;
+      var draftVisibility = overlay.querySelector('#stVis').value;
+      var draftLocation = state.location
+        ? { lat: state.location.lat, lng: state.location.lng, label: locLabel.value.trim(), visibility: locVis.value }
+        : null;
+
+      setBusy(true);
+      publishBtn.textContent = 'Sharing…';
+      var ensureMedia = Promise.resolve(draftMedia);
       // A freshly chosen file is uploaded to the library first.
-      if (state.media && state.media.file) {
+      if (draftMedia && draftMedia.file) {
         publishBtn.textContent = 'Uploading…';
-        ensureMedia = uploadToLibrary(state.media.file, me.id, state.filter).then(function (d) {
-          return { file: null, kind: d.kind, preview: '', url: d.url };
+        ensureMedia = uploadToLibrary(draftMedia.file, me.id, draftFilter, function (percent) {
+          publishBtn.textContent = 'Uploading ' + percent + '%';
+        }).then(function (d) {
+          // Keep the successful library item on the draft. If posting fails,
+          // retrying reuses this URL instead of consuming quota with a duplicate.
+          draftMedia.file = null;
+          draftMedia.kind = d.kind;
+          draftMedia.url = d.url;
+          return draftMedia;
         });
       }
 
       ensureMedia.then(function (media) {
         var payload = {
-          kind: 'post', postType: mode, authorId: me.id, body: caption,
-          filter: state.filter, music: state.music, visibility: overlay.querySelector('#stVis').value
+          kind: 'post', postType: draftMode, authorId: me.id, body: caption,
+          filter: draftFilter, music: draftMusic, visibility: draftVisibility
         };
         if (media) {
           if (media.kind === 'video') payload.videoUrl = media.url; else payload.imageUrl = media.url;
         }
-        if (state.location) {
-          payload.location = { lat: state.location.lat, lng: state.location.lng, label: locLabel.value.trim(), visibility: locVis.value };
-        }
+        if (draftLocation) payload.location = draftLocation;
         return fetch(S.SOCIAL_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       }).then(function (r) {
         return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not share'); return d; });
       }).then(function () {
+        submitting = false;
         close();
         if (opts.onDone) opts.onDone();
       }).catch(function (err) {
         errorEl.textContent = err.message; errorEl.hidden = false;
-        publishBtn.disabled = false; publishBtn.textContent = 'Share';
+        setBusy(false);
+        publishBtn.textContent = 'Share';
       });
     });
 
