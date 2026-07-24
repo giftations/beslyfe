@@ -1,4 +1,4 @@
-import { boolean, customType, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { bigint, boolean, customType, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
 // Raw binary column. Image and video bytes are stored directly in Postgres
@@ -419,7 +419,50 @@ export const socialMedia = pgTable("social_media", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index("social_media_owner_idx").on(t.ownerId),
+  index("social_media_url_idx").on(t.url),
   index("social_media_created_idx").on(t.createdAt),
+]);
+
+// One row per media owner is the database-level storage invariant. Upload
+// sessions reserve their full size before accepting chunks; completion moves
+// that reservation to used bytes in the same transaction.
+export const socialMediaStorageUsage = pgTable("social_media_storage_usage", {
+  ownerId: text("owner_id").primaryKey(),
+  usedBytes: bigint("used_bytes", { mode: "number" }).notNull().default(0),
+  reservedBytes: bigint("reserved_bytes", { mode: "number" }).notNull().default(0),
+  quotaBytes: bigint("quota_bytes", { mode: "number" }).notNull().default(209715200),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ── Resumable media uploads ──
+// Short-lived resumable uploads keep every browser request below the Netlify
+// Functions payload ceiling. Completed chunks are assembled into social_media
+// and these staging rows are removed.
+export const socialMediaUploads = pgTable("social_media_uploads", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id").notNull().default(""),
+  filename: text("filename").notNull().default(""),
+  contentType: text("content_type").notNull().default(""),
+  kind: text("kind").notNull().default(""),
+  totalBytes: integer("total_bytes").notNull().default(0),
+  chunkSize: integer("chunk_size").notNull().default(0),
+  totalChunks: integer("total_chunks").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+}, (t) => [
+  index("social_media_uploads_owner_idx").on(t.ownerId),
+  index("social_media_uploads_expires_idx").on(t.expiresAt),
+]);
+
+export const socialMediaUploadChunks = pgTable("social_media_upload_chunks", {
+  uploadId: text("upload_id").notNull().references(() => socialMediaUploads.id, { onDelete: "cascade" }),
+  chunkIndex: integer("chunk_index").notNull(),
+  data: bytea("data").notNull(),
+  byteLength: integer("byte_length").notNull().default(0),
+  sha256: text("sha256").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ columns: [t.uploadId, t.chunkIndex] }),
 ]);
 
 // ── Group chats ──
@@ -454,6 +497,7 @@ export const socialGroupMessages = pgTable("social_group_messages", {
   senderId: text("sender_id").notNull().default(""),
   body: text("body").notNull().default(""),
   mediaUrl: text("media_url").notNull().default(""),
+  mediaKind: text("media_kind").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index("social_group_messages_group_idx").on(t.groupId),

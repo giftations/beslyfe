@@ -25,25 +25,10 @@
     if (html) signedOut.innerHTML = html;
   }
 
-  // Upload a chosen photo/video to the member's media library and resolve to the
-  // stored { url, kind }. Images are resized/compressed first (via BeslyfeSocial) so
-  // large phone photos upload reliably; videos are sent as-is.
+  // Upload a chosen photo/video through the shared MIME-aware path.
   function uploadMedia(file) {
-    var prep = S.prepareImageForUpload
-      ? S.prepareImageForUpload(file)
-      : new Promise(function (resolve) {
-          var r = new FileReader();
-          r.onload = function () { resolve({ dataBase64: String(r.result).split(',')[1] || '', contentType: file.type, filename: file.name }); };
-          r.readAsDataURL(file);
-        });
-    return prep.then(function (prepared) {
-      return fetch(S.MEDIA_ENDPOINT, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: prepared.filename, contentType: prepared.contentType, dataBase64: prepared.dataBase64 })
-      }).then(function (r) {
-        return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Upload failed'); return d; });
-      });
-    });
+    if (!S.uploadMediaFile) return Promise.reject(new Error('Upload tools could not start.'));
+    return S.uploadMediaFile(file);
   }
 
   function fetchJson(url, opts) {
@@ -64,6 +49,8 @@
   function handledAuthError(e) {
     if (e && e.status === 401) {
       if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+      if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
+      pendingMedia = null;
       showSignedOut('<p>Your session has expired. Please sign in again to use messages.</p>' +
         '<a class="so-btn" href="/admin-login.html">Sign in</a>');
       return true;
@@ -107,6 +94,7 @@
   // incoming-message refreshes.
   function buildShell(partner) {
     currentPartner = partner;
+    if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
     pendingMedia = null;
     convEl.innerHTML =
       '<div class="dm-conv-head">' + S.avatar(partner, 'so-avatar sm') +
@@ -126,15 +114,18 @@
     var fileInput = document.getElementById('dmFile');
     var attachBtn = document.getElementById('dmAttach');
     var previewEl = document.getElementById('dmPreview');
+    var sending = false;
 
     function renderPreview() {
       if (!pendingMedia) { previewEl.hidden = true; previewEl.innerHTML = ''; return; }
       previewEl.hidden = false;
       var inner = pendingMedia.kind === 'video'
-        ? '<video src="' + S.escHtml(pendingMedia.preview) + '" muted playsinline></video>'
-        : '<img src="' + S.escHtml(pendingMedia.preview) + '" alt="">';
+        ? '<video src="' + S.escHtml(pendingMedia.preview) + '" muted playsinline aria-label="Selected message video preview"></video>'
+        : '<img src="' + S.escHtml(pendingMedia.preview) + '" alt="Selected message attachment preview">';
       previewEl.innerHTML = inner + '<button type="button" class="dm-preview-x" title="Remove">×</button>';
       previewEl.querySelector('.dm-preview-x').addEventListener('click', function () {
+        if (sending) return;
+        if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
         pendingMedia = null; fileInput.value = ''; renderPreview();
       });
     }
@@ -142,52 +133,122 @@
     attachBtn.addEventListener('click', function () { fileInput.click(); });
     fileInput.addEventListener('change', function () {
       var f = fileInput.files[0]; if (!f) return;
-      var kind = f.type.indexOf('video') === 0 ? 'video' : 'image';
-      var reader = new FileReader();
-      reader.onload = function () { pendingMedia = { file: f, kind: kind, preview: reader.result }; renderPreview(); };
-      reader.readAsDataURL(f);
+      if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
+      pendingMedia = null;
+      renderPreview();
+      var kind = S.mediaKindForFile ? S.mediaKindForFile(f) : '';
+      var fileError = document.getElementById('dmError');
+      if (!kind) {
+        if (fileError) {
+          fileError.textContent = 'Choose a photo or video file.';
+          fileError.hidden = false;
+        }
+        fileInput.value = '';
+        return;
+      }
+      if (fileError) fileError.hidden = true;
+      var previewPromise = S.createMediaPreview
+        ? S.createMediaPreview(f)
+        : Promise.reject(new Error('Preview tools could not start.'));
+      function isCurrentSelection() {
+        return currentPartner === partner
+          && document.getElementById('dmFile') === fileInput
+          && fileInput.files[0] === f;
+      }
+      previewPromise.then(function (preview) {
+        if (!isCurrentSelection()) {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(preview);
+          return;
+        }
+        pendingMedia = {
+          file: f,
+          kind: kind,
+          preview: preview.preview,
+          previewObjectUrl: preview.previewObjectUrl
+        };
+        renderPreview();
+      }).catch(function (error) {
+        if (!isCurrentSelection()) return;
+        pendingMedia = null;
+        fileInput.value = '';
+        renderPreview();
+        if (fileError) {
+          fileError.textContent = error.message || 'Could not preview that file.';
+          fileError.hidden = false;
+        }
+      });
     });
 
     document.getElementById('dmForm').addEventListener('submit', function (e) {
       e.preventDefault();
+      if (sending) return;
+      var form = e.target;
       var input = document.getElementById('dmInput');
       var errEl = document.getElementById('dmError');
-      var submitBtn = e.target.querySelector('button[type=submit]');
+      var submitBtn = form.querySelector('button[type=submit]');
       if (errEl) errEl.hidden = true;
       var text = input.value.trim();
       if (!text && !pendingMedia) return;
+      var submittedMedia = pendingMedia;
+      var targetPartnerId = partner.id;
+      function isCurrentComposer() {
+        return currentPartner
+          && currentPartner.id === targetPartnerId
+          && document.getElementById('dmForm') === form;
+      }
+      sending = true;
       input.disabled = true;
       if (submitBtn) submitBtn.disabled = true;
       attachBtn.disabled = true;
+      var removeBtn = previewEl.querySelector('.dm-preview-x');
+      if (removeBtn) removeBtn.disabled = true;
 
       // Upload the attachment first (if any), then send the message referencing it.
-      var ready = pendingMedia
-        ? (submitBtn && (submitBtn.textContent = 'Sending…'), uploadMedia(pendingMedia.file).then(function (d) {
-            return { mediaUrl: d.url, mediaKind: d.kind };
-          }))
+      var ready = submittedMedia
+        ? (submitBtn && (submitBtn.textContent = 'Sending…'),
+          submittedMedia.url
+            ? Promise.resolve({ mediaUrl: submittedMedia.url, mediaKind: submittedMedia.kind })
+            : uploadMedia(submittedMedia.file).then(function (d) {
+                // Keep the successful library item if message delivery fails, so
+                // retrying does not upload a duplicate and consume quota again.
+                submittedMedia.file = null;
+                submittedMedia.url = d.url;
+                submittedMedia.kind = d.kind;
+                return { mediaUrl: d.url, mediaKind: d.kind };
+              }))
         : Promise.resolve({ mediaUrl: '', mediaKind: '' });
 
       ready.then(function (media) {
         return fetchJson(ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recipientId: partner.id, body: text, mediaUrl: media.mediaUrl, mediaKind: media.mediaKind })
+          body: JSON.stringify({ recipientId: targetPartnerId, body: text, mediaUrl: media.mediaUrl, mediaKind: media.mediaKind })
         });
       }).then(function () {
+        if (!isCurrentComposer()) return;
+        sending = false;
         input.value = '';
         input.disabled = false;
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
         attachBtn.disabled = false;
-        pendingMedia = null; fileInput.value = ''; renderPreview();
+        if (pendingMedia === submittedMedia) {
+          if (S.releaseMediaPreview) S.releaseMediaPreview(submittedMedia);
+          pendingMedia = null;
+          fileInput.value = '';
+        }
+        renderPreview();
         input.focus();
         return refreshOpenThread();
       }).then(function () {
         loadThreads();
       }).catch(function (e) {
+        if (handledAuthError(e)) return;
+        if (!isCurrentComposer()) return;
+        sending = false;
         input.disabled = false;
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
         attachBtn.disabled = false;
-        if (handledAuthError(e)) return;
+        if (removeBtn && removeBtn.isConnected) removeBtn.disabled = false;
         // Surface the failure so a message never silently vanishes.
         if (errEl) {
           errEl.textContent = (e && e.message) || 'Your message could not be sent. Please try again.';
@@ -220,6 +281,8 @@
   }
 
   function openThread(partnerId) {
+    if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
+    pendingMedia = null;
     openWith = partnerId;
     currentPartner = null;   // force a fresh shell for the newly opened thread
     shell.classList.add('has-active');
@@ -232,8 +295,10 @@
 
   function refreshOpenThread() {
     if (!openWith) return Promise.resolve();
-    return fetchJson(ENDPOINT + '?type=thread&with=' + encodeURIComponent(openWith))
+    var requestedPartnerId = openWith;
+    return fetchJson(ENDPOINT + '?type=thread&with=' + encodeURIComponent(requestedPartnerId))
       .then(function (data) {
+        if (openWith !== requestedPartnerId) return;
         // (Re)build the composer shell only when the thread changes or the shell
         // was torn down; otherwise just refresh the messages so input is kept.
         if (!currentPartner || currentPartner.id !== data.partner.id || !document.getElementById('dmMessages')) {
@@ -242,7 +307,10 @@
         renderMessages(data.items || []);
       })
       .catch(function (e) {
+        if (openWith !== requestedPartnerId) return;
         if (handledAuthError(e)) return;
+        if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
+        pendingMedia = null;
         convEl.innerHTML = '<div class="dm-empty">Could not load this conversation.</div>';
       });
   }
@@ -257,7 +325,10 @@
   }
 
   // Stop polling when the page is hidden/unloaded so the timer can't leak.
-  window.addEventListener('pagehide', function () { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } });
+  window.addEventListener('pagehide', function () {
+    if (S.releaseMediaPreview) S.releaseMediaPreview(pendingMedia);
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  });
 
   // Boot: confirm the signed-in account from the server session (the httpOnly
   // cookie), which is the same identity the messages function acts as. The page

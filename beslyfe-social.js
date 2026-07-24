@@ -5,6 +5,7 @@
 (function () {
   var SOCIAL_ENDPOINT = '/.netlify/functions/social';
   var PROFILES_ENDPOINT = '/.netlify/functions/profiles';
+  var MEDIA_ENDPOINT = '/.netlify/functions/media-library';
   var STORE_KEY = 'beslyfe_active_profile';
   var PREVIOUS_STORE_KEY = ['ba', 'y_active_profile'].join('');
   try {
@@ -141,16 +142,27 @@
     return '';
   }
 
-  // ── Reliable photo uploads ──
-  // Phone photos and full-size PNG screenshots are routinely larger than a
-  // serverless function will accept in one request, which is why a straight
-  // upload used to fail (often silently for PNGs). To make "upload any photo"
-  // work everywhere, the image is decoded, resized to a sensible maximum edge and
-  // re-encoded — keeping the original when it is already small so PNG
-  // transparency is preserved. Returns a Promise of { dataBase64, contentType,
-  // filename }. Non-image files (e.g. video) are passed straight through.
+  // ── Reliable optional media uploads ──
+  // Mixed photo/video pickers use one MIME-aware path. Images are compressed
+  // before upload; videos never enter the image decoder and larger videos use
+  // bounded resumable chunks.
   var MAX_IMAGE_EDGE = 1600;            // longest side, in pixels
-  var TARGET_IMAGE_BYTES = 3 * 1024 * 1024; // keep the encoded image under the request limit
+  var TARGET_IMAGE_BYTES = 2 * 1024 * 1024;
+  var DIRECT_MEDIA_BYTES = 3 * 1024 * 1024;
+
+  function mediaKindForFile(file) {
+    if (!file) return '';
+    var type = String(file.type || '').trim().toLowerCase();
+    if (type.indexOf('image/') === 0) return 'image';
+    if (type.indexOf('video/') === 0) return 'video';
+
+    // File.type can be blank on mobile browsers and for drag/drop. Keep this
+    // extension list aligned with the media-library function.
+    var name = String(file.name || '').trim().toLowerCase();
+    if (/\.(jpe?g|png|gif|webp|svg|avif)$/.test(name)) return 'image';
+    if (/\.(mp4|m4v|webm|ogv|mov)$/.test(name)) return 'video';
+    return '';
+  }
 
   function readFileBase64(file) {
     return new Promise(function (resolve, reject) {
@@ -172,14 +184,13 @@
   }
 
   function prepareImageForUpload(file) {
+    if (mediaKindForFile(file) !== 'image') {
+      return Promise.reject(new Error('Choose an image file.'));
+    }
     var name = file && file.name ? file.name : 'photo';
     var type = (file && file.type) || '';
-    // Only images are processed; everything else is sent as-is.
-    if (type && type.indexOf('image/') !== 0) {
-      return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type, filename: name }; });
-    }
     // SVGs are vector/text and tiny — send unchanged.
-    if (type === 'image/svg+xml') {
+    if (type === 'image/svg+xml' || /\.svg$/i.test(name)) {
       return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type, filename: name }; });
     }
     return loadImage(file).then(function (img) {
@@ -187,7 +198,7 @@
       var h = img.naturalHeight || img.height;
       // Small enough already — keep the original bytes (preserves PNG transparency).
       if (w <= MAX_IMAGE_EDGE && h <= MAX_IMAGE_EDGE && file.size <= TARGET_IMAGE_BYTES) {
-        return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type || 'image/jpeg', filename: name }; });
+        return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type || '', filename: name }; });
       }
       var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(w, h));
       var canvas = document.createElement('canvas');
@@ -195,7 +206,7 @@
       canvas.height = Math.max(1, Math.round(h * scale));
       var ctx = canvas.getContext('2d');
       if (!ctx || typeof canvas.toDataURL !== 'function') {
-        return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type || 'image/jpeg', filename: name }; });
+        return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type || '', filename: name }; });
       }
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       var quality = 0.85;
@@ -211,9 +222,185 @@
         contentType: 'image/jpeg',
         filename: base + '.jpg',
       };
-    }).catch(function () {
-      // Could not decode for resizing — fall back to the raw bytes.
-      return readFileBase64(file).then(function (b) { return { dataBase64: b, contentType: type || 'application/octet-stream', filename: name }; });
+    }).catch(function (error) {
+      // Preserve a valid image's original bytes if this browser cannot decode it
+      // for optimization. mediaKindForFile already rejected non-images.
+      return readFileBase64(file).then(function (b) {
+        return { dataBase64: b, contentType: type || '', filename: name };
+      }).catch(function () { throw error; });
+    });
+  }
+
+  function readMediaForUpload(file, kind) {
+    return readFileBase64(file).then(function (dataBase64) {
+      return {
+        dataBase64: dataBase64,
+        contentType: file.type || '',
+        filename: file.name || (kind === 'video' ? 'video.mp4' : 'photo.jpg')
+      };
+    });
+  }
+
+  function createMediaPreview(file) {
+    if (window.URL && typeof window.URL.createObjectURL === 'function') {
+      return Promise.resolve({
+        preview: window.URL.createObjectURL(file),
+        previewObjectUrl: true
+      });
+    }
+    return readFileBase64(file).then(function (dataBase64) {
+      return {
+        preview: 'data:' + (file.type || 'application/octet-stream') + ';base64,' + dataBase64,
+        previewObjectUrl: false
+      };
+    });
+  }
+
+  function releaseMediaPreview(media) {
+    if (!media || !media.previewObjectUrl || !media.preview) return;
+    if (window.URL && typeof window.URL.revokeObjectURL === 'function') {
+      window.URL.revokeObjectURL(media.preview);
+    }
+    media.previewObjectUrl = false;
+  }
+
+  function prepareMediaForUpload(file) {
+    var kind = mediaKindForFile(file);
+    if (kind === 'image') return prepareImageForUpload(file);
+    if (kind === 'video') return readMediaForUpload(file, kind);
+    return Promise.reject(new Error('Choose a photo or video file.'));
+  }
+
+  function responseJson(response, fallback) {
+    return response.json().catch(function () { return {}; }).then(function (data) {
+      if (!response.ok) {
+        var error = new Error(data.error || fallback || 'Upload failed');
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    });
+  }
+
+  function requestJsonWithRetry(url, options, fallback, retries) {
+    var attempt = 0;
+    function run() {
+      return fetch(url, options)
+        .then(function (response) { return responseJson(response, fallback); })
+        .catch(function (error) {
+          var retryable = !error.status || error.status === 408 || error.status === 425 || error.status >= 500;
+          if (!retryable || attempt >= retries) throw error;
+          attempt += 1;
+          return new Promise(function (resolve) {
+            setTimeout(resolve, 250 * attempt);
+          }).then(run);
+        });
+    }
+    return run();
+  }
+
+  function clientUploadId() {
+    var value = window.crypto && typeof window.crypto.randomUUID === 'function'
+      ? window.crypto.randomUUID().toLowerCase()
+      : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    return 'upload_' + value.replace(/[^a-z0-9-]/g, '').slice(0, 100);
+  }
+
+  function uploadPreparedMedia(prepared, options) {
+    options = options || {};
+    return fetch(options.endpoint || MEDIA_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ownerId: options.ownerId || '',
+        filename: prepared.filename,
+        contentType: prepared.contentType,
+        dataBase64: prepared.dataBase64,
+        caption: options.caption || '',
+        filter: options.filter || ''
+      })
+    }).then(function (response) { return responseJson(response, 'Upload failed'); });
+  }
+
+  function uploadMediaInChunks(file, kind, options) {
+    options = options || {};
+    var endpoint = options.endpoint || MEDIA_ENDPOINT;
+    var uploadId = clientUploadId();
+    var chunkSize = 0;
+    var totalChunks = 0;
+
+    return requestJsonWithRetry(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'initUpload',
+        clientUploadId: uploadId,
+        ownerId: options.ownerId || '',
+        filename: file.name || (kind === 'video' ? 'video.mp4' : 'photo.jpg'),
+        contentType: file.type || '',
+        totalBytes: file.size
+      })
+    }, 'Could not start upload.', 2).then(function (session) {
+      uploadId = session.uploadId;
+      chunkSize = Number(session.chunkSize);
+      totalChunks = Number(session.totalChunks);
+      if (!uploadId || !chunkSize || !totalChunks) throw new Error('Upload session could not start.');
+
+      function sendChunk(index) {
+        if (index >= totalChunks) return Promise.resolve();
+        var start = index * chunkSize;
+        var end = Math.min(file.size, start + chunkSize);
+        var chunk = file.slice(start, end);
+        return requestJsonWithRetry(
+          endpoint + '?uploadId=' + encodeURIComponent(uploadId) + '&chunk=' + encodeURIComponent(index),
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+              'Content-Range': 'bytes ' + start + '-' + (end - 1) + '/' + file.size
+            },
+            body: chunk
+          },
+          'A media chunk could not be uploaded.',
+          2
+        ).then(function () {
+          if (typeof options.onProgress === 'function') {
+            options.onProgress(Math.round(((index + 1) / totalChunks) * 100));
+          }
+          return sendChunk(index + 1);
+        });
+      }
+
+      return sendChunk(0).then(function () {
+        return requestJsonWithRetry(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'finishUpload',
+            uploadId: uploadId,
+            caption: options.caption || '',
+            filter: options.filter || ''
+          })
+        }, 'Could not finish upload.', 2);
+      });
+    });
+  }
+
+  function uploadMediaFile(file, options) {
+    var kind = mediaKindForFile(file);
+    if (!kind) return Promise.reject(new Error('Choose a photo or video file.'));
+    if (kind === 'video' && Number(file.size || 0) > DIRECT_MEDIA_BYTES) {
+      return uploadMediaInChunks(file, kind, options);
+    }
+    return prepareMediaForUpload(file).then(function (prepared) {
+      var preparedBytes = Math.floor((String(prepared.dataBase64 || '').length * 3) / 4);
+      // Optimization normally keeps images below the direct ceiling. If a
+      // browser cannot decode an otherwise supported image (or a large SVG must
+      // remain lossless), use the same resumable transport as video.
+      if (preparedBytes > DIRECT_MEDIA_BYTES) {
+        return uploadMediaInChunks(file, kind, options);
+      }
+      return uploadPreparedMedia(prepared, options);
     });
   }
 
@@ -266,7 +453,7 @@
   window.BeslyfeSocial = {
     SOCIAL_ENDPOINT: SOCIAL_ENDPOINT,
     PROFILES_ENDPOINT: PROFILES_ENDPOINT,
-    MEDIA_ENDPOINT: '/.netlify/functions/media-library',
+    MEDIA_ENDPOINT: MEDIA_ENDPOINT,
     GROUPS_ENDPOINT: '/.netlify/functions/groups',
     LOCATIONS_ENDPOINT: '/.netlify/functions/locations',
     NOTIFICATIONS_ENDPOINT: '/.netlify/functions/notifications',
@@ -280,7 +467,12 @@
     openProfilePicker: openProfilePicker,
     FILTERS: FILTERS,
     filterCss: filterCss,
+    mediaKindForFile: mediaKindForFile,
     prepareImageForUpload: prepareImageForUpload,
+    prepareMediaForUpload: prepareMediaForUpload,
+    createMediaPreview: createMediaPreview,
+    releaseMediaPreview: releaseMediaPreview,
+    uploadMediaFile: uploadMediaFile,
     renderNav: renderNav
   };
 })();

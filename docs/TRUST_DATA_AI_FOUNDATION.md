@@ -42,6 +42,18 @@ Data should be modeled around clear ownership:
 | Media | Uploader or organization | Profiles, posts, pages, promotion | Ownership, reuse permissions |
 | Analytics events | Platform/operator | Measurement and operations | Aggregation, minimization, purpose limits |
 
+### Social media storage boundary
+
+Social photos and videos are owner-scoped. Conversation attachments may only
+use an item from the sender's own media library; the stored media record, not
+caller-supplied metadata, determines whether it is an image or video.
+
+Each profile has a 200 MB social-media quota enforced atomically by the
+database. Resumable upload sessions reserve their declared size before
+accepting chunks, expire after interruption, and are removed by an hourly
+cleanup. Completed media counts as used storage until its owner or an authorized
+administrator deletes it.
+
 ## Consent Boundaries
 
 Consent must be specific, reversible, and understandable.
